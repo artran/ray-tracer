@@ -42,6 +42,15 @@ impl ColumnVector {
             w: self.w - other.w,
         }
     }
+
+    pub fn negate(&self) -> ColumnVector {
+        Self {
+            x: -self.x,
+            y: -self.y,
+            z: -self.z,
+            w: -self.w,
+        }
+    }
 }
 
 /* -------------------------------------------------------------------------------------------------
@@ -110,5 +119,21 @@ mod tests {
         let expected = ColumnVector::point(-2.0, -4.0, -6.0);
 
         assert_that!(point.minus(&vector)).is_equal_to(expected)
+    }
+
+    #[test]
+    fn negating_a_vector_returns_the_negative_vector() {
+        let vector = ColumnVector::vector(1.0, -2.0, 3.0);
+        let expected = ColumnVector::vector(-1.0, 2.0, -3.0);
+
+        assert_that!(vector.negate()).is_equal_to(expected);
+    }
+
+    #[test]
+    fn negating_a_tuple_returns_the_negative_tuple() {
+        let tuple = ColumnVector { x: 1.0, y: -2.0, z: 3.0, w: -4.0 };
+        let expected = ColumnVector { x: -1.0, y: 2.0, z: -3.0, w: 4.0 };
+
+        assert_that!(tuple.negate()).is_equal_to(expected);
     }
 }
