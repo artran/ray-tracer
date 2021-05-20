@@ -66,6 +66,16 @@ impl ColumnVector {
         //       vectors where w = 0.0
         (self.x * self.x + self.y * self.y + self.z * self.z).sqrt()
     }
+
+    pub fn normalize(&self) -> ColumnVector {
+        let scale = self.magnitude();
+        ColumnVector {
+            x: self.x / scale,
+            y: self.y / scale,
+            z: self.z / scale,
+            w: self.w / scale,
+        }
+    }
 }
 
 /* -------------------------------------------------------------------------------------------------
@@ -74,8 +84,10 @@ Tests
 
 #[cfg(test)]
 mod tests {
-    use crate::column_vector::ColumnVector;
     use spectral::assert_that;
+    use spectral::numeric::FloatAssertions;
+
+    use crate::column_vector::ColumnVector;
 
     #[test]
     fn point_has_three_coordinates() {
@@ -201,5 +213,33 @@ mod tests {
         let z = ColumnVector::vector(-1.0, -2.0, -3.0);
 
         assert_that!(z.magnitude()).is_equal_to(14.0_f32.sqrt());
+    }
+
+    #[test]
+    fn normalizing_vector_returns_unit_vector_same_direction() {
+        let x = ColumnVector::vector(4.0, 0.0, 0.0);
+        let expected = ColumnVector::vector(1.0, 0.0, 0.0);
+
+        assert_that!(x.normalize()).is_equal_to(expected);
+    }
+
+    #[test]
+    fn normalizing_vector_returns_unit_vector_same_direction2() {
+        let x = ColumnVector::vector(1.0, 2.0, 3.0);
+        let expected = ColumnVector::vector(0.26726, 0.53452, 0.80178);
+
+        let normalized = x.normalize();
+
+        assert_that!(normalized.x).is_close_to(expected.x, 0.0001_f32);
+        assert_that!(normalized.y).is_close_to(expected.y, 0.0001_f32);
+        assert_that!(normalized.z).is_close_to(expected.z, 0.0001_f32);
+        assert_that!(normalized.w).is_equal_to(expected.w);
+    }
+
+    #[test]
+    fn normalized_vector_is_a_unit_vector() {
+        let x = ColumnVector::vector(1.0, 2.0, 3.0);
+
+        assert_that!(x.normalize().magnitude()).is_close_to(1.0, 0.0001_f32);
     }
 }
