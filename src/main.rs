@@ -1,3 +1,4 @@
+mod color;
 mod column_vector;
 
 fn main() {

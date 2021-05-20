@@ -8,21 +8,11 @@ pub struct ColumnVector {
 
 impl ColumnVector {
     pub fn point(x: f32, y: f32, z: f32) -> Self {
-        Self {
-            x,
-            y,
-            z,
-            w: 1.0,
-        }
+        Self { x, y, z, w: 1.0 }
     }
 
     pub fn vector(x: f32, y: f32, z: f32) -> Self {
-        Self {
-            x,
-            y,
-            z,
-            w: 0.0,
-        }
+        Self { x, y, z, w: 0.0 }
     }
 
     pub fn plus(&self, other: &ColumnVector) -> ColumnVector {
