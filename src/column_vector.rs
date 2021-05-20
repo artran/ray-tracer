@@ -76,6 +76,11 @@ impl ColumnVector {
             w: self.w / scale,
         }
     }
+
+    pub fn dot(&self, other: &ColumnVector) -> f32 {
+        // a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w
+        self.x * other.x + self.y * other.y + self.z * other.z + self.w * other.w
+    }
 }
 
 /* -------------------------------------------------------------------------------------------------
@@ -241,5 +246,13 @@ mod tests {
         let x = ColumnVector::vector(1.0, 2.0, 3.0);
 
         assert_that!(x.normalize().magnitude()).is_close_to(1.0, 0.0001_f32);
+    }
+
+    #[test]
+    fn dot_product_of_two_tuples_is_scalar() {
+        let a = ColumnVector::vector(1.0, 2.0, 3.0);
+        let b = ColumnVector::vector(2.0, 3.0, 4.0);
+
+        assert_that!(a.dot(&b)).is_equal_to(20.0);
     }
 }
