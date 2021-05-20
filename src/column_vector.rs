@@ -51,6 +51,15 @@ impl ColumnVector {
             w: -self.w,
         }
     }
+
+    pub fn scale(&self, scale: &f32) -> ColumnVector {
+        Self {
+            x: self.x * scale,
+            y: self.y * scale,
+            z: self.z * scale,
+            w: self.w * scale,
+        }
+    }
 }
 
 /* -------------------------------------------------------------------------------------------------
@@ -135,5 +144,21 @@ mod tests {
         let expected = ColumnVector { x: -1.0, y: 2.0, z: -3.0, w: 4.0 };
 
         assert_that!(tuple.negate()).is_equal_to(expected);
+    }
+
+    #[test]
+    fn multiplying_a_tuple_by_scalar_scales_the_tuple() {
+        let tuple = ColumnVector { x: 1.0, y: -2.0, z: 3.0, w: -4.0 };
+        let expected = ColumnVector { x: 3.5, y: -7.0, z: 10.5, w: -14.0 };
+
+        assert_that!(tuple.scale(&3.5)).is_equal_to(expected);
+    }
+
+    #[test]
+    fn multiplying_a_tuple_by_fraction_scales_the_tuple() {
+        let tuple = ColumnVector { x: 1.0, y: -2.0, z: 3.0, w: -4.0 };
+        let expected = ColumnVector { x: 0.5, y: -1.0, z: 1.5, w: -2.0 };
+
+        assert_that!(tuple.scale(&0.5)).is_equal_to(expected);
     }
 }
