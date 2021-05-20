@@ -60,6 +60,12 @@ impl ColumnVector {
             w: self.w * scale,
         }
     }
+
+    pub fn magnitude(&self) -> f32 {
+        // Note: Not including the 'w' part at the moment as this probably only makes sense for
+        //       vectors where w = 0.0
+        (self.x * self.x + self.y * self.y + self.z * self.z).sqrt()
+    }
 }
 
 /* -------------------------------------------------------------------------------------------------
@@ -160,5 +166,40 @@ mod tests {
         let expected = ColumnVector { x: 0.5, y: -1.0, z: 1.5, w: -2.0 };
 
         assert_that!(tuple.scale(&0.5)).is_equal_to(expected);
+    }
+
+    #[test]
+    fn unit_vector_x_has_magnitude_of_1() {
+        let x = ColumnVector::vector(1.0, 0.0, 0.0);
+
+        assert_that!(x.magnitude()).is_equal_to(1.0);
+    }
+
+    #[test]
+    fn unit_vector_y_has_magnitude_of_1() {
+        let y = ColumnVector::vector(0.0, 1.0, 0.0);
+
+        assert_that!(y.magnitude()).is_equal_to(1.0);
+    }
+
+    #[test]
+    fn unit_vector_z_has_magnitude_of_1() {
+        let z = ColumnVector::vector(0.0, 0.0, 1.0);
+
+        assert_that!(z.magnitude()).is_equal_to(1.0);
+    }
+
+    #[test]
+    fn vector_has_magnitude() {
+        let z = ColumnVector::vector(1.0, 2.0, 3.0);
+
+        assert_that!(z.magnitude()).is_equal_to(14.0_f32.sqrt());
+    }
+
+    #[test]
+    fn negative_vector_has_positive_magnitude() {
+        let z = ColumnVector::vector(-1.0, -2.0, -3.0);
+
+        assert_that!(z.magnitude()).is_equal_to(14.0_f32.sqrt());
     }
 }
