@@ -81,6 +81,16 @@ impl ColumnVector {
         // a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w
         self.x * other.x + self.y * other.y + self.z * other.z + self.w * other.w
     }
+
+    pub fn cross(&self, other: &ColumnVector) -> ColumnVector {
+        // vector(a.y * b.z - a.z * b.y,
+        //        a.z * b.x - a.x * b.z,
+        //        a.x * b.y - a.y * b.x)
+        Self::vector(self.y * other.z - self.z * other.y,
+                     self.z * other.x - self.x * other.z,
+                     self.x * other.y - self.y * other.x,
+        )
+    }
 }
 
 /* -------------------------------------------------------------------------------------------------
@@ -249,10 +259,28 @@ mod tests {
     }
 
     #[test]
-    fn dot_product_of_two_tuples_is_scalar() {
+    fn dot_product_of_two_vectors_is_scalar() {
         let a = ColumnVector::vector(1.0, 2.0, 3.0);
         let b = ColumnVector::vector(2.0, 3.0, 4.0);
 
         assert_that!(a.dot(&b)).is_equal_to(20.0);
+    }
+
+    #[test]
+    fn cross_product_of_two_vectors_is_vector() {
+        let a = ColumnVector::vector(1.0, 2.0, 3.0);
+        let b = ColumnVector::vector(2.0, 3.0, 4.0);
+        let expected = ColumnVector::vector(-1.0, 2.0, -1.0);
+
+        assert_that!(a.cross(&b)).is_equal_to(expected);
+    }
+
+    #[test]
+    fn cross_product_of_two_vectors_is_not_commutative() {
+        let a = ColumnVector::vector(1.0, 2.0, 3.0);
+        let b = ColumnVector::vector(2.0, 3.0, 4.0);
+        let expected = ColumnVector::vector(1.0, -2.0, 1.0);
+
+        assert_that!(b.cross(&a)).is_equal_to(expected);
     }
 }
