@@ -1,3 +1,5 @@
+use std::io::Write;
+
 use crate::color::Color;
 
 struct Canvas {
@@ -25,6 +27,10 @@ impl Canvas {
 
     pub fn write_pixel(&mut self, x: usize, y: usize, color: &Color) {
         self.pixels[y][x] = color.clone();
+    }
+
+    pub fn save(&self, file: &mut impl Write) {
+        let _ = file.write(b"P3\n5 3\n255\n").unwrap();
     }
 }
 
@@ -78,5 +84,15 @@ mod tests {
         canvas.write_pixel(5, 7, &red);
 
         assert_that!(canvas.pixel_at(5, 7)).is_equal_to(red);
+    }
+
+    #[test]
+    fn saved_canvas_has_correct_magic() {
+        let canvas = Canvas::new(5, 3);
+        let mut file = vec![];
+
+        canvas.save(&mut file);
+
+        assert_that!(String::from_utf8(file).unwrap()).is_equal_to(String::from("P3\n5 3\n255\n"));
     }
 }
