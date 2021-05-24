@@ -1,4 +1,4 @@
-use std::io::Write;
+use std::io::{Write, Error};
 
 use crate::color::Color;
 
@@ -29,8 +29,19 @@ impl Canvas {
         self.pixels[y][x] = color.clone();
     }
 
-    pub fn save(&self, file: &mut impl Write) {
+    pub fn save(&self, file: &mut impl Write) -> Result<(), Error> {
         let _ = file.write(b"P3\n5 3\n255\n").unwrap();
+        for row in &self.pixels {
+            for (i, pixel) in row.iter().enumerate() {
+                if i > 0 {
+                    file.write(b" ")?;
+                }
+                file.write(pixel.to_string().as_bytes())?;
+            }
+            file.write(b"\n")?;
+        }
+
+        Ok(())
     }
 }
 
@@ -43,6 +54,7 @@ mod tests {
     use spectral::assert_that;
 
     use super::*;
+    use std::io::BufRead;
 
     #[test]
     fn new_canvas_has_width() {
@@ -91,8 +103,47 @@ mod tests {
         let canvas = Canvas::new(5, 3);
         let mut file = vec![];
 
-        canvas.save(&mut file);
+        let _ = canvas.save(&mut file);
 
-        assert_that!(String::from_utf8(file).unwrap()).is_equal_to(String::from("P3\n5 3\n255\n"));
+        let mut readable = &file[..];
+        let mut buf = String::new();
+        let _ = readable.read_line(&mut buf);
+        assert_that!(buf).is_equal_to(String::from("P3\n"));
+        buf.clear();
+        let _ = readable.read_line(&mut buf);
+        assert_that!(buf).is_equal_to(String::from("5 3\n"));
+        buf.clear();
+        let _ = readable.read_line(&mut buf);
+        assert_that!(buf).is_equal_to(String::from("255\n"));
+        buf.clear();
+    }
+
+    #[test]
+    fn saved_canvas_has_correct_image_data() {
+        let mut canvas = Canvas::new(5, 3);
+        let c1 = Color::new(1.5, 0.0, 0.0);
+        let c2 = Color::new(0.0, 0.5, 0.0);
+        let c3 = Color::new(-0.5, 0.0, 1.0);
+        canvas.write_pixel(0, 0, &c1);
+        canvas.write_pixel(2, 1, &c2);
+        canvas.write_pixel(4, 2, &c3);
+        let mut file = vec![];
+
+        let _ = canvas.save(&mut file);
+
+        let mut readable = &file[..];
+        let mut buf = String::new();
+        for _ in 0..3 {
+            let _ = readable.read_line(&mut buf);  // Discard header lines
+            buf.clear();
+        }
+        let _ = readable.read_line(&mut buf);
+        assert_that!(buf).is_equal_to(String::from("255 0 0 0 0 0 0 0 0 0 0 0 0 0 0\n"));
+        buf.clear();
+        let _ = readable.read_line(&mut buf);
+        assert_that!(buf).is_equal_to(String::from("0 0 0 0 0 0 0 128 0 0 0 0 0 0 0\n"));
+        buf.clear();
+        let _ = readable.read_line(&mut buf);
+        assert_that!(buf).is_equal_to(String::from("0 0 0 0 0 0 0 0 0 0 0 0 0 0 255\n"));
     }
 }
