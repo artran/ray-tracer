@@ -1,3 +1,4 @@
+#[derive(Debug, PartialEq)]
 pub struct Matrix<const M: usize, const N: usize> {
     contents: [[f32; M]; N],
 }
@@ -53,5 +54,41 @@ mod tests {
         assert_that!(m.index(2, 2)).is_equal_to(11.0);
         assert_that!(m.index(3, 0)).is_equal_to(13.5);
         assert_that!(m.index(3, 2)).is_equal_to(15.5);
+    }
+
+    #[test]
+    fn matrices_with_the_same_values_are_equal() {
+        let m1: Matrix<4, 4> = Matrix::rows([
+            [1.0, 2.0, 3.0, 4.0],
+            [5.0, 6.0, 7.0, 8.0],
+            [9.0, 8.0, 8.0, 6.0],
+            [5.0, 4.0, 3.0, 2.0],
+        ]);
+        let m2: Matrix<4, 4> = Matrix::rows([
+            [1.0, 2.0, 3.0, 4.0],
+            [5.0, 6.0, 7.0, 8.0],
+            [9.0, 8.0, 8.0, 6.0],
+            [5.0, 4.0, 3.0, 2.0],
+        ]);
+
+        assert_that!(m1).is_equal_to(m2);
+    }
+
+    #[test]
+    fn matrices_with_the_different_values_are_not_equal() {
+        let m1: Matrix<4, 4> = Matrix::rows([
+            [1.0, 2.0, 3.0, 4.0],
+            [5.0, 6.0, 7.0, 8.0],
+            [9.0, 8.0, 8.0, 6.0],
+            [5.0, 4.0, 3.0, 2.0],
+        ]);
+        let m2: Matrix<4, 4> = Matrix::rows([
+            [2.0, 3.0, 4.0, 5.0],
+            [6.0, 7.0, 8.0, 9.0],
+            [8.0, 7.0, 6.0, 5.0],
+            [4.0, 3.0, 2.0, 1.0],
+        ]);
+
+        assert_that!(m1).is_not_equal_to(m2);
     }
 }
