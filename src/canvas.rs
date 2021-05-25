@@ -1,6 +1,8 @@
-use std::io::{Write, Error};
+use std::io::{Error, Write};
 
 use crate::color::Color;
+
+const PPM_MAX_LINE_LENGTH: usize = 70;
 
 struct Canvas {
     pixels: Vec<Vec<Color>>
@@ -32,11 +34,20 @@ impl Canvas {
     pub fn save(&self, file: &mut impl Write) -> Result<(), Error> {
         let _ = file.write(b"P3\n5 3\n255\n").unwrap();
         for row in &self.pixels {
+            let mut current_length = 0;
             for (i, pixel) in row.iter().enumerate() {
                 if i > 0 {
                     file.write(b" ")?;
+                    current_length += 1;
                 }
-                file.write(pixel.to_string().as_bytes())?;
+                let pixel_str = pixel.to_string();
+                let pixel_bytes = pixel_str.as_bytes();
+                if current_length + pixel_bytes.len() > PPM_MAX_LINE_LENGTH {
+                    file.write(b"\n")?;
+                    current_length = 1;
+                }
+                file.write(pixel_bytes)?;
+                current_length += pixel_bytes.len();
             }
             file.write(b"\n")?;
         }
@@ -51,10 +62,12 @@ Tests
 
 #[cfg(test)]
 mod tests {
+    use std::io::BufRead;
+
     use spectral::assert_that;
+    use spectral::prelude::ResultAssertions;
 
     use super::*;
-    use std::io::BufRead;
 
     #[test]
     fn new_canvas_has_width() {
@@ -115,7 +128,6 @@ mod tests {
         buf.clear();
         let _ = readable.read_line(&mut buf);
         assert_that!(buf).is_equal_to(String::from("255\n"));
-        buf.clear();
     }
 
     #[test]
@@ -145,5 +157,59 @@ mod tests {
         buf.clear();
         let _ = readable.read_line(&mut buf);
         assert_that!(buf).is_equal_to(String::from("0 0 0 0 0 0 0 0 0 0 0 0 0 0 255\n"));
+        buf.clear();
+        let res = readable.read_line(&mut buf);
+        assert_that!(res).is_ok().is_equal_to(0);
+    }
+
+    #[test]
+    fn saved_canvas_has_correct_lines_less_than_70_chars() {
+        let mut canvas = Canvas::new(10, 2);
+        let c1 = Color::new(1.0, 0.8, 0.6);
+        for row in 0..2 {
+            for col in 0..10 {
+                canvas.write_pixel(col, row, &c1);
+            }
+        }
+        let mut file = vec![];
+
+        let _ = canvas.save(&mut file);
+
+        let mut readable = &file[..];
+        let mut buf = String::new();
+        for _ in 0..3 {
+            let _ = readable.read_line(&mut buf);  // Discard header lines
+            buf.clear();
+        }
+        let _ = readable.read_line(&mut buf);
+        assert_that!(buf).is_equal_to(String::from("255 204 153 255 204 153 255 204 153 255 204 153 255 204 153 \n"));
+        buf.clear();
+        let _ = readable.read_line(&mut buf);
+        assert_that!(buf).is_equal_to(String::from("255 204 153 255 204 153 255 204 153 255 204 153 255 204 153\n"));
+        buf.clear();
+        let _ = readable.read_line(&mut buf);
+        assert_that!(buf).is_equal_to(String::from("255 204 153 255 204 153 255 204 153 255 204 153 255 204 153 \n"));
+        buf.clear();
+        let _ = readable.read_line(&mut buf);
+        assert_that!(buf).is_equal_to(String::from("255 204 153 255 204 153 255 204 153 255 204 153 255 204 153\n"));
+        buf.clear();
+        let res = readable.read_line(&mut buf);
+        assert_that!(res).is_ok().is_equal_to(0);
+    }
+
+    #[test]
+    fn saved_canvas_ends_with_newline_character() {
+        let mut canvas = Canvas::new(10, 2);
+        let c1 = Color::new(1.0, 0.8, 0.6);
+        for row in 0..2 {
+            for col in 0..10 {
+                canvas.write_pixel(col, row, &c1);
+            }
+        }
+        let mut file = vec![];
+
+        let _ = canvas.save(&mut file);
+
+        assert_that!(file.last().unwrap()).is_equal_to(&10u8);
     }
 }
