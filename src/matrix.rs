@@ -13,7 +13,7 @@ impl<const M: usize, const N: usize> Matrix<M, N> {
         Matrix::new(rows)
     }
 
-    pub fn at(&self, row: usize, col: usize) -> f32 {
+    pub fn index(&self, row: usize, col: usize) -> f32 {
         self.contents[row][col]
     }
 }
@@ -38,7 +38,7 @@ mod tests {
     }
 
     #[test]
-    fn matrices_addressed_by_row_col() {
+    fn matrices_indexed_by_row_col() {
         let m: Matrix<4, 4> = Matrix::rows([
             [1.0, 2.0, 3.0, 4.0],
             [5.5, 6.5, 7.5, 8.5],
@@ -46,12 +46,12 @@ mod tests {
             [13.5, 14.5, 15.5, 16.5],
         ]);
 
-        assert_that!(m.at(0, 0)).is_equal_to(1.0);
-        assert_that!(m.at(0, 3)).is_equal_to(4.0);
-        assert_that!(m.at(1, 0)).is_equal_to(5.5);
-        assert_that!(m.at(1, 2)).is_equal_to(7.5);
-        assert_that!(m.at(2, 2)).is_equal_to(11.0);
-        assert_that!(m.at(3, 0)).is_equal_to(13.5);
-        assert_that!(m.at(3, 2)).is_equal_to(15.5);
+        assert_that!(m.index(0, 0)).is_equal_to(1.0);
+        assert_that!(m.index(0, 3)).is_equal_to(4.0);
+        assert_that!(m.index(1, 0)).is_equal_to(5.5);
+        assert_that!(m.index(1, 2)).is_equal_to(7.5);
+        assert_that!(m.index(2, 2)).is_equal_to(11.0);
+        assert_that!(m.index(3, 0)).is_equal_to(13.5);
+        assert_that!(m.index(3, 2)).is_equal_to(15.5);
     }
 }
