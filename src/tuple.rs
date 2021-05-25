@@ -1,12 +1,12 @@
 #[derive(Debug, PartialEq)]
-pub struct ColumnVector {
+pub struct Tuple {
     x: f32,
     y: f32,
     z: f32,
     w: f32,
 }
 
-impl ColumnVector {
+impl Tuple {
     pub fn point(x: f32, y: f32, z: f32) -> Self {
         Self { x, y, z, w: 1.0 }
     }
@@ -15,8 +15,8 @@ impl ColumnVector {
         Self { x, y, z, w: 0.0 }
     }
 
-    pub fn plus(&self, other: &ColumnVector) -> ColumnVector {
-        ColumnVector {
+    pub fn plus(&self, other: &Tuple) -> Tuple {
+        Tuple {
             x: self.x + other.x,
             y: self.y + other.y,
             z: self.z + other.z,
@@ -24,8 +24,8 @@ impl ColumnVector {
         }
     }
 
-    pub fn minus(&self, other: &ColumnVector) -> ColumnVector {
-        ColumnVector {
+    pub fn minus(&self, other: &Tuple) -> Tuple {
+        Tuple {
             x: self.x - other.x,
             y: self.y - other.y,
             z: self.z - other.z,
@@ -33,7 +33,7 @@ impl ColumnVector {
         }
     }
 
-    pub fn negate(&self) -> ColumnVector {
+    pub fn negate(&self) -> Tuple {
         Self {
             x: -self.x,
             y: -self.y,
@@ -42,7 +42,7 @@ impl ColumnVector {
         }
     }
 
-    pub fn scale(&self, scale: &f32) -> ColumnVector {
+    pub fn scale(&self, scale: &f32) -> Tuple {
         Self {
             x: self.x * scale,
             y: self.y * scale,
@@ -57,9 +57,9 @@ impl ColumnVector {
         (self.x * self.x + self.y * self.y + self.z * self.z).sqrt()
     }
 
-    pub fn normalize(&self) -> ColumnVector {
+    pub fn normalize(&self) -> Tuple {
         let scale = self.magnitude();
-        ColumnVector {
+        Tuple {
             x: self.x / scale,
             y: self.y / scale,
             z: self.z / scale,
@@ -67,12 +67,12 @@ impl ColumnVector {
         }
     }
 
-    pub fn dot(&self, other: &ColumnVector) -> f32 {
+    pub fn dot(&self, other: &Tuple) -> f32 {
         // a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w
         self.x * other.x + self.y * other.y + self.z * other.z + self.w * other.w
     }
 
-    pub fn cross(&self, other: &ColumnVector) -> ColumnVector {
+    pub fn cross(&self, other: &Tuple) -> Tuple {
         // vector(a.y * b.z - a.z * b.y,
         //        a.z * b.x - a.x * b.z,
         //        a.x * b.y - a.y * b.x)
@@ -92,11 +92,11 @@ mod tests {
     use spectral::assert_that;
     use spectral::numeric::FloatAssertions;
 
-    use crate::column_vector::ColumnVector;
+    use crate::tuple::Tuple;
 
     #[test]
     fn point_has_three_coordinates() {
-        let cv = ColumnVector::point(4.3, -4.2, 3.1);
+        let cv = Tuple::point(4.3, -4.2, 3.1);
 
         assert_that!(cv.x).is_equal_to(4.3);
         assert_that!(cv.y).is_equal_to(-4.2);
@@ -105,14 +105,14 @@ mod tests {
 
     #[test]
     fn point_has_w_of_1() {
-        let cv = ColumnVector::point(3.0, 2.0, 1.0);
+        let cv = Tuple::point(3.0, 2.0, 1.0);
 
         assert_that!(cv.w).is_equal_to(1.0);
     }
 
     #[test]
     fn vector_has_three_coordinates() {
-        let cv = ColumnVector::vector(4.3, -4.2, 3.1);
+        let cv = Tuple::vector(4.3, -4.2, 3.1);
 
         assert_that!(cv.x).is_equal_to(4.3);
         assert_that!(cv.y).is_equal_to(-4.2);
@@ -121,117 +121,117 @@ mod tests {
 
     #[test]
     fn vector_has_w_of_0() {
-        let cv = ColumnVector::vector(1.0, 2.0, 3.0);
+        let cv = Tuple::vector(1.0, 2.0, 3.0);
 
         assert_that!(cv.w).is_equal_to(0.0);
     }
 
     #[test]
     fn adding_a_vector_to_a_point_returns_a_new_point() {
-        let point = ColumnVector::point(3.0, -2.0, 5.0);
-        let vector = ColumnVector::vector(-2.0, 3.0, 1.0);
-        let expected = ColumnVector::point(1.0, 1.0, 6.0);
+        let point = Tuple::point(3.0, -2.0, 5.0);
+        let vector = Tuple::vector(-2.0, 3.0, 1.0);
+        let expected = Tuple::point(1.0, 1.0, 6.0);
 
         assert_that!(point.plus(&vector)).is_equal_to(expected)
     }
 
     #[test]
     fn subtracting_two_points_returns_a_vector() {
-        let point1 = ColumnVector::point(3.0, 2.0, 1.0);
-        let point2 = ColumnVector::point(5.0, 6.0, 7.0);
-        let expected = ColumnVector::vector(-2.0, -4.0, -6.0);
+        let point1 = Tuple::point(3.0, 2.0, 1.0);
+        let point2 = Tuple::point(5.0, 6.0, 7.0);
+        let expected = Tuple::vector(-2.0, -4.0, -6.0);
 
         assert_that!(point1.minus(&point2)).is_equal_to(expected)
     }
 
     #[test]
     fn subtracting_a_vector_from_a_point_returns_a_new_point() {
-        let point = ColumnVector::point(3.0, 2.0, 1.0);
-        let vector = ColumnVector::vector(5.0, 6.0, 7.0);
-        let expected = ColumnVector::point(-2.0, -4.0, -6.0);
+        let point = Tuple::point(3.0, 2.0, 1.0);
+        let vector = Tuple::vector(5.0, 6.0, 7.0);
+        let expected = Tuple::point(-2.0, -4.0, -6.0);
 
         assert_that!(point.minus(&vector)).is_equal_to(expected)
     }
 
     #[test]
     fn negating_a_vector_returns_the_negative_vector() {
-        let vector = ColumnVector::vector(1.0, -2.0, 3.0);
-        let expected = ColumnVector::vector(-1.0, 2.0, -3.0);
+        let vector = Tuple::vector(1.0, -2.0, 3.0);
+        let expected = Tuple::vector(-1.0, 2.0, -3.0);
 
         assert_that!(vector.negate()).is_equal_to(expected);
     }
 
     #[test]
     fn negating_a_tuple_returns_the_negative_tuple() {
-        let tuple = ColumnVector { x: 1.0, y: -2.0, z: 3.0, w: -4.0 };
-        let expected = ColumnVector { x: -1.0, y: 2.0, z: -3.0, w: 4.0 };
+        let tuple = Tuple { x: 1.0, y: -2.0, z: 3.0, w: -4.0 };
+        let expected = Tuple { x: -1.0, y: 2.0, z: -3.0, w: 4.0 };
 
         assert_that!(tuple.negate()).is_equal_to(expected);
     }
 
     #[test]
     fn multiplying_a_tuple_by_scalar_scales_the_tuple() {
-        let tuple = ColumnVector { x: 1.0, y: -2.0, z: 3.0, w: -4.0 };
-        let expected = ColumnVector { x: 3.5, y: -7.0, z: 10.5, w: -14.0 };
+        let tuple = Tuple { x: 1.0, y: -2.0, z: 3.0, w: -4.0 };
+        let expected = Tuple { x: 3.5, y: -7.0, z: 10.5, w: -14.0 };
 
         assert_that!(tuple.scale(&3.5)).is_equal_to(expected);
     }
 
     #[test]
     fn multiplying_a_tuple_by_fraction_scales_the_tuple() {
-        let tuple = ColumnVector { x: 1.0, y: -2.0, z: 3.0, w: -4.0 };
-        let expected = ColumnVector { x: 0.5, y: -1.0, z: 1.5, w: -2.0 };
+        let tuple = Tuple { x: 1.0, y: -2.0, z: 3.0, w: -4.0 };
+        let expected = Tuple { x: 0.5, y: -1.0, z: 1.5, w: -2.0 };
 
         assert_that!(tuple.scale(&0.5)).is_equal_to(expected);
     }
 
     #[test]
     fn unit_vector_x_has_magnitude_of_1() {
-        let x = ColumnVector::vector(1.0, 0.0, 0.0);
+        let x = Tuple::vector(1.0, 0.0, 0.0);
 
         assert_that!(x.magnitude()).is_equal_to(1.0);
     }
 
     #[test]
     fn unit_vector_y_has_magnitude_of_1() {
-        let y = ColumnVector::vector(0.0, 1.0, 0.0);
+        let y = Tuple::vector(0.0, 1.0, 0.0);
 
         assert_that!(y.magnitude()).is_equal_to(1.0);
     }
 
     #[test]
     fn unit_vector_z_has_magnitude_of_1() {
-        let z = ColumnVector::vector(0.0, 0.0, 1.0);
+        let z = Tuple::vector(0.0, 0.0, 1.0);
 
         assert_that!(z.magnitude()).is_equal_to(1.0);
     }
 
     #[test]
     fn vector_has_magnitude() {
-        let z = ColumnVector::vector(1.0, 2.0, 3.0);
+        let z = Tuple::vector(1.0, 2.0, 3.0);
 
         assert_that!(z.magnitude()).is_equal_to(14.0_f32.sqrt());
     }
 
     #[test]
     fn negative_vector_has_positive_magnitude() {
-        let z = ColumnVector::vector(-1.0, -2.0, -3.0);
+        let z = Tuple::vector(-1.0, -2.0, -3.0);
 
         assert_that!(z.magnitude()).is_equal_to(14.0_f32.sqrt());
     }
 
     #[test]
     fn normalizing_vector_returns_unit_vector_same_direction() {
-        let x = ColumnVector::vector(4.0, 0.0, 0.0);
-        let expected = ColumnVector::vector(1.0, 0.0, 0.0);
+        let x = Tuple::vector(4.0, 0.0, 0.0);
+        let expected = Tuple::vector(1.0, 0.0, 0.0);
 
         assert_that!(x.normalize()).is_equal_to(expected);
     }
 
     #[test]
     fn normalizing_vector_returns_unit_vector_same_direction2() {
-        let x = ColumnVector::vector(1.0, 2.0, 3.0);
-        let expected = ColumnVector::vector(0.26726, 0.53452, 0.80178);
+        let x = Tuple::vector(1.0, 2.0, 3.0);
+        let expected = Tuple::vector(0.26726, 0.53452, 0.80178);
 
         let normalized = x.normalize();
 
@@ -243,33 +243,33 @@ mod tests {
 
     #[test]
     fn normalized_vector_is_a_unit_vector() {
-        let x = ColumnVector::vector(1.0, 2.0, 3.0);
+        let x = Tuple::vector(1.0, 2.0, 3.0);
 
         assert_that!(x.normalize().magnitude()).is_close_to(1.0, 0.0001_f32);
     }
 
     #[test]
     fn dot_product_of_two_vectors_is_scalar() {
-        let a = ColumnVector::vector(1.0, 2.0, 3.0);
-        let b = ColumnVector::vector(2.0, 3.0, 4.0);
+        let a = Tuple::vector(1.0, 2.0, 3.0);
+        let b = Tuple::vector(2.0, 3.0, 4.0);
 
         assert_that!(a.dot(&b)).is_equal_to(20.0);
     }
 
     #[test]
     fn cross_product_of_two_vectors_is_vector() {
-        let a = ColumnVector::vector(1.0, 2.0, 3.0);
-        let b = ColumnVector::vector(2.0, 3.0, 4.0);
-        let expected = ColumnVector::vector(-1.0, 2.0, -1.0);
+        let a = Tuple::vector(1.0, 2.0, 3.0);
+        let b = Tuple::vector(2.0, 3.0, 4.0);
+        let expected = Tuple::vector(-1.0, 2.0, -1.0);
 
         assert_that!(a.cross(&b)).is_equal_to(expected);
     }
 
     #[test]
     fn cross_product_of_two_vectors_is_not_commutative() {
-        let a = ColumnVector::vector(1.0, 2.0, 3.0);
-        let b = ColumnVector::vector(2.0, 3.0, 4.0);
-        let expected = ColumnVector::vector(1.0, -2.0, 1.0);
+        let a = Tuple::vector(1.0, 2.0, 3.0);
+        let b = Tuple::vector(2.0, 3.0, 4.0);
+        let expected = Tuple::vector(1.0, -2.0, 1.0);
 
         assert_that!(b.cross(&a)).is_equal_to(expected);
     }
