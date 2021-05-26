@@ -1,16 +1,17 @@
 #[derive(Debug, PartialEq)]
-pub struct Matrix<const M: usize, const N: usize> {
-    contents: [[f32; M]; N],
+pub struct Matrix<const M: usize> {
+    // Square Matrices only
+    contents: [[f32; M]; M],
 }
 
-impl<const M: usize, const N: usize> Matrix<M, N> {
-    fn new(contents: [[f32; M]; N]) -> Self {
+impl<const M: usize> Matrix<M> {
+    fn new(contents: [[f32; M]; M]) -> Self {
         Self {
             contents,
         }
     }
 
-    pub fn rows(rows: [[f32; M]; N]) -> Self {
+    pub fn rows(rows: [[f32; M]; M]) -> Self {
         Matrix::new(rows)
     }
 
@@ -30,7 +31,7 @@ mod tests {
 
     #[test]
     fn matrices_constructed_from_rows() {
-        let _: Matrix<4, 4> = Matrix::rows([
+        let _: Matrix<4> = Matrix::rows([
             [1.0, 2.0, 3.0, 4.0],
             [5.5, 6.5, 7.5, 8.5],
             [9.0, 10.0, 11.0, 12.0],
@@ -40,7 +41,7 @@ mod tests {
 
     #[test]
     fn matrices_indexed_by_row_col() {
-        let m: Matrix<4, 4> = Matrix::rows([
+        let m: Matrix<4> = Matrix::rows([
             [1.0, 2.0, 3.0, 4.0],
             [5.5, 6.5, 7.5, 8.5],
             [9.0, 10.0, 11.0, 12.0],
@@ -58,13 +59,13 @@ mod tests {
 
     #[test]
     fn matrices_with_the_same_values_are_equal() {
-        let m1: Matrix<4, 4> = Matrix::rows([
+        let m1: Matrix<4> = Matrix::rows([
             [1.0, 2.0, 3.0, 4.0],
             [5.0, 6.0, 7.0, 8.0],
             [9.0, 8.0, 8.0, 6.0],
             [5.0, 4.0, 3.0, 2.0],
         ]);
-        let m2: Matrix<4, 4> = Matrix::rows([
+        let m2: Matrix<4> = Matrix::rows([
             [1.0, 2.0, 3.0, 4.0],
             [5.0, 6.0, 7.0, 8.0],
             [9.0, 8.0, 8.0, 6.0],
@@ -76,13 +77,13 @@ mod tests {
 
     #[test]
     fn matrices_with_the_different_values_are_not_equal() {
-        let m1: Matrix<4, 4> = Matrix::rows([
+        let m1: Matrix<4> = Matrix::rows([
             [1.0, 2.0, 3.0, 4.0],
             [5.0, 6.0, 7.0, 8.0],
             [9.0, 8.0, 8.0, 6.0],
             [5.0, 4.0, 3.0, 2.0],
         ]);
-        let m2: Matrix<4, 4> = Matrix::rows([
+        let m2: Matrix<4> = Matrix::rows([
             [2.0, 3.0, 4.0, 5.0],
             [6.0, 7.0, 8.0, 9.0],
             [8.0, 7.0, 6.0, 5.0],
