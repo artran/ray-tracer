@@ -1,4 +1,4 @@
-use std::ops::{Index, IndexMut};
+use std::ops::{Index, IndexMut, Add, Sub, Neg};
 
 #[derive(Debug, PartialEq)]
 pub struct Tuple {
@@ -15,33 +15,6 @@ impl Tuple {
 
     pub fn vector(x: f32, y: f32, z: f32) -> Self {
         Self { x, y, z, w: 0.0 }
-    }
-
-    pub fn plus(&self, other: &Tuple) -> Tuple {
-        Tuple {
-            x: self.x + other.x,
-            y: self.y + other.y,
-            z: self.z + other.z,
-            w: self.w + other.w,
-        }
-    }
-
-    pub fn minus(&self, other: &Tuple) -> Tuple {
-        Tuple {
-            x: self.x - other.x,
-            y: self.y - other.y,
-            z: self.z - other.z,
-            w: self.w - other.w,
-        }
-    }
-
-    pub fn negate(&self) -> Tuple {
-        Self {
-            x: -self.x,
-            y: -self.y,
-            z: -self.z,
-            w: -self.w,
-        }
     }
 
     pub fn scale(&self, scale: &f32) -> Tuple {
@@ -109,6 +82,45 @@ impl IndexMut<usize> for Tuple {
     }
 }
 
+impl Add<&Tuple> for &Tuple {
+    type Output = Tuple;
+
+    fn add(self, rhs: &Tuple) -> Self::Output {
+        Tuple {
+            x: self.x + rhs.x,
+            y: self.y + rhs.y,
+            z: self.z + rhs.z,
+            w: self.w + rhs.w,
+        }
+    }
+}
+
+impl Sub<&Tuple> for &Tuple {
+    type Output = Tuple;
+
+    fn sub(self, rhs: &Tuple) -> Self::Output {
+        Tuple {
+            x: self.x - rhs.x,
+            y: self.y - rhs.y,
+            z: self.z - rhs.z,
+            w: self.w - rhs.w,
+        }
+    }
+}
+
+impl Neg for &Tuple {
+    type Output = Tuple;
+
+    fn neg(self) -> Self::Output {
+        Tuple {
+            x: -self.x,
+            y: -self.y,
+            z: -self.z,
+            w: -self.w,
+        }
+    }
+}
+
 /* -------------------------------------------------------------------------------------------------
 Tests
 ------------------------------------------------------------------------------------------------- */
@@ -158,7 +170,9 @@ mod tests {
         let vector = Tuple::vector(-2.0, 3.0, 1.0);
         let expected = Tuple::point(1.0, 1.0, 6.0);
 
-        assert_that!(point.plus(&vector)).is_equal_to(expected)
+        let result = &point + &vector;
+
+        assert_that!(result).is_equal_to(expected);
     }
 
     #[test]
@@ -167,7 +181,9 @@ mod tests {
         let point2 = Tuple::point(5.0, 6.0, 7.0);
         let expected = Tuple::vector(-2.0, -4.0, -6.0);
 
-        assert_that!(point1.minus(&point2)).is_equal_to(expected)
+        let result = &point1 - &point2;
+
+        assert_that!(result).is_equal_to(expected)
     }
 
     #[test]
@@ -176,7 +192,9 @@ mod tests {
         let vector = Tuple::vector(5.0, 6.0, 7.0);
         let expected = Tuple::point(-2.0, -4.0, -6.0);
 
-        assert_that!(point.minus(&vector)).is_equal_to(expected)
+        let result = &point - &vector;
+
+        assert_that!(result).is_equal_to(expected)
     }
 
     #[test]
@@ -184,7 +202,9 @@ mod tests {
         let vector = Tuple::vector(1.0, -2.0, 3.0);
         let expected = Tuple::vector(-1.0, 2.0, -3.0);
 
-        assert_that!(vector.negate()).is_equal_to(expected);
+        let result = -&vector;
+
+        assert_that!(result).is_equal_to(expected);
     }
 
     #[test]
@@ -192,7 +212,9 @@ mod tests {
         let tuple = Tuple { x: 1.0, y: -2.0, z: 3.0, w: -4.0 };
         let expected = Tuple { x: -1.0, y: 2.0, z: -3.0, w: 4.0 };
 
-        assert_that!(tuple.negate()).is_equal_to(expected);
+        let result = -&tuple;
+
+        assert_that!(result).is_equal_to(expected);
     }
 
     #[test]
