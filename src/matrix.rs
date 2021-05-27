@@ -32,13 +32,72 @@ impl<const M: usize> Matrix<M> {
         self.contents[row][col]
     }
 
-    pub fn transposed(&self)  -> Self{
+    pub fn transposed(&self) -> Self {
         let mut rows = [[0.0_f32; M]; M];
 
         for row in 0..M {
             for col in 0..M {
                 rows[row][col] = self.index(col, row);
             }
+        }
+
+        Matrix::new(rows)
+    }
+}
+
+impl Matrix<2> {
+    pub fn determinant(&self) -> f32 {
+        self.index(0, 0) * self.index(1, 1)
+            - self.index(0, 1) * self.index(1, 0)
+    }
+}
+
+impl Matrix<3> {
+    // fixme: code duplication
+    pub fn submatrix(&self, row: usize, col: usize) -> Matrix<2> {
+        let mut rows = [[0.0_f32; 2]; 2];
+
+        let mut result_row = 0;
+        let mut result_col = 0;
+        for r in 0..3 {
+            if r == row {
+                continue;
+            }
+            for c in 0..3 {
+                if c == col {
+                    continue;
+                }
+                rows[result_row][result_col] = self.index(r, c);
+                result_col += 1;
+            }
+            result_col = 0;
+            result_row += 1;
+        }
+
+        Matrix::new(rows)
+    }
+}
+
+impl Matrix<4> {
+    // fixme: code duplication
+    pub fn submatrix(&self, row: usize, col: usize) -> Matrix<3> {
+        let mut rows = [[0.0_f32; 3]; 3];
+
+        let mut result_row = 0;
+        let mut result_col = 0;
+        for r in 0..4 {
+            if r == row {
+                continue;
+            }
+            for c in 0..4 {
+                if c == col {
+                    continue;
+                }
+                rows[result_row][result_col] = self.index(r, c);
+                result_col += 1;
+            }
+            result_col = 0;
+            result_row += 1;
         }
 
         Matrix::new(rows)
@@ -238,5 +297,47 @@ mod tests {
         let a: Matrix<4> = Matrix::identity();
 
         assert_that(&a.transposed()).is_equal_to(a);
+    }
+
+    #[test]
+    fn calculating_the_determinant_of_2x2_matrix() {
+        let a = Matrix::rows([
+            [1.0, 5.0],
+            [-3.0, 2.0],
+        ]);
+
+        assert_that!(a.determinant()).is_equal_to(17.0);
+    }
+
+    #[test]
+    fn submatrix_of_3x3_matrix_is_2x2_matrix() {
+        let a = Matrix::rows([
+            [1.0, 5.0, 0.0],
+            [-3.0, 2.0, 7.0],
+            [0.0, 6.0, -3.0],
+        ]);
+        let expected = Matrix::rows([
+            [-3.0, 2.0],
+            [0.0, 6.0],
+        ]);
+
+        assert_that(&a.submatrix(0, 2)).is_equal_to(expected);
+    }
+
+    #[test]
+    fn submatrix_of_4x4_matrix_is_3x3_matrix() {
+        let a = Matrix::rows([
+            [-6.0, 1.0, 1.0, 6.0],
+            [-8.0, 5.0, 8.0, 6.0],
+            [-1.0, 0.0, 8.0, 2.0],
+            [-7.0, 1.0, -1.0, 1.0],
+        ]);
+        let expected = Matrix::rows([
+            [-6.0, 1.0, 6.0],
+            [-8.0, 8.0, 6.0],
+            [-7.0, -1.0, 1.0],
+        ]);
+
+        assert_that(&a.submatrix(2, 1)).is_equal_to(expected);
     }
 }
