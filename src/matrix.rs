@@ -32,6 +32,17 @@ impl<const M: usize> Matrix<M> {
         self.contents[row][col]
     }
 
+    pub fn transposed(&self)  -> Self{
+        let mut rows = [[0.0_f32; M]; M];
+
+        for row in 0..M {
+            for col in 0..M {
+                rows[row][col] = self.index(col, row);
+            }
+        }
+
+        Matrix::new(rows)
+    }
 }
 
 impl<const M: usize> Mul<&Matrix<M>> for &Matrix<M> {
@@ -202,5 +213,30 @@ mod tests {
         let result = &Matrix::identity() * &tuple;
 
         assert_that!(result).is_equal_to(tuple);
+    }
+
+    #[test]
+    fn transposing_a_matrix() {
+        let a = Matrix::rows([
+            [0.0, 9.0, 3.0, 0.0],
+            [9.0, 8.0, 0.0, 8.0],
+            [1.0, 8.0, 5.0, 3.0],
+            [0.0, 0.0, 5.0, 8.0],
+        ]);
+        let transposed = Matrix::rows([
+            [0.0, 9.0, 1.0, 0.0],
+            [9.0, 8.0, 8.0, 0.0],
+            [3.0, 0.0, 5.0, 5.0],
+            [0.0, 8.0, 3.0, 8.0],
+        ]);
+
+        assert_that(&a.transposed()).is_equal_to(transposed);
+    }
+
+    #[test]
+    fn transposing_the_identity_matrix_return_identity() {
+        let a: Matrix<4> = Matrix::identity();
+
+        assert_that(&a.transposed()).is_equal_to(a);
     }
 }
