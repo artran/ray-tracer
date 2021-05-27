@@ -1,4 +1,4 @@
-use std::ops::Index;
+use std::ops::{Index, IndexMut};
 
 #[derive(Debug, PartialEq)]
 pub struct Tuple {
@@ -94,6 +94,17 @@ impl Index<usize> for Tuple {
             1 => &self.y,
             2 => &self.z,
             _ => &self.w,
+        }
+    }
+}
+
+impl IndexMut<usize> for Tuple {
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        match index {
+            0 => &mut self.x,
+            1 => &mut self.y,
+            2 => &mut self.z,
+            _ => &mut self.w,
         }
     }
 }
@@ -294,6 +305,18 @@ mod tests {
         let a = Tuple::point(2.0, 3.0, 4.0);
 
         assert_that!(a[0]).is_equal_to(2.0);
+        assert_that!(a[1]).is_equal_to(3.0);
+        assert_that!(a[2]).is_equal_to(4.0);
+        assert_that!(a[3]).is_equal_to(1.0);
+    }
+
+    #[test]
+    fn tuple_can_be_indexed_mutably() {
+        let mut a = Tuple::point(2.0, 3.0, 4.0);
+
+        a[0] = 9.0;
+
+        assert_that!(a[0]).is_equal_to(9.0);
         assert_that!(a[1]).is_equal_to(3.0);
         assert_that!(a[2]).is_equal_to(4.0);
         assert_that!(a[3]).is_equal_to(1.0);
