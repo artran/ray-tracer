@@ -1,3 +1,5 @@
+use std::ops::Mul;
+
 #[derive(Debug, PartialEq)]
 pub struct Matrix<const M: usize> {
     // Square Matrices only
@@ -18,10 +20,13 @@ impl<const M: usize> Matrix<M> {
     pub fn index(&self, row: usize, col: usize) -> f32 {
         self.contents[row][col]
     }
+}
 
-    pub fn times(&self, rhs: &Matrix<M>) -> Self {
+impl<const M: usize> Mul<&Matrix<M>> for &Matrix<M> {
+    type Output = Matrix<M>;
+
+    fn mul(self, rhs: &Matrix<M>) -> Matrix<M> {
         let mut result: Matrix<M> = Matrix::rows([[0.0; M]; M]);
-
         for row in 0..M {
             for col in 0..M {
                 let mut sum = 0.0;
@@ -31,7 +36,6 @@ impl<const M: usize> Matrix<M> {
                 result.contents[row][col] = sum;
             }
         }
-
         result
     }
 }
@@ -130,6 +134,7 @@ mod tests {
             [16.0, 26.0, 46.0, 42.0],
         ]);
 
-        assert_that!(m1.times(&m2)).is_equal_to(expected);
+        let result: Matrix<4> = &m1 * &m2;
+        assert_that!(result).is_equal_to(expected);
     }
 }
