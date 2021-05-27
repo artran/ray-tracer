@@ -14,6 +14,16 @@ impl<const M: usize> Matrix<M> {
         }
     }
 
+    pub fn identity() -> Self {
+        let mut rows = [[0.0_f32; M]; M];
+
+        for idx in 0..M {
+            rows[idx][idx] = 1.0_f32;
+        }
+
+        Matrix::new(rows)
+    }
+
     pub fn rows(rows: [[f32; M]; M]) -> Self {
         Matrix::new(rows)
     }
@@ -21,13 +31,14 @@ impl<const M: usize> Matrix<M> {
     pub fn index(&self, row: usize, col: usize) -> f32 {
         self.contents[row][col]
     }
+
 }
 
 impl<const M: usize> Mul<&Matrix<M>> for &Matrix<M> {
     type Output = Matrix<M>;
 
     fn mul(self, rhs: &Matrix<M>) -> Matrix<M> {
-        let mut result: Matrix<M> = Matrix::rows([[0.0; M]; M]);
+        let mut result: Matrix<M> = Matrix::rows([[0.0_f32; M]; M]);
         for row in 0..M {
             for col in 0..M {
                 let mut sum = 0.0;
@@ -158,15 +169,38 @@ mod tests {
     #[test]
     fn multiplying_matrices_by_tuples() {
         let a: Matrix<4> = Matrix::rows([
-            [1.0, 2.0, 3.0, 4.0,],
-            [2.0, 4.0, 4.0, 2.0,],
-            [8.0, 6.0, 4.0, 1.0,],
-            [0.0, 0.0, 0.0, 1.0,],
+            [1.0, 2.0, 3.0, 4.0, ],
+            [2.0, 4.0, 4.0, 2.0, ],
+            [8.0, 6.0, 4.0, 1.0, ],
+            [0.0, 0.0, 0.0, 1.0, ],
         ]);
         let b = Tuple::point(1.0, 2.0, 3.0);
         let expected = Tuple::point(18.0, 24.0, 33.0);
 
         let result = &a * &b;
         assert_that!(result).is_equal_to(expected);
+    }
+
+    #[test]
+    fn multiplying_matrix_by_the_identity_matrix() {
+        let a = Matrix::rows([
+            [0.0, 1.0, 2.0, 4.0],
+            [1.0, 2.0, 4.0, 8.0],
+            [2.0, 4.0, 8.0, 16.0],
+            [4.0, 8.0, 16.0, 32.0],
+        ]);
+        let ident = Matrix::identity();
+
+        let result = &a * &ident;
+        assert_that!(result).is_equal_to(a);
+    }
+
+    #[test]
+    fn multiplying_identity_matrix_by_a_tuple() {
+        let tuple = Tuple::new(1.0, 2.0, 3.0, 4.0);
+
+        let result = &Matrix::identity() * &tuple;
+
+        assert_that!(result).is_equal_to(tuple);
     }
 }

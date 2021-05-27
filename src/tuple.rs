@@ -9,6 +9,10 @@ pub struct Tuple {
 }
 
 impl Tuple {
+    pub fn new(x: f32, y: f32, z: f32, w: f32) -> Self {
+        Self { x, y, z, w }
+    }
+
     pub fn point(x: f32, y: f32, z: f32) -> Self {
         Self { x, y, z, w: 1.0 }
     }
