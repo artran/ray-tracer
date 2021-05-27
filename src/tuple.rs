@@ -1,3 +1,5 @@
+use std::ops::Index;
+
 #[derive(Debug, PartialEq)]
 pub struct Tuple {
     x: f32,
@@ -80,6 +82,19 @@ impl Tuple {
                      self.z * other.x - self.x * other.z,
                      self.x * other.y - self.y * other.x,
         )
+    }
+}
+
+impl Index<usize> for Tuple {
+    type Output = f32;
+
+    fn index(&self, index: usize) -> &f32 {
+        match index {
+            0 => &self.x,
+            1 => &self.y,
+            2 => &self.z,
+            _ => &self.w,
+        }
     }
 }
 
@@ -272,5 +287,15 @@ mod tests {
         let expected = Tuple::vector(1.0, -2.0, 1.0);
 
         assert_that!(b.cross(&a)).is_equal_to(expected);
+    }
+
+    #[test]
+    fn tuple_can_be_indexed() {
+        let a = Tuple::point(2.0, 3.0, 4.0);
+
+        assert_that!(a[0]).is_equal_to(2.0);
+        assert_that!(a[1]).is_equal_to(3.0);
+        assert_that!(a[2]).is_equal_to(4.0);
+        assert_that!(a[3]).is_equal_to(1.0);
     }
 }
