@@ -1,4 +1,5 @@
 use std::ops::Mul;
+use crate::tuple::Tuple;
 
 #[derive(Debug, PartialEq)]
 pub struct Matrix<const M: usize> {
@@ -35,6 +36,22 @@ impl<const M: usize> Mul<&Matrix<M>> for &Matrix<M> {
                 }
                 result.contents[row][col] = sum;
             }
+        }
+        result
+    }
+}
+
+impl Mul<&Tuple> for &Matrix<4> {
+    type Output = Tuple;
+
+    fn mul(self, rhs: &Tuple) -> Tuple {
+        let mut result = Tuple::point(0.0, 0.0, 0.0);
+        for row in 0..4 {
+            let mut sum = 0.0;
+            for idx in 0..4 {
+                sum += self.index(row, idx) * rhs[idx];
+            }
+            result[row] = sum;
         }
         result
     }
@@ -135,6 +152,21 @@ mod tests {
         ]);
 
         let result: Matrix<4> = &m1 * &m2;
+        assert_that!(result).is_equal_to(expected);
+    }
+
+    #[test]
+    fn multiplying_matrices_by_tuples() {
+        let a: Matrix<4> = Matrix::rows([
+            [1.0, 2.0, 3.0, 4.0,],
+            [2.0, 4.0, 4.0, 2.0,],
+            [8.0, 6.0, 4.0, 1.0,],
+            [0.0, 0.0, 0.0, 1.0,],
+        ]);
+        let b = Tuple::point(1.0, 2.0, 3.0);
+        let expected = Tuple::point(18.0, 24.0, 33.0);
+
+        let result = &a * &b;
         assert_that!(result).is_equal_to(expected);
     }
 }
