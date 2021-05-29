@@ -8,10 +8,6 @@ pub struct Matrix<const M: usize> {
 }
 
 impl<const M: usize> Matrix<M> {
-    fn new(contents: [[f32; M]; M]) -> Self {
-        Self { contents }
-    }
-
     pub fn identity() -> Self {
         let mut rows = [[0.0_f32; M]; M];
 
@@ -19,11 +15,13 @@ impl<const M: usize> Matrix<M> {
             rows[idx][idx] = 1.0_f32;
         }
 
-        Matrix::new(rows)
+        Matrix::rows(rows)
     }
 
     pub fn rows(rows: [[f32; M]; M]) -> Self {
-        Matrix::new(rows)
+        Matrix {
+            contents: rows
+        }
     }
 
     pub fn index(&self, row: usize, col: usize) -> f32 {
@@ -39,7 +37,7 @@ impl<const M: usize> Matrix<M> {
             }
         }
 
-        Matrix::new(rows)
+        Matrix::rows(rows)
     }
 }
 
@@ -71,7 +69,7 @@ impl Matrix<3> {
             result_row += 1;
         }
 
-        Matrix::new(rows)
+        Matrix::rows(rows)
     }
 
     pub fn minor(&self, row: usize, col: usize) -> f32 {
@@ -118,7 +116,7 @@ impl Matrix<4> {
             result_row += 1;
         }
 
-        Matrix::new(rows)
+        Matrix::rows(rows)
     }
 
     pub fn minor(&self, row: usize, col: usize) -> f32 {
@@ -140,6 +138,27 @@ impl Matrix<4> {
             result += self.index(0, idx) * self.cofactor(0, idx);
         }
         result
+    }
+
+    pub fn invertible(&self) -> bool {
+        self.determinant() != 0.0
+    }
+
+    pub fn inverse(&self) -> Matrix<4> {
+        let mut rows = [[0.0_f32; 4]; 4];
+        let determinant = self.determinant();
+        if determinant == 0.0 {
+            Matrix::rows(rows)
+        } else {
+            for row in 0..4 {
+                for col in 0..4 {
+                    let c = self.cofactor(row, col);
+                    rows[col][row] = c / determinant;
+                }
+            }
+
+            Matrix::rows(rows)
+        }
     }
 }
 
@@ -185,6 +204,8 @@ Tests
 mod tests {
     use super::*;
     use spectral::assert_that;
+    use spectral::boolean::BooleanAssertions;
+    use spectral::numeric::FloatAssertions;
 
     #[test]
     fn matrices_constructed_from_rows() {
@@ -411,9 +432,9 @@ mod tests {
     #[test]
     fn calculating_the_determinant_of_a_3x3_matrix() {
         let a = Matrix::rows([
-            [1.0, 2.0, 6.0 ],
-            [-5.0, 8.0, -4.0 ],
-            [2.0, 6.0, 4.0 ],
+            [1.0, 2.0, 6.0],
+            [-5.0, 8.0, -4.0],
+            [2.0, 6.0, 4.0],
         ]);
 
         assert_that!(a.cofactor(0, 0)).is_equal_to(56.0);
@@ -436,5 +457,123 @@ mod tests {
         assert_that!(a.cofactor(0, 2)).is_equal_to(210.0);
         assert_that!(a.cofactor(0, 3)).is_equal_to(51.0);
         assert_that!(a.determinant()).is_equal_to(-4071.0);
+    }
+
+    #[test]
+    fn testing_an_invertible_matrix_for_invertibility() {
+        let a = Matrix::rows([
+            [6.0, 4.0, 4.0, 4.0],
+            [5.0, 5.0, 7.0, 6.0],
+            [4.0, -9.0, 3.0, -7.0],
+            [9.0, 1.0, 7.0, -6.0],
+        ]);
+
+        assert_that!(a.determinant()).is_equal_to(-2120.0);
+        assert_that!(a.invertible()).is_true();
+    }
+
+    #[test]
+    fn testing_a_noninvertible_matrix_for_invertibility() {
+        let a = Matrix::rows([
+            [-4.0 , 2.0, -2.0, -3.0],
+            [9.0 , 6.0, 2.0, 6.0],
+            [0.0 , -5.0, 1.0, -5.0],
+            [0.0 , 0.0, 0.0, 0.0],
+        ]);
+
+        assert_that!(a.determinant()).is_equal_to(0.0);
+        assert_that!(a.invertible()).is_false();
+    }
+
+    #[test]
+    fn calculating_the_inverse_of_a_matrix() {
+        let a = Matrix::rows([
+            [-5.0, 2.0, 6.0, -8.0],
+            [1.0, -5.0, 1.0, 8.0],
+            [7.0, 7.0, -6.0, -7.0],
+            [1.0, -3.0, 7.0, 4.0],
+        ]);
+        let inverse = a.inverse();
+        let expected = Matrix::rows([
+            [0.21805, 0.45113, 0.24060, -0.04511],
+            [-0.80827, -1.45677, -0.44361, 0.52068],
+            [-0.07895, -0.22368, -0.05263, 0.19737],
+            [-0.52256, -0.81391, -0.30075, 0.30639],
+        ]);
+
+        assert_that!(a.determinant()).is_equal_to(532.0);
+        assert_that!(a.cofactor(2, 3)).is_equal_to(-160.0);
+        assert_that!(a.cofactor(3, 2)).is_equal_to(105.0);
+        for row in 0..4 {
+            for col in 0..4 {
+                assert_that!(inverse.index(row, col)).is_close_to(expected.index(row, col), 0.00001);
+            }
+        }
+    }
+
+    #[test]
+    fn calculating_the_inverse_of_another_matrix() {
+        let a = Matrix::rows([
+            [8.0, -5.0, 9.0, 2.0],
+            [7.0, 5.0, 6.0, 1.0],
+            [-6.0, 0.0, 9.0, 6.0],
+            [-3.0, 0.0, -9.0, -4.0],
+        ]);
+        let inverse = a.inverse();
+        let expected = Matrix::rows([
+            [-0.15385, -0.15385, -0.28205, -0.53846],
+            [-0.07692, 0.12308, 0.02564, 0.03077],
+            [0.35897, 0.35897, 0.43590, 0.92308],
+            [-0.69231, -0.69231, -0.76923, -1.92308],
+        ]);
+
+        for row in 0..4 {
+            for col in 0..4 {
+                assert_that!(inverse.index(row, col)).is_close_to(expected.index(row, col), 0.00001);
+            }
+        }
+    }
+
+    #[test]
+    fn calculating_the_inverse_of_a_third_matrix() {
+        let a = Matrix::rows([
+            [9.0, 3.0, 0.0, 9.0],
+            [-5.0, -2.0, -6.0, -3.0],
+            [-4.0, 9.0, 6.0, 4.0],
+            [-7.0, 6.0, 6.0, 2.0],
+        ]);
+        let inverse = a.inverse();
+        let expected = Matrix::rows([
+            [-0.04074, -0.07778, 0.14444, -0.22222],
+            [-0.07778, 0.03333, 0.36667, -0.33333],
+            [-0.02901, -0.14630, -0.10926, 0.12963],
+            [0.17778, 0.06667, -0.26667, 0.33333],
+        ]);
+
+        for row in 0..4 {
+            for col in 0..4 {
+                assert_that!(inverse.index(row, col)).is_close_to(expected.index(row, col), 0.00001);
+            }
+        }
+    }
+
+    #[test]
+    fn multiplying_a_product_by_its_inverse() {
+        let a = Matrix::rows([
+            [3.0, -9.0, 7.0, 3.0],
+            [3.0, -8.0, 2.0, -9.0],
+            [-4.0, 4.0, 4.0, 1.0],
+            [-6.0, 5.0, -1.0, 1.0],
+        ]);
+        let b = Matrix::rows([
+            [8.0, 2.0, 2.0, 2.0],
+            [3.0, -1.0, 7.0, 0.0],
+            [7.0, 0.0, 5.0, 4.0],
+            [6.0, -2.0, 0.0, 5.0],
+      ]);
+
+      let c = &a * &b;
+
+      // assert_that!((c as Matrix<4> * b.inverse())).is_equal_to(a);
     }
 }
