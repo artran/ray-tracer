@@ -1,5 +1,5 @@
-use std::ops::Mul;
 use crate::tuple::Tuple;
+use std::ops::Mul;
 
 #[derive(Debug, PartialEq)]
 pub struct Matrix<const M: usize> {
@@ -9,9 +9,7 @@ pub struct Matrix<const M: usize> {
 
 impl<const M: usize> Matrix<M> {
     fn new(contents: [[f32; M]; M]) -> Self {
-        Self {
-            contents,
-        }
+        Self { contents }
     }
 
     pub fn identity() -> Self {
@@ -47,8 +45,7 @@ impl<const M: usize> Matrix<M> {
 
 impl Matrix<2> {
     pub fn determinant(&self) -> f32 {
-        self.index(0, 0) * self.index(1, 1)
-            - self.index(0, 1) * self.index(1, 0)
+        self.index(0, 0) * self.index(1, 1) - self.index(0, 1) * self.index(1, 0)
     }
 }
 
@@ -76,6 +73,27 @@ impl Matrix<3> {
 
         Matrix::new(rows)
     }
+
+    pub fn minor(&self, row: usize, col: usize) -> f32 {
+        let s = self.submatrix(row, col);
+        s.determinant()
+    }
+
+    pub fn cofactor(&self, row: usize, col: usize) -> f32 {
+        if (row + col) % 2 == 0 {
+            self.minor(row, col)
+        } else {
+            - self.minor(row, col)
+        }
+    }
+
+    pub fn determinant(&self) -> f32 {
+        let mut result = 0.0;
+        for idx in 0..3 {
+            result += self.index(0, idx) * self.cofactor(0, idx);
+        }
+        result
+    }
 }
 
 impl Matrix<4> {
@@ -101,6 +119,27 @@ impl Matrix<4> {
         }
 
         Matrix::new(rows)
+    }
+
+    pub fn minor(&self, row: usize, col: usize) -> f32 {
+        let s = self.submatrix(row, col);
+        s.determinant()
+    }
+
+    pub fn cofactor(&self, row: usize, col: usize) -> f32 {
+        if (row + col) % 2 == 0 {
+            self.minor(row, col)
+        } else {
+            - self.minor(row, col)
+        }
+    }
+
+    pub fn determinant(&self) -> f32 {
+        let mut result = 0.0;
+        for idx in 0..4 {
+            result += self.index(0, idx) * self.cofactor(0, idx);
+        }
+        result
     }
 }
 
@@ -144,8 +183,8 @@ Tests
 
 #[cfg(test)]
 mod tests {
-    use spectral::assert_that;
     use super::*;
+    use spectral::assert_that;
 
     #[test]
     fn matrices_constructed_from_rows() {
@@ -239,10 +278,10 @@ mod tests {
     #[test]
     fn multiplying_matrices_by_tuples() {
         let a: Matrix<4> = Matrix::rows([
-            [1.0, 2.0, 3.0, 4.0, ],
-            [2.0, 4.0, 4.0, 2.0, ],
-            [8.0, 6.0, 4.0, 1.0, ],
-            [0.0, 0.0, 0.0, 1.0, ],
+            [1.0, 2.0, 3.0, 4.0],
+            [2.0, 4.0, 4.0, 2.0],
+            [8.0, 6.0, 4.0, 1.0],
+            [0.0, 0.0, 0.0, 1.0],
         ]);
         let b = Tuple::point(1.0, 2.0, 3.0);
         let expected = Tuple::point(18.0, 24.0, 33.0);
@@ -303,7 +342,7 @@ mod tests {
     fn calculating_the_determinant_of_2x2_matrix() {
         let a = Matrix::rows([
             [1.0, 5.0],
-            [-3.0, 2.0],
+            [-3.0, 2.0]
         ]);
 
         assert_that!(a.determinant()).is_equal_to(17.0);
@@ -314,11 +353,11 @@ mod tests {
         let a = Matrix::rows([
             [1.0, 5.0, 0.0],
             [-3.0, 2.0, 7.0],
-            [0.0, 6.0, -3.0],
+            [0.0, 6.0, -3.0]
         ]);
         let expected = Matrix::rows([
             [-3.0, 2.0],
-            [0.0, 6.0],
+            [0.0, 6.0]
         ]);
 
         assert_that(&a.submatrix(0, 2)).is_equal_to(expected);
@@ -335,9 +374,67 @@ mod tests {
         let expected = Matrix::rows([
             [-6.0, 1.0, 6.0],
             [-8.0, 8.0, 6.0],
-            [-7.0, -1.0, 1.0],
+            [-7.0, -1.0, 1.0]
         ]);
 
         assert_that(&a.submatrix(2, 1)).is_equal_to(expected);
+    }
+
+    #[test]
+    fn calculating_a_minor_of_a_3x3_matrix() {
+        let a = Matrix::rows([
+            [3.0, 5.0, 0.0],
+            [2.0, -1.0, -7.0],
+            [6.0, -1.0, 5.0]
+        ]);
+
+        let b = a.submatrix(1, 0);
+
+        assert_that!(b.determinant()).is_equal_to(25.0);
+        assert_that!(a.minor(1, 0)).is_equal_to(25.0);
+    }
+
+    #[test]
+    fn calculating_a_cofactor_of_a_3x3_matrix() {
+        let a = Matrix::rows([
+            [3.0, 5.0, 0.0],
+            [2.0, -1.0, -7.0],
+            [6.0, -1.0, 5.0]
+        ]);
+
+        assert_that!(a.minor(0, 0)).is_equal_to(-12.0);
+        assert_that!(a.cofactor(0, 0)).is_equal_to(-12.0);
+        assert_that!(a.minor(1, 0)).is_equal_to(25.0);
+        assert_that!(a.cofactor(1, 0)).is_equal_to(-25.0);
+    }
+
+    #[test]
+    fn calculating_the_determinant_of_a_3x3_matrix() {
+        let a = Matrix::rows([
+            [1.0, 2.0, 6.0 ],
+            [-5.0, 8.0, -4.0 ],
+            [2.0, 6.0, 4.0 ],
+        ]);
+
+        assert_that!(a.cofactor(0, 0)).is_equal_to(56.0);
+        assert_that!(a.cofactor(0, 1)).is_equal_to(12.0);
+        assert_that!(a.cofactor(0, 2)).is_equal_to(-46.0);
+        assert_that!(a.determinant()).is_equal_to(-196.0);
+    }
+
+    #[test]
+    fn calculating_the_determinant_of_a_4x4_matrix() {
+        let a = Matrix::rows([
+            [-2.0, -8.0, 3.0, 5.0],
+            [-3.0, 1.0, 7.0, 3.0],
+            [1.0, 2.0, -9.0, 6.0],
+            [-6.0, 7.0, 7.0, -9.0],
+        ]);
+
+        assert_that!(a.cofactor(0, 0)).is_equal_to(690.0);
+        assert_that!(a.cofactor(0, 1)).is_equal_to(447.0);
+        assert_that!(a.cofactor(0, 2)).is_equal_to(210.0);
+        assert_that!(a.cofactor(0, 3)).is_equal_to(51.0);
+        assert_that!(a.determinant()).is_equal_to(-4071.0);
     }
 }
