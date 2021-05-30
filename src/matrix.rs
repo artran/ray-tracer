@@ -1,3 +1,4 @@
+
 /* -------------------------------------------------------------------------------------------------
 Tests
 ------------------------------------------------------------------------------------------------- */
@@ -8,6 +9,8 @@ mod tests {
     use spectral::assert_that;
     use spectral::boolean::BooleanAssertions;
     use spectral::numeric::FloatAssertions;
+
+    use crate::tuple::*;
 
     #[test]
     fn matrices_constructed_from_rows() {
@@ -106,8 +109,8 @@ mod tests {
             8.0, 6.0, 4.0, 1.0,
             0.0, 0.0, 0.0, 1.0,
         );
-        let b: Vector4<f32> = Vector4::new(1.0, 2.0, 3.0, 1.0);
-        let expected = Vector4::new(18.0, 24.0, 33.0, 1.0);
+        let b: Vector4<f32> = Vector4::point(1.0, 2.0, 3.0);
+        let expected = Vector4::point(18.0, 24.0, 33.0);
 
         let result = &a * &b;
         assert_that!(result).is_equal_to(expected);

@@ -1,127 +1,27 @@
-use std::ops::{Index, IndexMut, Add, Sub, Neg};
+use nalgebra::Vector4;
 
-#[derive(Debug, PartialEq)]
-pub struct Tuple {
-    x: f32,
-    y: f32,
-    z: f32,
-    w: f32,
+pub trait Tuple {
+    fn point(x: f32, y: f32, z: f32) -> Vector4<f32>;
+    fn vector(x: f32, y: f32, z: f32) -> Vector4<f32>;
+    fn cross_product(&self, other: &Vector4<f32>) -> Vector4<f32>;
 }
 
-impl Tuple {
-    pub fn new(x: f32, y: f32, z: f32, w: f32) -> Self {
-        Self { x, y, z, w }
+impl Tuple for Vector4<f32> {
+    fn point(x: f32, y: f32, z: f32) -> Vector4<f32> {
+        Vector4::new(x, y, z, 1.0)
     }
 
-    pub fn point(x: f32, y: f32, z: f32) -> Self {
-        Self { x, y, z, w: 1.0 }
+    fn vector(x: f32, y: f32, z: f32) -> Vector4<f32> {
+        Vector4::new(x, y, z, 0.0)
     }
 
-    pub fn vector(x: f32, y: f32, z: f32) -> Self {
-        Self { x, y, z, w: 0.0 }
-    }
+    fn cross_product(&self, other: &Vector4<f32>) -> Vector4<f32> {
+        let me = self.remove_row(3);
+        let rhs = other.remove_row(3);
 
-    pub fn scale(&self, scale: &f32) -> Tuple {
-        Self {
-            x: self.x * scale,
-            y: self.y * scale,
-            z: self.z * scale,
-            w: self.w * scale,
-        }
-    }
+        let res = me.cross(&rhs);
 
-    pub fn magnitude(&self) -> f32 {
-        // Note: Not including the 'w' part at the moment as this probably only makes sense for
-        //       vectors where w = 0.0
-        (self.x * self.x + self.y * self.y + self.z * self.z).sqrt()
-    }
-
-    pub fn normalize(&self) -> Tuple {
-        let scale = self.magnitude();
-        Tuple {
-            x: self.x / scale,
-            y: self.y / scale,
-            z: self.z / scale,
-            w: self.w / scale,
-        }
-    }
-
-    pub fn dot(&self, other: &Tuple) -> f32 {
-        // a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w
-        self.x * other.x + self.y * other.y + self.z * other.z + self.w * other.w
-    }
-
-    pub fn cross(&self, other: &Tuple) -> Tuple {
-        // vector(a.y * b.z - a.z * b.y,
-        //        a.z * b.x - a.x * b.z,
-        //        a.x * b.y - a.y * b.x)
-        Self::vector(self.y * other.z - self.z * other.y,
-                     self.z * other.x - self.x * other.z,
-                     self.x * other.y - self.y * other.x,
-        )
-    }
-}
-
-impl Index<usize> for Tuple {
-    type Output = f32;
-
-    fn index(&self, index: usize) -> &f32 {
-        match index {
-            0 => &self.x,
-            1 => &self.y,
-            2 => &self.z,
-            _ => &self.w,
-        }
-    }
-}
-
-impl IndexMut<usize> for Tuple {
-    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-        match index {
-            0 => &mut self.x,
-            1 => &mut self.y,
-            2 => &mut self.z,
-            _ => &mut self.w,
-        }
-    }
-}
-
-impl Add<&Tuple> for &Tuple {
-    type Output = Tuple;
-
-    fn add(self, rhs: &Tuple) -> Self::Output {
-        Tuple {
-            x: self.x + rhs.x,
-            y: self.y + rhs.y,
-            z: self.z + rhs.z,
-            w: self.w + rhs.w,
-        }
-    }
-}
-
-impl Sub<&Tuple> for &Tuple {
-    type Output = Tuple;
-
-    fn sub(self, rhs: &Tuple) -> Self::Output {
-        Tuple {
-            x: self.x - rhs.x,
-            y: self.y - rhs.y,
-            z: self.z - rhs.z,
-            w: self.w - rhs.w,
-        }
-    }
-}
-
-impl Neg for &Tuple {
-    type Output = Tuple;
-
-    fn neg(self) -> Self::Output {
-        Tuple {
-            x: -self.x,
-            y: -self.y,
-            z: -self.z,
-            w: -self.w,
-        }
+        res.insert_row(3, 0.0)
     }
 }
 
@@ -134,11 +34,11 @@ mod tests {
     use spectral::assert_that;
     use spectral::numeric::FloatAssertions;
 
-    use crate::tuple::Tuple;
+    use super::*;
 
     #[test]
     fn point_has_three_coordinates() {
-        let cv = Tuple::point(4.3, -4.2, 3.1);
+        let cv = Vector4::point(4.3, -4.2, 3.1);
 
         assert_that!(cv.x).is_equal_to(4.3);
         assert_that!(cv.y).is_equal_to(-4.2);
@@ -147,14 +47,14 @@ mod tests {
 
     #[test]
     fn point_has_w_of_1() {
-        let cv = Tuple::point(3.0, 2.0, 1.0);
+        let cv = Vector4::point(3.0, 2.0, 1.0);
 
         assert_that!(cv.w).is_equal_to(1.0);
     }
 
     #[test]
     fn vector_has_three_coordinates() {
-        let cv = Tuple::vector(4.3, -4.2, 3.1);
+        let cv = Vector4::vector(4.3, -4.2, 3.1);
 
         assert_that!(cv.x).is_equal_to(4.3);
         assert_that!(cv.y).is_equal_to(-4.2);
@@ -163,16 +63,16 @@ mod tests {
 
     #[test]
     fn vector_has_w_of_0() {
-        let cv = Tuple::vector(1.0, 2.0, 3.0);
+        let cv = Vector4::vector(1.0, 2.0, 3.0);
 
         assert_that!(cv.w).is_equal_to(0.0);
     }
 
     #[test]
     fn adding_a_vector_to_a_point_returns_a_new_point() {
-        let point = Tuple::point(3.0, -2.0, 5.0);
-        let vector = Tuple::vector(-2.0, 3.0, 1.0);
-        let expected = Tuple::point(1.0, 1.0, 6.0);
+        let point = Vector4::point(3.0, -2.0, 5.0);
+        let vector = Vector4::vector(-2.0, 3.0, 1.0);
+        let expected = Vector4::point(1.0, 1.0, 6.0);
 
         let result = &point + &vector;
 
@@ -181,9 +81,9 @@ mod tests {
 
     #[test]
     fn subtracting_two_points_returns_a_vector() {
-        let point1 = Tuple::point(3.0, 2.0, 1.0);
-        let point2 = Tuple::point(5.0, 6.0, 7.0);
-        let expected = Tuple::vector(-2.0, -4.0, -6.0);
+        let point1 = Vector4::point(3.0, 2.0, 1.0);
+        let point2 = Vector4::point(5.0, 6.0, 7.0);
+        let expected = Vector4::vector(-2.0, -4.0, -6.0);
 
         let result = &point1 - &point2;
 
@@ -192,9 +92,9 @@ mod tests {
 
     #[test]
     fn subtracting_a_vector_from_a_point_returns_a_new_point() {
-        let point = Tuple::point(3.0, 2.0, 1.0);
-        let vector = Tuple::vector(5.0, 6.0, 7.0);
-        let expected = Tuple::point(-2.0, -4.0, -6.0);
+        let point = Vector4::point(3.0, 2.0, 1.0);
+        let vector = Vector4::vector(5.0, 6.0, 7.0);
+        let expected = Vector4::point(-2.0, -4.0, -6.0);
 
         let result = &point - &vector;
 
@@ -203,8 +103,8 @@ mod tests {
 
     #[test]
     fn negating_a_vector_returns_the_negative_vector() {
-        let vector = Tuple::vector(1.0, -2.0, 3.0);
-        let expected = Tuple::vector(-1.0, 2.0, -3.0);
+        let vector = Vector4::vector(1.0, -2.0, 3.0);
+        let expected = Vector4::vector(-1.0, 2.0, -3.0);
 
         let result = -&vector;
 
@@ -213,8 +113,8 @@ mod tests {
 
     #[test]
     fn negating_a_tuple_returns_the_negative_tuple() {
-        let tuple = Tuple { x: 1.0, y: -2.0, z: 3.0, w: -4.0 };
-        let expected = Tuple { x: -1.0, y: 2.0, z: -3.0, w: 4.0 };
+        let tuple = Vector4::new(1.0, -2.0, 3.0, -4.0 );
+        let expected = Vector4::new(-1.0, 2.0, -3.0, 4.0);
 
         let result = -&tuple;
 
@@ -223,67 +123,67 @@ mod tests {
 
     #[test]
     fn multiplying_a_tuple_by_scalar_scales_the_tuple() {
-        let tuple = Tuple { x: 1.0, y: -2.0, z: 3.0, w: -4.0 };
-        let expected = Tuple { x: 3.5, y: -7.0, z: 10.5, w: -14.0 };
+        let tuple = Vector4::new(1.0, -2.0, 3.0, -4.0);
+        let expected = Vector4::new(3.5, -7.0, 10.5, -14.0);
 
-        assert_that!(tuple.scale(&3.5)).is_equal_to(expected);
+        assert_that!(tuple * 3.5).is_equal_to(expected);
     }
 
     #[test]
     fn multiplying_a_tuple_by_fraction_scales_the_tuple() {
-        let tuple = Tuple { x: 1.0, y: -2.0, z: 3.0, w: -4.0 };
-        let expected = Tuple { x: 0.5, y: -1.0, z: 1.5, w: -2.0 };
+        let tuple = Vector4::new(1.0, -2.0, 3.0, -4.0);
+        let expected = Vector4::new(0.5, -1.0, 1.5, -2.0);
 
-        assert_that!(tuple.scale(&0.5)).is_equal_to(expected);
+        assert_that!(tuple * 0.5).is_equal_to(expected);
     }
 
     #[test]
     fn unit_vector_x_has_magnitude_of_1() {
-        let x = Tuple::vector(1.0, 0.0, 0.0);
+        let x = Vector4::vector(1.0, 0.0, 0.0);
 
         assert_that!(x.magnitude()).is_equal_to(1.0);
     }
 
     #[test]
     fn unit_vector_y_has_magnitude_of_1() {
-        let y = Tuple::vector(0.0, 1.0, 0.0);
+        let y = Vector4::vector(0.0, 1.0, 0.0);
 
         assert_that!(y.magnitude()).is_equal_to(1.0);
     }
 
     #[test]
     fn unit_vector_z_has_magnitude_of_1() {
-        let z = Tuple::vector(0.0, 0.0, 1.0);
+        let z = Vector4::vector(0.0, 0.0, 1.0);
 
         assert_that!(z.magnitude()).is_equal_to(1.0);
     }
 
     #[test]
     fn vector_has_magnitude() {
-        let z = Tuple::vector(1.0, 2.0, 3.0);
+        let z = Vector4::vector(1.0, 2.0, 3.0);
 
         assert_that!(z.magnitude()).is_equal_to(14.0_f32.sqrt());
     }
 
     #[test]
     fn negative_vector_has_positive_magnitude() {
-        let z = Tuple::vector(-1.0, -2.0, -3.0);
+        let z = Vector4::vector(-1.0, -2.0, -3.0);
 
         assert_that!(z.magnitude()).is_equal_to(14.0_f32.sqrt());
     }
 
     #[test]
     fn normalizing_vector_returns_unit_vector_same_direction() {
-        let x = Tuple::vector(4.0, 0.0, 0.0);
-        let expected = Tuple::vector(1.0, 0.0, 0.0);
+        let x = Vector4::vector(4.0, 0.0, 0.0);
+        let expected = Vector4::vector(1.0, 0.0, 0.0);
 
         assert_that!(x.normalize()).is_equal_to(expected);
     }
 
     #[test]
     fn normalizing_vector_returns_unit_vector_same_direction2() {
-        let x = Tuple::vector(1.0, 2.0, 3.0);
-        let expected = Tuple::vector(0.26726, 0.53452, 0.80178);
+        let x = Vector4::vector(1.0, 2.0, 3.0);
+        let expected = Vector4::vector(0.26726, 0.53452, 0.80178);
 
         let normalized = x.normalize();
 
@@ -295,40 +195,40 @@ mod tests {
 
     #[test]
     fn normalized_vector_is_a_unit_vector() {
-        let x = Tuple::vector(1.0, 2.0, 3.0);
+        let x = Vector4::vector(1.0, 2.0, 3.0);
 
         assert_that!(x.normalize().magnitude()).is_close_to(1.0, 0.0001_f32);
     }
 
     #[test]
     fn dot_product_of_two_vectors_is_scalar() {
-        let a = Tuple::vector(1.0, 2.0, 3.0);
-        let b = Tuple::vector(2.0, 3.0, 4.0);
+        let a = Vector4::vector(1.0, 2.0, 3.0);
+        let b = Vector4::vector(2.0, 3.0, 4.0);
 
         assert_that!(a.dot(&b)).is_equal_to(20.0);
     }
 
     #[test]
     fn cross_product_of_two_vectors_is_vector() {
-        let a = Tuple::vector(1.0, 2.0, 3.0);
-        let b = Tuple::vector(2.0, 3.0, 4.0);
-        let expected = Tuple::vector(-1.0, 2.0, -1.0);
+        let a = Vector4::vector(1.0, 2.0, 3.0);
+        let b = Vector4::vector(2.0, 3.0, 4.0);
+        let expected = Vector4::vector(-1.0, 2.0, -1.0);
 
-        assert_that!(a.cross(&b)).is_equal_to(expected);
+        assert_that!(a.cross_product(&b)).is_equal_to(expected);
     }
 
     #[test]
     fn cross_product_of_two_vectors_is_not_commutative() {
-        let a = Tuple::vector(1.0, 2.0, 3.0);
-        let b = Tuple::vector(2.0, 3.0, 4.0);
-        let expected = Tuple::vector(1.0, -2.0, 1.0);
+        let a = Vector4::vector(1.0, 2.0, 3.0);
+        let b = Vector4::vector(2.0, 3.0, 4.0);
+        let expected = Vector4::vector(1.0, -2.0, 1.0);
 
-        assert_that!(b.cross(&a)).is_equal_to(expected);
+        assert_that!(b.cross_product(&a)).is_equal_to(expected);
     }
 
     #[test]
     fn tuple_can_be_indexed() {
-        let a = Tuple::point(2.0, 3.0, 4.0);
+        let a = Vector4::point(2.0, 3.0, 4.0);
 
         assert_that!(a[0]).is_equal_to(2.0);
         assert_that!(a[1]).is_equal_to(3.0);
@@ -338,7 +238,7 @@ mod tests {
 
     #[test]
     fn tuple_can_be_indexed_mutably() {
-        let mut a = Tuple::point(2.0, 3.0, 4.0);
+        let mut a = Vector4::point(2.0, 3.0, 4.0);
 
         a[0] = 9.0;
 
