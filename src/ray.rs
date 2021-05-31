@@ -7,7 +7,7 @@ pub struct Ray {
 }
 
 impl Ray {
-    fn new(origin: Vector4<f32>, direction: Vector4<f32>) -> Self {
+    pub fn new(origin: Vector4<f32>, direction: Vector4<f32>) -> Self {
         assert!(origin.is_point(), "Origin must be a point");
         assert!(direction.is_vector(), "Direction must be a vector");
         Self { origin, direction }
