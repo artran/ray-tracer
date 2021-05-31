@@ -4,6 +4,8 @@ pub trait Tuple {
     fn point(x: f32, y: f32, z: f32) -> Vector4<f32>;
     fn vector(x: f32, y: f32, z: f32) -> Vector4<f32>;
     fn cross_product(&self, other: &Vector4<f32>) -> Vector4<f32>;
+    fn is_point(&self) -> bool;
+    fn is_vector(&self) -> bool;
 }
 
 impl Tuple for Vector4<f32> {
@@ -23,6 +25,14 @@ impl Tuple for Vector4<f32> {
 
         res.insert_row(3, 0.0)
     }
+
+    fn is_point(&self) -> bool {
+        self.w == 1.0
+    }
+
+    fn is_vector(&self) -> bool {
+        self.w == 0.0
+    }
 }
 
 /* -------------------------------------------------------------------------------------------------
@@ -32,6 +42,7 @@ Tests
 #[cfg(test)]
 mod tests {
     use spectral::assert_that;
+    use spectral::boolean::BooleanAssertions;
     use spectral::numeric::FloatAssertions;
 
     use super::*;
@@ -53,6 +64,14 @@ mod tests {
     }
 
     #[test]
+    fn point_returns_true_for_is_point_false_for_is_vector() {
+        let cv = Vector4::point(1.0, 2.0, 3.0);
+
+        assert_that!(cv.is_vector()).is_false();
+        assert_that!(cv.is_point()).is_true();
+    }
+
+    #[test]
     fn vector_has_three_coordinates() {
         let cv = Vector4::vector(4.3, -4.2, 3.1);
 
@@ -66,6 +85,14 @@ mod tests {
         let cv = Vector4::vector(1.0, 2.0, 3.0);
 
         assert_that!(cv.w).is_equal_to(0.0);
+    }
+
+    #[test]
+    fn vector_returns_true_for_is_vector_false_for_is_point() {
+        let cv = Vector4::vector(1.0, 2.0, 3.0);
+
+        assert_that!(cv.is_vector()).is_true();
+        assert_that!(cv.is_point()).is_false();
     }
 
     #[test]
@@ -127,6 +154,14 @@ mod tests {
         let expected = Vector4::new(3.5, -7.0, 10.5, -14.0);
 
         assert_that!(tuple * 3.5).is_equal_to(expected);
+    }
+
+    #[test]
+    fn tuple_returns_false_for_is_vector_false_for_is_point() {
+        let cv = Vector4::new(1.0, 2.0, 3.0, 4.0);
+
+        assert_that!(cv.is_vector()).is_false();
+        assert_that!(cv.is_point()).is_false();
     }
 
     #[test]
