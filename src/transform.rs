@@ -39,7 +39,7 @@ impl Transform for Matrix4<f32> {
     fn rotation_y(r: f32) -> Matrix4<f32> {
         Matrix4::new(
             r.cos(), 0.0, r.sin(), 0.0,
-            0.0, r, 1.0, 0.0,
+            0.0, 1.0, 0.0, 0.0,
             -r.sin(), 0.0, r.cos(), 0.0,
             0.0, 0.0, 0.0, 1.0,
         )
@@ -61,13 +61,22 @@ Tests
 
 #[cfg(test)]
 mod tests {
+    use std::f32::consts::PI;
+
     use nalgebra::{Matrix4, Vector4};
     use spectral::assert_that;
+    use spectral::numeric::FloatAssertions;
 
     use crate::tuple::*;
 
     use super::*;
-    use std::f32::consts::PI;
+
+    fn vector_values_are_close(actual: Vector4<f32>, expected: Vector4<f32>, tolerance: f32) {
+        for row in 0..4 {
+            assert_that!(actual[row]).is_close_to(expected[row], tolerance);
+        }
+    }
+
 
     #[test]
     fn multiplying_by_a_translation_matrix() {
@@ -133,8 +142,8 @@ mod tests {
         let half_quarter = Matrix4::rotation_x(PI/4.0);
         let full_quarter = Matrix4::rotation_x(PI/2.0);
 
-        assert_that!(half_quarter * p).is_equal_to(Vector4::point(0.0, 2.0_f32.sqrt()/2.0, 2.0_f32.sqrt()/2.0));
-        assert_that!(full_quarter * p).is_equal_to(Vector4::point(0.0, 0.0, 1.0));
+        vector_values_are_close(half_quarter * p, Vector4::point(0.0, 2.0_f32.sqrt()/2.0, 2.0_f32.sqrt()/2.0), 0.0001);
+        vector_values_are_close(full_quarter * p, Vector4::point(0.0, 0.0, 1.0), 0.00001);
     }
 
     #[test]
@@ -143,7 +152,7 @@ mod tests {
         let half_quarter = Matrix4::rotation_x(PI/4.0);
         let inv = half_quarter.try_inverse().unwrap();
 
-        assert_that!(inv * p).is_equal_to(Vector4::point(0.0, 2.0_f32.sqrt()/2.0, -2.0_f32.sqrt()/2.0));
+        vector_values_are_close(inv * p, Vector4::point(0.0, 2.0_f32.sqrt()/2.0, -2.0_f32.sqrt()/2.0), 0.00001);
     }
 
     #[test]
@@ -152,8 +161,8 @@ mod tests {
         let half_quarter = Matrix4::rotation_y(PI/4.0);
         let full_quarter = Matrix4::rotation_y(PI/2.0);
 
-        assert_that!(half_quarter * p).is_equal_to(Vector4::point(2.0_f32.sqrt()/2.0, 0.0, 2.0_f32.sqrt()/2.0));
-        assert_that!(full_quarter * p).is_equal_to(Vector4::point(1.0, 0.0, 0.0));
+        vector_values_are_close(half_quarter * p, Vector4::point(2.0_f32.sqrt()/2.0, 0.0, 2.0_f32.sqrt()/2.0), 0.00001);
+        vector_values_are_close(full_quarter * p, Vector4::point(1.0, 0.0, 0.0), 0.00001);
     }
 
     #[test]
@@ -162,7 +171,7 @@ mod tests {
         let half_quarter = Matrix4::rotation_z(PI/4.0);
         let full_quarter = Matrix4::rotation_z(PI/2.0);
 
-        assert_that!(half_quarter * p).is_equal_to(Vector4::point(-2.0_f32.sqrt()/2.0, 2.0_f32.sqrt()/2.0, 0.0));
-        assert_that!(full_quarter * p).is_equal_to(Vector4::point(-1.0, 0.0, 0.0));
+        vector_values_are_close(half_quarter * p, Vector4::point(-2.0_f32.sqrt()/2.0, 2.0_f32.sqrt()/2.0, 0.0), 0.0001);
+        vector_values_are_close(full_quarter * p, Vector4::point(-1.0, 0.0, 0.0), 0.0001);
     }
 }

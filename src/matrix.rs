@@ -12,6 +12,14 @@ mod tests {
 
     use crate::tuple::*;
 
+    fn matrix_values_close_to(actual: Matrix4<f32>, expected: Matrix4<f32>, tolerance: f32) {
+        for row in 0..4 {
+            for col in 0..4 {
+                assert_that!(actual[(row, col)]).is_close_to(expected[(row, col)], tolerance);
+            }
+        }
+    }
+
     #[test]
     fn matrices_constructed_from_rows() {
         let _: Matrix4<f32> = Matrix4::new(
@@ -240,11 +248,7 @@ mod tests {
         );
 
         assert_that!(a.determinant()).is_close_to(532.0, 0.001);
-        for row in 0..4 {
-            for col in 0..4 {
-                assert_that!(inverse[(row, col)]).is_close_to(expected[(row, col)], 0.00001);
-            }
-        }
+        matrix_values_close_to(inverse, expected, 0.0001);
     }
 
     #[test]
@@ -263,11 +267,7 @@ mod tests {
             -0.69231, -0.69231, -0.76923, -1.92308,
         );
 
-        for row in 0..4 {
-            for col in 0..4 {
-                assert_that!(inverse[(row, col)]).is_close_to(expected[(row, col)], 0.00001);
-            }
-        }
+        matrix_values_close_to(inverse, expected, 0.0001);
     }
 
     #[test]
@@ -286,11 +286,7 @@ mod tests {
             0.17778, 0.06667, -0.26667, 0.33333,
         );
 
-        for row in 0..4 {
-            for col in 0..4 {
-                assert_that!(inverse[(row, col)]).is_close_to(expected[(row, col)], 0.00001);
-            }
-        }
+        matrix_values_close_to(inverse, expected, 0.0001);
     }
 
     #[test]
@@ -311,10 +307,6 @@ mod tests {
 
         let prod_x_inv = product * b.try_inverse().unwrap();
 
-        for row in 0..4 {
-            for col in 0..4 {
-                assert_that!(prod_x_inv[(row, col)]).is_close_to(a[(row, col)], 0.00001);
-            }
-        }
+        matrix_values_close_to(prod_x_inv, a, 0.0001);
     }
 }
