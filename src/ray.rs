@@ -1,5 +1,6 @@
+use nalgebra::{Matrix4, Vector4};
+
 use crate::tuple::*;
-use nalgebra::Vector4;
 
 pub struct Ray {
     origin: Vector4<f32>,
@@ -16,6 +17,13 @@ impl Ray {
     pub fn position(&self, t: f32) -> Vector4<f32> {
         self.origin + self.direction * t
     }
+
+    fn transform(&self, transformation: &Matrix4<f32>) -> Self {
+        Self {
+            origin: transformation * self.origin,
+            direction: transformation * self.direction
+        }
+    }
 }
 
 /* -------------------------------------------------------------------------------------------------
@@ -26,6 +34,7 @@ Tests
 mod tests {
     use spectral::assert_that;
 
+    use crate::transform::*;
     use super::*;
 
     #[test]
@@ -68,5 +77,27 @@ mod tests {
         assert_that!(ray.position(1.0)).is_equal_to(Vector4::point(3.0, 3.0, 4.0));
         assert_that!(ray.position(-1.0)).is_equal_to(Vector4::point(1.0, 3.0, 4.0));
         assert_that!(ray.position(2.5)).is_equal_to(Vector4::point(4.5, 3.0, 4.0));
+    }
+
+    #[test]
+    fn translating_a_ray() {
+        let r = Ray::new(Vector4::point(1.0, 2.0, 3.0), Vector4::vector(0.0, 1.0, 0.0));
+        let m = Matrix4::translation(3.0, 4.0, 5.0);
+
+        let r2 = r.transform(&m);
+
+        assert_that!(r2.origin).is_equal_to(Vector4::point(4.0, 6.0, 8.0));
+        assert_that!(r2.direction).is_equal_to(Vector4::vector(0.0, 1.0, 0.0));
+    }
+
+    #[test]
+    fn scaling_a_ray() {
+        let r = Ray::new(Vector4::point(1.0, 2.0, 3.0), Vector4::vector(0.0, 1.0, 0.0));
+        let m = Matrix4::scaling(2.0, 3.0, 4.0);
+
+        let r2 = r.transform(&m);
+
+        assert_that!(r2.origin).is_equal_to(Vector4::point(2.0, 6.0, 12.0));
+        assert_that!(r2.direction).is_equal_to(Vector4::vector(0.0, 3.0, 0.0));
     }
 }
