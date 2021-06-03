@@ -232,4 +232,85 @@ mod tests {
       
         assert_that!(transform * p).is_equal_to(Vector4::point(2.0, 3.0, 7.0));
     }
+
+    #[test]
+    fn individual_transformations_are_applied_in_sequence() {
+        let p = Vector4::point(1.0, 0.0, 1.0);
+        let a = Matrix4::rotation_x(PI/2.0);
+        let b = Matrix4::scaling(5.0, 5.0, 5.0);
+        let c = Matrix4::translation(10.0, 5.0, 7.0);
+
+        // apply rotation first
+        let p2 = a * p;
+        vector_values_are_close(p2, Vector4::point(1.0, -1.0, 0.0), 0.00001);
+
+        // then apply scaling
+        let p3 = b * p2;
+        vector_values_are_close(p3, Vector4::point(5.0, -5.0, 0.0), 0.00001);
+
+        // then apply translation
+        let p4 = c * p3;
+        vector_values_are_close(p4, Vector4::point(15.0, 0.0, 7.0), 0.00001);
+    }
+
+    #[test]
+    fn chained_transformations_must_be_applied_in_reverse_order() {
+        let p = Vector4::point(1.0, 0.0, 1.0);
+        let a = Matrix4::rotation_x(PI/2.0);
+        let b = Matrix4::scaling(5.0, 5.0, 5.0);
+        let c = Matrix4::translation(10.0, 5.0, 7.0);
+
+        let t = c * b * a;
+
+        vector_values_are_close(t * p, Vector4::point(15.0, 0.0, 7.0), 0.00001);
+    }
+
+//    #[test]
+//    fn the_transformation_matrix_for_the_default_orientation() {
+//        let from = Vector4::point(0.0, 0.0, 0.0);
+//        let to = Vector4::point(0.0, 0.0, -1.0);
+//        let up = Vector4::vector(0.0, 1.0, 0.0);
+//
+//        let t = view_transform(from, to, up);
+//
+//        assert_that!(t).is_equal_to(Matrix4::identity());
+//    }
+//
+//    #[test]
+//    fn a_view_transformation_matrix_looking_in_positive_z_direction() {
+//        let from = Vector4::point(0.0, 0.0, 0.0);
+//        let to = Vector4::point(0.0, 0.0, 1.0);
+//        let up = Vector4::vector(0.0, 1.0, 0.0);
+//
+//        let t = view_transform(from, to, up);
+//
+//        assert_that!(t).is_equal_to(Matrix4::scaling(-1.0, 1.0, -1.0));
+//    }
+//
+//    #[test]
+//    fn the_view_transformation_moves_the_world() {
+//        let from = Vector4::point(0.0, 0.0, 8.0);
+//        let to = Vector4::point(0.0, 0.0, 0.0);
+//        let up = Vector4::vector(0.0, 1.0, 0.0);
+//
+//        let t = view_transform(from, to, up);
+//
+//        assert_that!(t).is_equal_to(Matrix4::translation(0.0, 0.0, -8.0));
+//    }
+//
+//    #[test]
+//    fn an_arbitrary_view_transformation() {
+//        let from = Vector4::point(1.0, 3.0, 2.0);
+//        let to = Vector4::point(4.0, -2.0, 8.0);
+//        let up = Vector4::vector(1.0, 1.0, 0.0);
+//
+//        let t = view_transform(from, to, up);
+//
+//        assert_that!(t).is_equal_to(Matrix4::new(
+//            -0.50709, 0.50709, 0.67612, -2.36643,
+//            0.76772, 0.60609, 0.12122, -2.82843,
+//            -0.35857, 0.59761, -0.71714, 0.00000,
+//            0.00000, 0.00000, 0.00000, 1.00000,
+//       ));
+//    }
 }
