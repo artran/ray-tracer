@@ -6,6 +6,7 @@ pub trait Transform {
     fn rotation_x(r: f32) -> Matrix4<f32>;
     fn rotation_y(r: f32) -> Matrix4<f32>;
     fn rotation_z(r: f32) -> Matrix4<f32>;
+    fn shearing(xy: f32, xz: f32, yx: f32, yz: f32, zx: f32, zy: f32) -> Matrix4<f32>;
 }
 
 impl Transform for Matrix4<f32> {
@@ -50,6 +51,15 @@ impl Transform for Matrix4<f32> {
             r.cos(), -r.sin(), 0.0, 0.0,
             r.sin(), r.cos(), 0.0, 0.0,
             0.0, 0.0, 1.0, 0.0,
+            0.0, 0.0, 0.0, 1.0,
+        )
+    }
+
+    fn shearing(xy: f32, xz: f32, yx: f32, yz: f32, zx: f32, zy: f32) -> Matrix4<f32> {
+        Matrix4::new (
+            1.0, xy, xz, 0.0,
+            yx, 1.0, yz, 0.0,
+            zx, zy, 1.0, 0.0,
             0.0, 0.0, 0.0, 1.0,
         )
     }
@@ -173,5 +183,53 @@ mod tests {
 
         vector_values_are_close(half_quarter * p, Vector4::point(-2.0_f32.sqrt()/2.0, 2.0_f32.sqrt()/2.0, 0.0), 0.0001);
         vector_values_are_close(full_quarter * p, Vector4::point(-1.0, 0.0, 0.0), 0.0001);
+    }
+
+    #[test]
+    fn a_shearing_transformation_moves_x_in_proportion_to_y() {
+        let transform = Matrix4::shearing(1.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+        let p = Vector4::point(2.0, 3.0, 4.0);
+      
+        assert_that!(transform * p).is_equal_to(Vector4::point(5.0, 3.0, 4.0));
+    }
+
+    #[test]
+    fn a_shearing_transformation_moves_x_in_proportion_to_z() {
+        let transform = Matrix4::shearing(0.0, 1.0, 0.0, 0.0, 0.0, 0.0);
+        let p = Vector4::point(2.0, 3.0, 4.0);
+      
+        assert_that!(transform * p).is_equal_to(Vector4::point(6.0, 3.0, 4.0));
+    }
+
+    #[test]
+    fn a_shearing_transformation_moves_y_in_proportion_to_x() {
+        let transform = Matrix4::shearing(0.0, 0.0, 1.0, 0.0, 0.0, 0.0);
+        let p = Vector4::point(2.0, 3.0, 4.0);
+      
+        assert_that!(transform * p).is_equal_to(Vector4::point(2.0, 5.0, 4.0));
+    }
+
+    #[test]
+    fn a_shearing_transformation_moves_y_in_proportion_to_z() {
+        let transform = Matrix4::shearing(0.0, 0.0, 0.0, 1.0, 0.0, 0.0);
+        let p = Vector4::point(2.0, 3.0, 4.0);
+      
+        assert_that!(transform * p).is_equal_to(Vector4::point(2.0, 7.0, 4.0));
+    }
+
+    #[test]
+    fn a_shearing_transformation_moves_z_in_proportion_to_x() {
+        let transform = Matrix4::shearing(0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+        let p = Vector4::point(2.0, 3.0, 4.0);
+      
+        assert_that!(transform * p).is_equal_to(Vector4::point(2.0, 3.0, 6.0));
+    }
+
+    #[test]
+    fn a_shearing_transformation_moves_z_in_proportion_to_y() {
+        let transform = Matrix4::shearing(0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
+        let p = Vector4::point(2.0, 3.0, 4.0);
+      
+        assert_that!(transform * p).is_equal_to(Vector4::point(2.0, 3.0, 7.0));
     }
 }
