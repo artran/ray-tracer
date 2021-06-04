@@ -3,8 +3,8 @@ use nalgebra::{Matrix4, Vector4};
 use crate::tuple::*;
 
 pub struct Ray {
-    origin: Vector4<f32>,
-    direction: Vector4<f32>,
+    pub origin: Vector4<f32>,
+    pub direction: Vector4<f32>,
 }
 
 impl Ray {
