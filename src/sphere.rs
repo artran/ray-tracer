@@ -1,10 +1,20 @@
+use crate::ray::Ray;
+
 pub struct Sphere {
 
 }
 
 impl Sphere {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Self{}
+    }
+
+    pub fn intersect(&self, ray: &Ray) -> Option<[f32;2]> {
+        None
+    }
+
+    fn discriminant(&self, ray: &Ray) -> Option<[f32; 2]> {
+        None
     }
 }
 
@@ -27,7 +37,7 @@ mod tests {
         let r = Ray::new(Vector4::point(0.0, 0.0, -5.0), Vector4::vector(0.0, 0.0, 1.0));
         let s = Sphere::new();
 
-        let xs = s.intersect(r);
+        let xs = s.intersect(&r);
 
         assert_that!(xs.count).is_equal_to(2);
         assert_that!(xs[0]).is_equal_to(4.0);
@@ -39,7 +49,7 @@ mod tests {
         let r = Ray::new(Vector4::point(0.0, 1.0, -5.0), Vector4::vector(0.0, 0.0, 1.0));
         let s = Sphere::new();
 
-        let xs = s.intersect(r);
+        let xs = s.intersect(&r);
 
         assert_that!(xs.count).is_equal_to(2);
         assert_that!(xs[0]).is_equal_to(5.0);
@@ -51,7 +61,7 @@ mod tests {
         let r = Ray::new(Vector4::point(0.0, 2.0, -5.0), Vector4::vector(0.0, 0.0, 1.0));
         let s = Sphere::new();
 
-        let xs = s.intersect(r);
+        let xs = s.intersect(&r);
 
         assert_that!(xs.count).is_equal_to(0);
     }
@@ -61,7 +71,7 @@ mod tests {
         let r = Ray::new(Vector4::point(0.0, 0.0, 0.0), Vector4::vector(0.0, 0.0, 1.0));
         let s = Sphere::new();
 
-        let xs = s.intersect(r);
+        let xs = s.intersect(&r);
 
         assert_that!(xs.count).is_equal_to(2);
         assert_that!(xs[0]).is_equal_to(-1.0);
@@ -73,22 +83,22 @@ mod tests {
         let r = Ray::new(Vector4::point(0.0, 0.0, 5.0), Vector4::vector(0.0, 0.0, 1.0));
         let s = Sphere::new();
 
-        let xs = s.intersect(r);
+        let xs = s.intersect(&r);
 
         assert_that!(xs.count).is_equal_to(2);
         assert_that!(xs[0]).is_equal_to(-6.0);
         assert_that!(xs[1]).is_equal_to(-4.0);
     }
 
-    #[test]
-    fn intersect_sets_the_object_on_the_intersection() {
-        let r = Ray::new(Vector4::point(0.0, 0.0, -5.0), Vector4::vector(0.0, 0.0, 1.0));
-        let s = Sphere::new();
-
-        let xs = s.intersect(r);
-
-        assert_that!(xs.count).is_equal_to(2);
-        assert_that!(xs[0].object).is_equal_to(s);
-        assert_that!(xs[1].object).is_equal_to(s);
-    }
+    // #[test]
+    // fn intersect_sets_the_object_on_the_intersection() {
+    //     let r = Ray::new(Vector4::point(0.0, 0.0, -5.0), Vector4::vector(0.0, 0.0, 1.0));
+    //     let s = Sphere::new();
+    //
+    //     let xs = s.intersect(&r);
+    //
+    //     assert_that!(xs.count).is_equal_to(2);
+    //     assert_that!(xs[0].object).is_equal_to(s);
+    //     assert_that!(xs[1].object).is_equal_to(s);
+    // }
 }
