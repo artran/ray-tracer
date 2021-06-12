@@ -1,8 +1,10 @@
 use nalgebra::Vector4;
 
+use crate::intersection::Intersection;
 use crate::ray::Ray;
 use crate::tuple::Tuple;
 
+#[derive(Clone, Debug, PartialEq)]
 pub struct Sphere {
 
 }
@@ -12,7 +14,7 @@ impl Sphere {
         Self{}
     }
 
-    pub fn intersect(&self, ray: &Ray) -> Option<[f32;2]> {
+    pub fn intersect(&self, ray: &Ray) -> Option<Vec<Intersection>> {
         let sphere_to_ray = &ray.origin - Vector4::point(0.0, 0.0, 0.0);
         let a = &ray.direction.dot(&ray.direction);
         let b = 2.0 * &ray.direction.dot(&sphere_to_ray);
@@ -29,7 +31,7 @@ impl Sphere {
         let t1 = (-b - root_disc) / (two_a);
         let t2 = (-b + root_disc) / (two_a);
 
-        Some([t1, t2])
+        Some(vec!(Intersection::new(t1, self), Intersection::new(t2, self)))
     }
 }
 
@@ -52,8 +54,8 @@ mod tests {
         let xs = s.intersect(&r).unwrap();
 
         assert_that!(xs.len()).is_equal_to(2);
-        assert_that!(xs[0]).is_equal_to(4.0);
-        assert_that!(xs[1]).is_equal_to(6.0);
+        assert_that!(xs[0].t).is_equal_to(4.0);
+        assert_that!(xs[1].t).is_equal_to(6.0);
     }
 
     #[test]
@@ -64,8 +66,8 @@ mod tests {
         let xs = s.intersect(&r).unwrap();
 
         assert_that!(xs.len()).is_equal_to(2);
-        assert_that!(xs[0]).is_equal_to(5.0);
-        assert_that!(xs[1]).is_equal_to(5.0);
+        assert_that!(xs[0].t).is_equal_to(5.0);
+        assert_that!(xs[1].t).is_equal_to(5.0);
     }
 
     #[test]
@@ -86,8 +88,8 @@ mod tests {
         let xs = s.intersect(&r).unwrap();
 
         assert_that!(xs.len()).is_equal_to(2);
-        assert_that!(xs[0]).is_equal_to(-1.0);
-        assert_that!(xs[1]).is_equal_to(1.0);
+        assert_that!(xs[0].t).is_equal_to(-1.0);
+        assert_that!(xs[1].t).is_equal_to(1.0);
     }
 
     #[test]
@@ -98,19 +100,19 @@ mod tests {
         let xs = s.intersect(&r).unwrap();
 
         assert_that!(xs.len()).is_equal_to(2);
-        assert_that!(xs[0]).is_equal_to(-6.0);
-        assert_that!(xs[1]).is_equal_to(-4.0);
+        assert_that!(xs[0].t).is_equal_to(-6.0);
+        assert_that!(xs[1].t).is_equal_to(-4.0);
     }
 
-    // #[test]
-    // fn intersect_sets_the_object_on_the_intersection() {
-    //     let r = Ray::new(Vector4::point(0.0, 0.0, -5.0), Vector4::vector(0.0, 0.0, 1.0));
-    //     let s = Sphere::new();
-    //
-    //     let xs = s.intersect(&r);
-    //
-    //     assert_that!(xs.len()).is_equal_to(2);
-    //     assert_that!(xs[0].object).is_equal_to(s);
-    //     assert_that!(xs[1].object).is_equal_to(s);
-    // }
+    #[test]
+    fn intersect_sets_the_object_on_the_intersection() {
+        let r = Ray::new(Vector4::point(0.0, 0.0, -5.0), Vector4::vector(0.0, 0.0, 1.0));
+        let s = Sphere::new();
+
+        let xs = s.intersect(&r).unwrap();
+
+        assert_that!(xs.len()).is_equal_to(2);
+        assert_that!(xs[0].object).is_equal_to(&s);
+        assert_that!(xs[1].object).is_equal_to(&s);
+    }
 }
