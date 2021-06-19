@@ -1,4 +1,4 @@
-use nalgebra::Vector4;
+use nalgebra::{Vector4, Matrix4};
 
 use crate::intersection::Intersection;
 use crate::ray::Ray;
@@ -6,12 +6,14 @@ use crate::tuple::Tuple;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Sphere {
-
+    transform: Matrix4<f32>
 }
 
 impl Sphere {
     pub fn new() -> Self {
-        Self{}
+        Self{
+            transform: Matrix4::identity()
+        }
     }
 
     pub fn intersect(&self, ray: &Ray) -> Option<Vec<Intersection>> {
@@ -45,6 +47,8 @@ mod tests {
     use spectral::option::OptionAssertions;
 
     use super::*;
+    use crate::transform::Transform;
+    use nalgebra::Matrix4;
 
     #[test]
     fn a_ray_intersects_a_sphere_at_two_points() {
@@ -114,5 +118,22 @@ mod tests {
         assert_that!(xs.len()).is_equal_to(2);
         assert_that!(xs[0].object).is_equal_to(&s);
         assert_that!(xs[1].object).is_equal_to(&s);
+    }
+
+    #[test]
+    fn a_spheres_default_transformation() {
+        let s = Sphere::new();
+
+        assert_that!(s.transform).is_equal_to(Matrix4::identity());
+    }
+
+    #[test]
+    fn changing_a_spheres_transformation() {
+        let mut s = Sphere::new();
+        let t = Matrix4::translation(2.0, 3.0, 4.0);
+
+        s.transform = t;
+
+        assert_that!(s.transform).is_equal_to(t);
     }
 }
