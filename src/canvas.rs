@@ -4,7 +4,7 @@ use crate::color::Color;
 
 const PPM_MAX_LINE_LENGTH: usize = 70;
 
-struct Canvas {
+pub struct Canvas {
     pixels: Vec<Vec<Color>>
 }
 
