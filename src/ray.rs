@@ -18,7 +18,7 @@ impl Ray {
         self.origin + self.direction * t
     }
 
-    fn transform(&self, transformation: &Matrix4<f32>) -> Self {
+    pub fn transform(&self, transformation: &Matrix4<f32>) -> Self {
         Self {
             origin: transformation * self.origin,
             direction: transformation * self.direction

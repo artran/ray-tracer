@@ -6,20 +6,24 @@ use crate::tuple::Tuple;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Sphere {
-    transform: Matrix4<f32>
+    // Note: we store the inverse of the transform as an optimisation.
+    inv_transform: Matrix4<f32>
 }
 
 impl Sphere {
     pub fn new() -> Self {
         Self{
-            transform: Matrix4::identity()
+            // The inverse of the identity is the identity
+            inv_transform: Matrix4::identity()
         }
     }
 
     pub fn intersect(&self, ray: &Ray) -> Option<Vec<Intersection>> {
-        let sphere_to_ray = &ray.origin - Vector4::point(0.0, 0.0, 0.0);
-        let a = &ray.direction.dot(&ray.direction);
-        let b = 2.0 * &ray.direction.dot(&sphere_to_ray);
+        let transformed_ray = ray.transform(&self.inv_transform);
+
+        let sphere_to_ray = transformed_ray.origin - Vector4::point(0.0, 0.0, 0.0);
+        let a = transformed_ray.direction.dot(&transformed_ray.direction);
+        let b = 2.0 * transformed_ray.direction.dot(&sphere_to_ray);
         let c = &sphere_to_ray.dot(&sphere_to_ray) - 1.0;
 
         let discriminant = b * b - 4.0 * a * c;
@@ -34,6 +38,11 @@ impl Sphere {
         let t2 = (-b + root_disc) / (two_a);
 
         Some(vec!(Intersection::new(t1, self), Intersection::new(t2, self)))
+    }
+
+    pub fn set_transform(&mut self, transform: Matrix4<f32>) {
+        // As an optimisation we invert the transform before storing it.
+        self.inv_transform = transform.try_inverse().unwrap();
     }
 }
 
@@ -124,7 +133,7 @@ mod tests {
     fn a_spheres_default_transformation() {
         let s = Sphere::new();
 
-        assert_that!(s.transform).is_equal_to(Matrix4::identity());
+        assert_that!(s.inv_transform).is_equal_to(Matrix4::identity());
     }
 
     #[test]
@@ -132,8 +141,32 @@ mod tests {
         let mut s = Sphere::new();
         let t = Matrix4::translation(2.0, 3.0, 4.0);
 
-        s.transform = t;
+        s.inv_transform = t;
 
-        assert_that!(s.transform).is_equal_to(t);
+        assert_that!(s.inv_transform).is_equal_to(t);
+    }
+
+    #[test]
+    fn intersecting_a_scaled_sphere_with_a_ray() {
+        let r = Ray::new(Vector4::point(0.0, 0.0, -5.0), Vector4::vector(0.0, 0.0, 1.0));
+        let mut s = Sphere::new();
+        s.set_transform(Matrix4::scaling(2.0, 2.0, 2.0));
+
+        let xs = s.intersect(&r).unwrap();
+
+        assert_that!(xs.len()).is_equal_to(2);
+        assert_that!(xs[0].t).is_equal_to(3.0);
+        assert_that!(xs[1].t).is_equal_to(7.0);
+    }
+
+    #[test]
+    fn intersecting_a_translated_sphere_with_a_ray() {
+        let r = Ray::new(Vector4::point(0.0, 0.0, -5.0), Vector4::vector(0.0, 0.0, 1.0));
+        let mut s = Sphere::new();
+        s.set_transform(Matrix4::translation(5.0, 0.0, 0.0));
+
+        let xs = s.intersect(&r);
+
+        assert_that!(xs).is_none();
     }
 }
