@@ -1,6 +1,6 @@
 use nalgebra::{Vector4, Matrix4};
 
-use crate::intersection::Intersection;
+use crate::intersection::{Intersection, Intersections};
 use crate::ray::Ray;
 use crate::tuple::Tuple;
 
@@ -18,7 +18,7 @@ impl Sphere {
         }
     }
 
-    pub fn intersect(&self, ray: &Ray) -> Option<Vec<Intersection>> {
+    pub fn intersect(&self, ray: &Ray) -> Option<Intersections> {
         let transformed_ray = ray.transform(&self.inv_transform);
 
         let sphere_to_ray = transformed_ray.origin - Vector4::point(0.0, 0.0, 0.0);
@@ -37,7 +37,7 @@ impl Sphere {
         let t1 = (-b - root_disc) / (two_a);
         let t2 = (-b + root_disc) / (two_a);
 
-        Some(vec!(Intersection::new(t1, self), Intersection::new(t2, self)))
+        Some(Intersections::new(Intersection::new(t1, self), Intersection::new(t2, self)))
     }
 
     pub fn set_transform(&mut self, transform: Matrix4<f32>) {

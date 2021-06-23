@@ -16,6 +16,7 @@ impl<'a> Intersection<'a> {
     }
 }
 
+#[derive(Debug)]
 pub struct Intersections<'a> {
     intersections: Vec<Intersection<'a>>
 }
