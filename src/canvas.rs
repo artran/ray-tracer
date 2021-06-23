@@ -32,7 +32,8 @@ impl Canvas {
     }
 
     pub fn save(&self, file: &mut impl Write) -> Result<(), Error> {
-        let _ = file.write(b"P3\n5 3\n255\n").unwrap();
+        let header = format!("P3\n{width} {height}\n255\n", width=self.width(), height=self.height());
+        let _ = file.write(header.as_bytes()).unwrap();
         for row in &self.pixels {
             let mut current_length = 0;
             for (i, pixel) in row.iter().enumerate() {
@@ -125,6 +126,25 @@ mod tests {
         buf.clear();
         let _ = readable.read_line(&mut buf);
         assert_that!(buf).is_equal_to(String::from("5 3\n"));
+        buf.clear();
+        let _ = readable.read_line(&mut buf);
+        assert_that!(buf).is_equal_to(String::from("255\n"));
+    }
+
+    #[test]
+    fn saved_canvas_has_correct_width_and_height() {
+        let canvas = Canvas::new(10, 15);
+        let mut file = vec![];
+
+        let _ = canvas.save(&mut file);
+
+        let mut readable = &file[..];
+        let mut buf = String::new();
+        let _ = readable.read_line(&mut buf);
+        assert_that!(buf).is_equal_to(String::from("P3\n"));
+        buf.clear();
+        let _ = readable.read_line(&mut buf);
+        assert_that!(buf).is_equal_to(String::from("10 15\n"));
         buf.clear();
         let _ = readable.read_line(&mut buf);
         assert_that!(buf).is_equal_to(String::from("255\n"));
