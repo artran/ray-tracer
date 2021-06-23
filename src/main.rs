@@ -1,4 +1,3 @@
-use std::f32::consts::PI;
 use std::fs::File;
 
 use nalgebra::{Matrix4, Vector4};
