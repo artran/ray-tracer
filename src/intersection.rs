@@ -17,11 +17,11 @@ impl<'a> Intersection<'a> {
 }
 
 pub struct Intersections<'a> {
-    intersections: Vec<&'a Intersection<'a>>
+    intersections: Vec<Intersection<'a>>
 }
 
 impl<'a> Intersections<'a> {
-    pub fn new(i1: &'a Intersection, i2: &'a Intersection) -> Self {
+    pub fn new(i1: Intersection<'a>, i2: Intersection<'a>) -> Self {
         let intersections = vec!(i1, i2);
         let mut result = Self {
             intersections
@@ -33,14 +33,14 @@ impl<'a> Intersections<'a> {
     }
 
     fn sort(&mut self) {
-        self.intersections.sort_unstable_by(|&a, &b| a.t.partial_cmp(&b.t).unwrap_or(Equal));
+        self.intersections.sort_unstable_by(|a, b| a.t.partial_cmp(&b.t).unwrap_or(Equal));
     }
 
     pub fn len(&self) -> usize {
         self.intersections.len()
     }
 
-    pub fn push(&mut self, intersection: &'a Intersection) {
+    pub fn push(&mut self, intersection: Intersection<'a>) {
         self.intersections.push(intersection);
         self.sort();
     }
@@ -91,7 +91,7 @@ mod tests {
         let i1 = Intersection::new(1.0, &s);
         let i2 = Intersection::new(2.0, &s);
 
-        let xs = Intersections::new(&i1, &i2);
+        let xs = Intersections::new(i1, i2);
 
         assert_that!(xs.len()).is_equal_to(2);
         assert_that!(xs[0].t).is_equal_to(1.0);
@@ -103,7 +103,7 @@ mod tests {
         let s = Sphere::new();
         let i1 = Intersection::new(1.0, &s);
         let i2 = Intersection::new(2.0, &s);
-        let xs = Intersections::new(&i1, &i2);
+        let xs = Intersections::new(i1.clone(), i2);
 
         let i = xs.hit();
 
@@ -115,7 +115,7 @@ mod tests {
         let s = Sphere::new();
         let i1 = Intersection::new(-1.0, &s);
         let i2 = Intersection::new(1.0, &s);
-        let xs = Intersections::new(&i2, &i1);
+        let xs = Intersections::new(i2.clone(), i1);
 
         let i = xs.hit();
 
@@ -127,7 +127,7 @@ mod tests {
         let s = Sphere::new();
         let i1 = Intersection::new(-2.0, &s);
         let i2 = Intersection::new(-1.0, &s);
-        let xs = Intersections::new(&i2, &i1);
+        let xs = Intersections::new(i2, i1);
 
         let i = xs.hit();
 
@@ -141,9 +141,9 @@ mod tests {
         let i2 = Intersection::new(7.0, &s);
         let i3 = Intersection::new(-3.0, &s);
         let i4 = Intersection::new(2.0, &s);
-        let mut xs = Intersections::new(&i1, &i2);
-        xs.push(&i3);
-        xs.push(&i4);
+        let mut xs = Intersections::new(i1, i2);
+        xs.push(i3);
+        xs.push(i4.clone());
 
         let i = xs.hit();
 
