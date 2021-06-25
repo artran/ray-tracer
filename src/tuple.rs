@@ -6,6 +6,7 @@ pub trait Tuple {
     fn cross_product(&self, other: &Vector4<f32>) -> Vector4<f32>;
     fn is_point(&self) -> bool;
     fn is_vector(&self) -> bool;
+    fn reflect(&self, normal: &Vector4<f32>) -> Vector4<f32>;
 }
 
 impl Tuple for Vector4<f32> {
@@ -32,6 +33,10 @@ impl Tuple for Vector4<f32> {
 
     fn is_vector(&self) -> bool {
         self.w == 0.0
+    }
+
+    fn reflect(&self, normal: &Vector4<f32>) -> Vector4<f32> {
+        self - normal * 2.0 * self.dot(normal)
     }
 }
 
@@ -281,5 +286,29 @@ mod tests {
         assert_that!(a[1]).is_equal_to(3.0);
         assert_that!(a[2]).is_equal_to(4.0);
         assert_that!(a[3]).is_equal_to(1.0);
+    }
+
+    #[test]
+    fn reflecting_a_vector_approaching_at_45_deg() {
+    let v = Vector4::vector(1.0, -1.0, 0.0);
+    let n = Vector4::vector(0.0, 1.0, 0.0);
+
+    let r = v.reflect(&n);
+
+    assert_that!(r).is_equal_to(Vector4::vector(1.0, 1.0, 0.0));
+    }
+
+    #[test]
+    fn reflecting_a_vector_off_a_slanted_surface() {
+    let v = Vector4::vector(0.0, -1.0, 0.0);
+    let n = Vector4::vector(2.0_f32.sqrt()/2.0, 2.0_f32.sqrt()/2.0, 0.0);
+
+    let r = v.reflect(&n);
+
+        let expected = Vector4::vector(1.0, 0.0, 0.0);
+        assert_that!(r.x).is_close_to(expected.x, 0.0001);
+        assert_that!(r.y).is_close_to(expected.y, 0.0001);
+        assert_that!(r.z).is_close_to(expected.z, 0.0001);
+        assert_that!(r.w).is_equal_to(expected.w);
     }
 }
