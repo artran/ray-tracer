@@ -222,9 +222,9 @@ mod tests {
 
         let normalized = x.normalize();
 
-        assert_that!(normalized.x).is_close_to(expected.x, 0.0001_f32);
-        assert_that!(normalized.y).is_close_to(expected.y, 0.0001_f32);
-        assert_that!(normalized.z).is_close_to(expected.z, 0.0001_f32);
+        assert_that!(normalized.x).is_close_to(expected.x, 0.0001);
+        assert_that!(normalized.y).is_close_to(expected.y, 0.0001);
+        assert_that!(normalized.z).is_close_to(expected.z, 0.0001);
         assert_that!(normalized.w).is_equal_to(expected.w);
     }
 
@@ -232,7 +232,7 @@ mod tests {
     fn normalized_vector_is_a_unit_vector() {
         let x = Vector4::vector(1.0, 2.0, 3.0);
 
-        assert_that!(x.normalize().magnitude()).is_close_to(1.0, 0.0001_f32);
+        assert_that!(x.normalize().magnitude()).is_close_to(1.0, 0.0001);
     }
 
     #[test]

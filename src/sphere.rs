@@ -1,4 +1,4 @@
-use nalgebra::{Vector4, Matrix4};
+use nalgebra::{Matrix4, Vector4};
 
 use crate::intersection::{Intersection, Intersections};
 use crate::ray::Ray;
@@ -7,12 +7,12 @@ use crate::tuple::Tuple;
 #[derive(Clone, Debug, PartialEq)]
 pub struct Sphere {
     // Note: we store the inverse of the transform as an optimisation.
-    inv_transform: Matrix4<f32>
+    inv_transform: Matrix4<f32>,
 }
 
 impl Sphere {
     pub fn new() -> Self {
-        Self{
+        Self {
             // The inverse of the identity is the identity
             inv_transform: Matrix4::identity()
         }
@@ -44,6 +44,15 @@ impl Sphere {
         // As an optimisation we invert the transform before storing it.
         self.inv_transform = transform.try_inverse().unwrap();
     }
+
+    pub fn normal_at(&self, world_point: &Vector4<f32>) -> Vector4<f32> {
+        let object_point = self.inv_transform * world_point;
+        let object_normal = object_point - Vector4::point(0.0, 0.0, 0.0);
+        let mut world_normal = self.inv_transform.transpose() * object_normal;
+        world_normal.w = 0.0;
+
+        (world_normal).normalize()
+    }
 }
 
 /* -------------------------------------------------------------------------------------------------
@@ -52,12 +61,15 @@ Tests
 
 #[cfg(test)]
 mod tests {
+    use nalgebra::Matrix4;
     use spectral::assert_that;
+    use spectral::numeric::FloatAssertions;
     use spectral::option::OptionAssertions;
 
-    use super::*;
     use crate::transform::Transform;
-    use nalgebra::Matrix4;
+
+    use super::*;
+    use std::f32::consts::{PI, FRAC_1_SQRT_2};
 
     #[test]
     fn a_ray_intersects_a_sphere_at_two_points() {
@@ -168,5 +180,81 @@ mod tests {
         let xs = s.intersect(&r);
 
         assert_that!(xs).is_none();
+    }
+
+    #[test]
+    fn the_normal_on_a_sphere_at_a_point_on_the_x_axis() {
+        let s = Sphere::new();
+        let n = s.normal_at(&Vector4::point(1.0, 0.0, 0.0));
+        assert_that!(n).is_equal_to(Vector4::vector(1.0, 0.0, 0.0));
+    }
+
+    #[test]
+    fn the_normal_on_a_sphere_at_a_point_on_the_y_axis() {
+        let s = Sphere::new();
+        let n = s.normal_at(&Vector4::point(0.0, 1.0, 0.0));
+        assert_that!(n).is_equal_to(Vector4::vector(0.0, 1.0, 0.0));
+    }
+
+    #[test]
+    fn the_normal_on_a_sphere_at_a_point_on_the_z_axis() {
+        let s = Sphere::new();
+        let n = s.normal_at(&Vector4::point(0.0, 0.0, 1.0));
+        assert_that!(n).is_equal_to(Vector4::vector(0.0, 0.0, 1.0));
+    }
+
+    #[test]
+    fn the_normal_on_a_sphere_at_a_non_axial_point() {
+        let s = Sphere::new();
+
+        let n = s.normal_at(&Vector4::point(3.0_f32.sqrt()/3.0, 3.0_f32.sqrt()/3.0, 3.0_f32.sqrt()/3.0));
+
+        let expected = Vector4::vector(3.0_f32.sqrt() / 3.0, 3.0_f32.sqrt() / 3.0, 3.0_f32.sqrt() / 3.0);
+        assert_that!(n.x).is_close_to(expected.x, 0.0001);
+        assert_that!(n.y).is_close_to(expected.y, 0.0001);
+        assert_that!(n.z).is_close_to(expected.z, 0.0001);
+        assert_that!(n.w).is_equal_to(expected.w);
+    }
+
+    #[test]
+    fn the_normal_is_a_normalized_vector() {
+        let s = Sphere::new();
+
+        let n = s.normal_at(&Vector4::point(3.0_f32.sqrt()/3.0, 3.0_f32.sqrt()/3.0, 3.0_f32.sqrt()/3.0));
+
+        let normalized: Vector4<f32> = n.normalize();
+        assert_that!(n.x).is_close_to(normalized.x, 0.0001);
+        assert_that!(n.y).is_close_to(normalized.y, 0.0001);
+        assert_that!(n.z).is_close_to(normalized.z, 0.0001);
+        assert_that!(n.w).is_equal_to(normalized.w);
+    }
+
+    #[test]
+    fn computing_the_normal_on_a_translated_sphere() {
+        let mut s = Sphere::new();
+        s.set_transform(Matrix4::translation(0.0, 1.0, 0.0));
+
+        let n = s.normal_at(&Vector4::point(0.0, 1.70711, -FRAC_1_SQRT_2));
+
+        let expected = Vector4::vector(0.0, FRAC_1_SQRT_2, -FRAC_1_SQRT_2);
+        assert_that!(n.x).is_close_to(expected.x, 0.0001);
+        assert_that!(n.y).is_close_to(expected.y, 0.0001);
+        assert_that!(n.z).is_close_to(expected.z, 0.0001);
+        assert_that!(n.w).is_equal_to(expected.w);
+    }
+
+    #[test]
+    fn computing_the_normal_on_a_transformed_sphere() {
+        let mut s = Sphere::new();
+        let m = Matrix4::scaling(1.0, 0.5, 1.0) * Matrix4::rotation_z(PI/5.0);
+        s.set_transform(m);
+
+        let n = s.normal_at(&Vector4::point(0.0, 2.0_f32.sqrt()/2.0, -2.0_f32.sqrt()/2.0));
+
+        let expected = Vector4::vector(0.0, 0.97014, -0.24254);
+        assert_that!(n.x).is_close_to(expected.x, 0.0001);
+        assert_that!(n.y).is_close_to(expected.y, 0.0001);
+        assert_that!(n.z).is_close_to(expected.z, 0.0001);
+        assert_that!(n.w).is_equal_to(expected.w);
     }
 }
