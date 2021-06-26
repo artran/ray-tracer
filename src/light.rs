@@ -3,8 +3,8 @@ use crate::color::Color;
 use crate::tuple::Tuple;
 
 pub struct PointLight {
-    position: Vector4<f32>,
-    intensity: Color,
+    pub position: Vector4<f32>,
+    pub intensity: Color,
 }
 
 impl PointLight {

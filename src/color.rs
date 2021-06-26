@@ -2,9 +2,9 @@ use std::fmt::{Formatter, Display, Error};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Color {
-    r: f32,
-    g: f32,
-    b: f32,
+    pub r: f32,
+    pub g: f32,
+    pub b: f32,
 }
 
 impl Color {
@@ -24,7 +24,7 @@ impl Color {
         Color::new(self.r - other.r, self.g - other.g, self.b - other.b)
     }
 
-    pub fn scale(&self, factor: &f32) -> Color {
+    pub fn scale(&self, factor: f32) -> Color {
         Color::new(self.r * factor, self.g * factor, self.b * factor)
     }
 
@@ -83,7 +83,7 @@ mod tests {
         let c = Color::new(0.2, 0.3, 0.4);
         let expected = Color::new(0.4, 0.6, 0.8);
 
-        assert_that!(c.scale(&2.0)).is_equal_to(expected);
+        assert_that!(c.scale(2.0)).is_equal_to(expected);
     }
 
     #[test]

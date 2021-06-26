@@ -13,6 +13,7 @@ mod canvas;
 mod color;
 mod intersection;
 mod light;
+mod material;
 mod matrix;
 mod ray;
 mod sphere;
@@ -28,7 +29,7 @@ fn main() -> Result<(), std::io::Error> {
     let half: f32 = wall_size / 2.0;
     let mut canvas = Canvas::new(canvas_pixels, canvas_pixels);
     let red = Color::new(1.0, 0.0, 0.0);
-    let mut shape = Sphere::new();
+    let mut shape = Sphere::default();
     shape.set_transform(Matrix4::shearing(1.0, 0.0, 0.0, 0.0, 0.0, 0.0) * Matrix4::scaling(0.5, 1.0, 1.0));
 
     for y in 0..canvas_pixels - 1 {
