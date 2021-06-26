@@ -12,6 +12,7 @@ use crate::tuple::Tuple;
 mod canvas;
 mod color;
 mod intersection;
+mod light;
 mod matrix;
 mod ray;
 mod sphere;
