@@ -1,6 +1,7 @@
 use std::fmt::{Formatter, Display, Error};
+use std::ops::{Add, Sub, Mul};
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Color {
     pub r: f32,
     pub g: f32,
@@ -15,21 +16,37 @@ impl Color {
     pub fn black() -> Self {
         Self::new(0.0, 0.0, 0.0)
     }
+}
 
-    pub fn plus(&self, other: &Color) -> Color {
+impl Add for Color {
+    type Output = Color;
+
+    fn add(self, other: Self) -> Self::Output {
         Color::new(self.r + other.r, self.g + other.g, self.b + other.b)
     }
+}
 
-    pub fn minus(&self, other: &Color) -> Color {
+impl Sub for Color {
+    type Output = Color;
+
+    fn sub(self, other: Self) -> Self::Output {
         Color::new(self.r - other.r, self.g - other.g, self.b - other.b)
     }
+}
 
-    pub fn scale(&self, factor: f32) -> Color {
-        Color::new(self.r * factor, self.g * factor, self.b * factor)
-    }
+impl Mul for Color {
+    type Output = Color;
 
-    pub fn hadamard(&self, other: &Color) -> Color {
+    fn mul(self, other: Self) -> Self::Output {
         Color::new(self.r * other.r, self.g * other.g, self.b * other.b)
+    }
+}
+
+impl Mul<f32> for Color {
+    type Output = Color;
+
+    fn mul(self, factor: f32) -> Self::Output {
+        Color::new(self.r * factor, self.g * factor, self.b * factor)
     }
 }
 
@@ -58,7 +75,7 @@ mod tests {
         let c2 = Color::new(0.7, 0.1, 0.25);
         let expected = Color::new(1.6, 0.7, 1.0);
 
-        let result = c1.plus(&c2);
+        let result = c1 + c2;
 
         assert_that!(result.r).is_close_to(expected.r, 0.0001_f32);
         assert_that!(result.g).is_close_to(expected.g, 0.0001_f32);
@@ -71,7 +88,7 @@ mod tests {
         let c2 = Color::new(0.7, 0.1, 0.25);
         let expected = Color::new(0.2, 0.5, 0.5);
 
-        let result = c1.minus(&c2);
+        let result = c1 - c2;
 
         assert_that!(result.r).is_close_to(expected.r, 0.0001_f32);
         assert_that!(result.g).is_close_to(expected.g, 0.0001_f32);
@@ -83,7 +100,7 @@ mod tests {
         let c = Color::new(0.2, 0.3, 0.4);
         let expected = Color::new(0.4, 0.6, 0.8);
 
-        assert_that!(c.scale(2.0)).is_equal_to(expected);
+        assert_that!(c * 2.0).is_equal_to(expected);
     }
 
     #[test]
@@ -92,7 +109,7 @@ mod tests {
         let c2 = Color::new(0.9, 1.0, 0.1);
         let expected = Color::new(0.9, 0.2, 0.04);
 
-        let result = c1.hadamard(&c2);
+        let result = c1 * c2;
 
         assert_that!(result.r).is_close_to(expected.r, 0.0001_f32);
         assert_that!(result.g).is_close_to(expected.g, 0.0001_f32);

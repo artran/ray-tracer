@@ -15,26 +15,26 @@ pub struct Material {
 
 impl Material {
     pub fn lighting(&self, light: PointLight, point: Vector4<f32>, eye_vector: Vector4<f32>, normal_vector: Vector4<f32>) -> Color {
-        let effective_color = &self.color.hadamard(&light.intensity);
+        let effective_color = self.color * light.intensity;
 
-        let ambient = effective_color.scale(self.ambient);
+        let ambient = effective_color * self.ambient;
         let mut diffuse = Color::black();
         let mut specular = Color::black();
 
         let light_vector = (light.position - point).normalize();
         let light_dot_normal = light_vector.dot(&normal_vector);
         if light_dot_normal >= 0.0 {
-            diffuse = effective_color.scale(self.diffuse * light_dot_normal);
+            diffuse = effective_color * self.diffuse * light_dot_normal;
 
             let reflect_vector = (-light_vector).reflect(&normal_vector);
             let reflect_dot_eye = reflect_vector.dot(&eye_vector);
             if reflect_dot_eye > 0.0 {
                 let factor = reflect_dot_eye.powf(self.shininess);
-                specular = light.intensity.scale(self.specular * factor);
+                specular = light.intensity * self.specular * factor;
             }
         }
 
-        ambient.plus(&diffuse.plus(&specular))
+        ambient + diffuse + specular
     }
 }
 
