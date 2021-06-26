@@ -10,7 +10,7 @@ pub struct Sphere {
     // Note: we store the inverse of the transform as an optimisation.
     inv_transform: Matrix4<f32>,
 
-    material: Material,
+    pub material: Material,
 }
 
 impl Sphere {
