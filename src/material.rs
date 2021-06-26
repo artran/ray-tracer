@@ -14,7 +14,7 @@ pub struct Material {
 }
 
 impl Material {
-    pub fn lighting(&self, light: PointLight, point: Vector4<f32>, eye_vector: Vector4<f32>, normal_vector: Vector4<f32>) -> Color {
+    pub fn lighting(&self, light: &PointLight, point: Vector4<f32>, eye_vector: Vector4<f32>, normal_vector: Vector4<f32>) -> Color {
         let effective_color = self.color * light.intensity;
 
         let ambient = effective_color * self.ambient;
@@ -80,7 +80,7 @@ mod tests {
         let normal_vector = Vector4::vector(0.0, 0.0, -1.0);
         let light = PointLight::new(Vector4::point(0.0, 0.0, -10.0), Color::new(1.0, 1.0, 1.0));
 
-        let result = m.lighting(light, position, eye_vector, normal_vector);
+        let result = m.lighting(&light, position, eye_vector, normal_vector);
 
         assert_that!(result).is_equal_to(Color::new(1.9, 1.9, 1.9));
     }
@@ -93,7 +93,7 @@ mod tests {
         let normal_vector = Vector4::vector(0.0, 0.0, -1.0);
         let light = PointLight::new(Vector4::point(0.0, 0.0, -10.0), Color::new(1.0, 1.0, 1.0));
 
-        let result = m.lighting(light, position, eye_vector, normal_vector);
+        let result = m.lighting(&light, position, eye_vector, normal_vector);
 
         assert_that!(result).is_equal_to(Color::new(1.0, 1.0, 1.0));
     }
@@ -106,7 +106,7 @@ mod tests {
         let normal_vector = Vector4::vector(0.0, 0.0, -1.0);
         let light = PointLight::new(Vector4::point(0.0, 10.0, -10.0), Color::new(1.0, 1.0, 1.0));
 
-        let result = m.lighting(light, position, eye_vector, normal_vector);
+        let result = m.lighting(&light, position, eye_vector, normal_vector);
 
         let expected = Color::new(0.7364, 0.7364, 0.7364);
         assert_that!(result.r).is_close_to(expected.r, 0.0001);
@@ -122,7 +122,7 @@ mod tests {
         let normal_vector = Vector4::vector(0.0, 0.0, -1.0);
         let light = PointLight::new(Vector4::point(0.0, 10.0, -10.0), Color::new(1.0, 1.0, 1.0));
 
-        let result = m.lighting(light, position, eye_vector, normal_vector);
+        let result = m.lighting(&light, position, eye_vector, normal_vector);
 
         let expected = Color::new(1.6364, 1.6364, 1.6364);
         assert_that!(result.r).is_close_to(expected.r, 0.0001);
@@ -138,7 +138,7 @@ mod tests {
         let normal_vector = Vector4::vector(0.0, 0.0, -1.0);
         let light = PointLight::new(Vector4::point(0.0, 0.0, 10.0), Color::new(1.0, 1.0, 1.0));
 
-        let result = m.lighting(light, position, eye_vector, normal_vector);
+        let result = m.lighting(&light, position, eye_vector, normal_vector);
 
         assert_that!(result).is_equal_to(Color::new(0.1, 0.1, 0.1));
     }
