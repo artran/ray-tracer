@@ -33,7 +33,10 @@ impl Sphere {
         let t1 = (-b - root_disc) / (two_a);
         let t2 = (-b + root_disc) / (two_a);
 
-        Some(Intersections::new(Intersection::new(t1, self), Intersection::new(t2, self)))
+        let mut result = Intersections::default();
+        result.push(Intersection::new(t1, self));
+        result.push(Intersection::new(t2, self));
+        Some(result)
     }
 
     pub fn set_transform(&mut self, transform: Matrix4<f32>) {

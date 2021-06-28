@@ -22,17 +22,6 @@ pub struct Intersections<'a> {
 }
 
 impl<'a> Intersections<'a> {
-    pub fn new(i1: Intersection<'a>, i2: Intersection<'a>) -> Self {
-        let intersections = vec!(i1, i2);
-        let mut result = Self {
-            intersections
-        };
-
-        result.sort();
-
-        result
-    }
-
     fn sort(&mut self) {
         self.intersections.sort_unstable_by(|a, b| a.t.partial_cmp(&b.t).unwrap_or(Equal));
     }
@@ -65,14 +54,30 @@ impl<'a> Index<usize> for Intersections<'a> {
     }
 }
 
+impl<'a> Default for Intersections<'a> {
+    fn default() -> Self {
+        Self {
+            intersections: Vec::new()
+        }
+    }
+}
+
+impl<'a> IntoIterator for Intersections<'a> {
+    type Item = Intersection<'a>;
+    type IntoIter = std::vec::IntoIter<Intersection<'a>>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.intersections.into_iter()
+    }
+}
+
 /* -------------------------------------------------------------------------------------------------
 Tests
 ------------------------------------------------------------------------------------------------- */
 
 #[cfg(test)]
 mod tests {
-    use spectral::assert_that;
-    use spectral::option::OptionAssertions;
+    use spectral::prelude::*;
 
     use super::*;
 
@@ -92,7 +97,9 @@ mod tests {
         let i1 = Intersection::new(1.0, &s);
         let i2 = Intersection::new(2.0, &s);
 
-        let xs = Intersections::new(i1, i2);
+        let mut xs = Intersections::default();
+        xs.push(i1);
+        xs.push(i2);
 
         assert_that!(xs.len()).is_equal_to(2);
         assert_that!(xs[0].t).is_equal_to(1.0);
@@ -104,7 +111,9 @@ mod tests {
         let s = Sphere::default();
         let i1 = Intersection::new(1.0, &s);
         let i2 = Intersection::new(2.0, &s);
-        let xs = Intersections::new(i1.clone(), i2);
+        let mut xs = Intersections::default();
+        xs.push(i1.clone());
+        xs.push(i2);
 
         let i = xs.hit();
 
@@ -116,7 +125,9 @@ mod tests {
         let s = Sphere::default();
         let i1 = Intersection::new(-1.0, &s);
         let i2 = Intersection::new(1.0, &s);
-        let xs = Intersections::new(i2.clone(), i1);
+        let mut xs = Intersections::default();
+        xs.push(i2.clone());
+        xs.push(i1);
 
         let i = xs.hit();
 
@@ -128,7 +139,9 @@ mod tests {
         let s = Sphere::default();
         let i1 = Intersection::new(-2.0, &s);
         let i2 = Intersection::new(-1.0, &s);
-        let xs = Intersections::new(i2, i1);
+        let mut xs = Intersections::default();
+        xs.push(i2);
+        xs.push(i1);
 
         let i = xs.hit();
 
@@ -142,7 +155,9 @@ mod tests {
         let i2 = Intersection::new(7.0, &s);
         let i3 = Intersection::new(-3.0, &s);
         let i4 = Intersection::new(2.0, &s);
-        let mut xs = Intersections::new(i1, i2);
+        let mut xs = Intersections::default();
+        xs.push(i1);
+        xs.push(i2);
         xs.push(i3);
         xs.push(i4.clone());
 
