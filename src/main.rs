@@ -20,6 +20,7 @@ mod ray;
 mod sphere;
 mod transform;
 mod tuple;
+mod world;
 
 fn main() -> Result<(), std::io::Error> {
     let ray_origin = Vector4::point(0.0, 0.0, -5.0);

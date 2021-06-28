@@ -2,6 +2,7 @@ use nalgebra::Vector4;
 use crate::color::Color;
 use crate::tuple::Tuple;
 
+#[derive(Debug)]
 pub struct PointLight {
     pub position: Vector4<f32>,
     pub intensity: Color,

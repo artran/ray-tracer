@@ -10,4 +10,5 @@ edition = "2018"
 nalgebra = "0.26.2"
 
 [dev-dependencies]
+rstest = "0.10.0"
 spectral = "^0.6.0"
