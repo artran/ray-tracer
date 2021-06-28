@@ -1,11 +1,29 @@
-use crate::sphere::*;
-use std::ops::Index;
 use std::cmp::Ordering::Equal;
+use std::ops::Index;
+
+use nalgebra::Vector4;
+
+use crate::ray::Ray;
+use crate::sphere::*;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Intersection<'a> {
     pub t: f32,
     pub object: &'a Sphere,
+}
+
+#[derive(Debug)]
+pub struct Intersections<'a> {
+    intersections: Vec<Intersection<'a>>
+}
+
+struct Computations<'a> {
+    t: f32,
+    object: &'a Sphere,
+    point: Vector4<f32>,
+    eye_vector: Vector4<f32>,
+    normal_vector: Vector4<f32>,
+    inside: bool,
 }
 
 impl<'a> Intersection<'a> {
@@ -14,11 +32,27 @@ impl<'a> Intersection<'a> {
             t, object
         }
     }
-}
 
-#[derive(Debug)]
-pub struct Intersections<'a> {
-    intersections: Vec<Intersection<'a>>
+    pub fn prepare_computations(&self, ray: &Ray) -> Computations {
+        let point = ray.position(self.t);
+        let eye_vector = -ray.direction;
+
+        let mut normal_vector = self.object.normal_at(&point);
+        let mut inside = false;
+        if normal_vector.dot(&eye_vector) < 0.0 {
+            inside = true;
+            normal_vector = -normal_vector;
+        }
+
+        Computations {
+            t: self.t,
+            object: self.object,
+            point,
+            eye_vector,
+            normal_vector,
+            inside,
+        }
+    }
 }
 
 impl<'a> Intersections<'a> {
@@ -77,7 +111,11 @@ Tests
 
 #[cfg(test)]
 mod tests {
+    use nalgebra::Vector4;
     use spectral::prelude::*;
+
+    use crate::ray::Ray;
+    use crate::tuple::Tuple;
 
     use super::*;
 
@@ -164,5 +202,46 @@ mod tests {
         let i = xs.hit();
 
         assert_that!(i).is_some().is_equal_to(&i4);
+    }
+
+    #[test]
+    fn precomputing_the_state_of_an_intersection() {
+        let r = Ray::new(Vector4::point(0.0, 0.0, -5.0), Vector4::vector(0.0, 0.0, 1.0));
+        let shape = Sphere::default();
+        let i = Intersection::new(4.0, &shape);
+
+        let comps = i.prepare_computations(&r);
+
+        assert_that!(comps.t).is_equal_to(i.t);
+        assert_that!(comps.object).is_equal_to(&shape);
+        assert_that!(comps.point).is_equal_to(Vector4::point(0.0, 0.0, -1.0));
+        assert_that!(comps.eye_vector).is_equal_to(Vector4::vector(0.0, 0.0, -1.0));
+        assert_that!(comps.normal_vector).is_equal_to(Vector4::vector(0.0, 0.0, -1.0));
+    }
+
+    #[test]
+    fn the_hit_when_an_intersection_occurs_on_the_outside() {
+        let r = Ray::new(Vector4::point(0.0, 0.0, -5.0), Vector4::vector(0.0, 0.0, 1.0));
+        let shape = Sphere::default();
+        let i = Intersection::new(4.0, &shape);
+
+        let comps = i.prepare_computations(&r);
+
+        assert_that!(comps.inside).is_false();
+    }
+
+    #[test]
+    fn the_hit_when_an_intersection_occurs_on_the_inside() {
+        let r = Ray::new(Vector4::point(0.0, 0.0, 0.0), Vector4::vector(0.0, 0.0, 1.0));
+        let shape = Sphere::default();
+        let i = Intersection::new(1.0, &shape);
+
+        let comps = i.prepare_computations(&r);
+
+        assert_that!(comps.point).is_equal_to(Vector4::point(0.0, 0.0, 1.0));
+        assert_that!(comps.eye_vector).is_equal_to(Vector4::vector(0.0, 0.0, -1.0));
+        assert_that!(comps.inside).is_true();
+        // normal would have been (0, 0, 1), but is inverted!
+        assert_that!(comps.normal_vector).is_equal_to(Vector4::vector(0.0, 0.0, -1.0));
     }
 }
