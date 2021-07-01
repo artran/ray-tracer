@@ -17,13 +17,13 @@ pub struct Intersections<'a> {
     intersections: Vec<Intersection<'a>>
 }
 
-struct Computations<'a> {
-    t: f32,
-    object: &'a Sphere,
-    point: Vector4<f32>,
-    eye_vector: Vector4<f32>,
-    normal_vector: Vector4<f32>,
-    inside: bool,
+pub struct Computations<'a> {
+    pub t: f32,
+    pub object: &'a Sphere,
+    pub point: Vector4<f32>,
+    pub eye_vector: Vector4<f32>,
+    pub normal_vector: Vector4<f32>,
+    pub inside: bool,
 }
 
 impl<'a> Intersection<'a> {
