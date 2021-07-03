@@ -5,18 +5,17 @@ use crate::ray::Ray;
 use crate::tuple::Tuple;
 use crate::world::World;
 
-struct Camera {
+pub struct Camera {
     hsize: usize,
     vsize: usize,
-    field_of_view: f32,
-    transform: Matrix4<f32>,
+    pub transform: Matrix4<f32>,
     pixel_size: f32,
     half_width: f32,
     half_height: f32,
 }
 
 impl Camera {
-    fn new(hsize: usize, vsize: usize, field_of_view: f32) -> Self {
+    pub fn new(hsize: usize, vsize: usize, field_of_view: f32) -> Self {
         let half_view = (field_of_view / 2.0).tan();
         let aspect = hsize as f32 / vsize as f32;
         let half_width: f32;
@@ -33,7 +32,6 @@ impl Camera {
         Self {
             hsize,
             vsize,
-            field_of_view,
             transform: Matrix4::identity(),
             pixel_size,
             half_width,
@@ -61,7 +59,7 @@ impl Camera {
         Ray::new(origin, direction)
     }
 
-    fn render(&self, world: &World) -> Canvas {
+    pub fn render(&self, world: &World) -> Canvas {
         let mut image = Canvas::new(self.hsize, self.vsize);
 
         for y in 0..self.vsize - 1 {
@@ -111,7 +109,6 @@ mod tests {
 
         assert_that!(c.hsize).is_equal_to(160);
         assert_that!(c.vsize).is_equal_to(120);
-        assert_that!(c.field_of_view).is_equal_to(PI / 2.0);
         assert_that!(c.transform).is_equal_to(Matrix4::identity());
     }
 
@@ -173,9 +170,9 @@ mod tests {
         s2.set_transform(Matrix4::scaling(0.5, 0.5, 0.5));
 
         let mut world = World::default();
-        world.objects.push(s1);
-        world.objects.push(s2);
-        world.light_source = Some(light);
+        world.add_object(s1);
+        world.add_object(s2);
+        world.set_light_source(light);
 
         world
     }

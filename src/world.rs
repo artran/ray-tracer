@@ -5,8 +5,8 @@ use crate::sphere::Sphere;
 use crate::color::Color;
 
 pub struct World {
-    pub objects: Vec<Sphere>,
-    pub light_source: Option<PointLight>,
+    objects: Vec<Sphere>,
+    light_source: Option<PointLight>,
 }
 
 impl World {
@@ -30,6 +30,10 @@ impl World {
 
     pub fn set_light_source(&mut self, light_source: PointLight) {
         self.light_source = Some(light_source);
+    }
+
+    pub fn add_object(&mut self, object: Sphere) {
+        self.objects.push(object);
     }
 
     pub fn shade_hit(&self, comps: Computations) -> Color {

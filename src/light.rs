@@ -1,6 +1,5 @@
 use nalgebra::Vector4;
 use crate::color::Color;
-use crate::tuple::Tuple;
 
 #[derive(Debug)]
 pub struct PointLight {
@@ -26,6 +25,7 @@ mod tests {
     use spectral::assert_that;
 
     use super::*;
+    use crate::tuple::Tuple;
 
     #[test]
     fn a_point_light_has_a_position_and_intensity() {
