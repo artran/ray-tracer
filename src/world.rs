@@ -4,19 +4,12 @@ use crate::ray::Ray;
 use crate::sphere::Sphere;
 use crate::color::Color;
 
-struct World {
+pub struct World {
     pub objects: Vec<Sphere>,
-    light_source: Option<PointLight>,
+    pub light_source: Option<PointLight>,
 }
 
 impl World {
-    fn new() -> Self {
-        Self {
-            objects: Vec::new(),
-            light_source: None,
-        }
-    }
-
     pub fn intersect(&self, ray: &Ray) -> Option<Intersections> {
         let mut found: Intersections = Intersections::default();
 
@@ -61,6 +54,15 @@ impl World {
     }
 }
 
+impl Default for World {
+    fn default() -> Self {
+        Self {
+            objects: Vec::new(),
+            light_source: None,
+        }
+    }
+}
+
 /* -------------------------------------------------------------------------------------------------
 Tests
 ------------------------------------------------------------------------------------------------- */
@@ -90,7 +92,7 @@ mod tests {
         let mut s2 = Sphere::default();
         s2.set_transform(Matrix4::scaling(0.5, 0.5, 0.5));
 
-        let mut w = World::new();
+        let mut w = World::default();
         w.objects.push(s1);
         w.objects.push(s2);
         w.light_source = Some(light);
@@ -100,7 +102,7 @@ mod tests {
 
     #[rstest]
     fn creating_a_world() {
-        let w = World::new();
+        let w = World::default();
         assert_that!(w.objects).is_empty();
         assert_that!(w.light_source).is_none();
     }

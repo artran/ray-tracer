@@ -10,6 +10,7 @@ use crate::transform::Transform;
 use crate::tuple::Tuple;
 use crate::light::PointLight;
 
+mod camera;
 mod canvas;
 mod color;
 mod intersection;
