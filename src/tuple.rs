@@ -28,11 +28,11 @@ impl Tuple for Vector4<f32> {
     }
 
     fn is_point(&self) -> bool {
-        self.w == 1.0
+        self.w.round() == 1.0
     }
 
     fn is_vector(&self) -> bool {
-        self.w == 0.0
+        self.w.round() == 0.0
     }
 
     fn reflect(&self, normal: &Vector4<f32>) -> Vector4<f32> {
