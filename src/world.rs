@@ -1,9 +1,11 @@
-use crate::intersection::{Intersections, Computations};
+use nalgebra::Vector4;
+
+use crate::color::Color;
+use crate::intersection::{Computations, Intersections};
 use crate::light::PointLight;
 use crate::ray::Ray;
+use crate::shape::Shape;
 use crate::sphere::Sphere;
-use crate::color::Color;
-use nalgebra::Vector4;
 use crate::tuple::Tuple;
 
 pub struct World {
@@ -39,7 +41,7 @@ impl World {
     }
 
     pub fn shade_hit(&self, comps: Computations) -> Color {
-        comps.object.material.lighting(
+        comps.object.get_material().lighting(
             &self.light_source,
             comps.point,
             comps.eye_vector,
@@ -94,18 +96,21 @@ mod tests {
     use rstest::*;
     use spectral::prelude::*;
 
+    use crate::intersection::Intersection;
+    use crate::shape::Shape;
     use crate::transform::Transform;
     use crate::tuple::Tuple;
 
     use super::*;
-    use crate::intersection::Intersection;
 
     #[fixture]
     fn default_world() -> World {
         let mut s1 = Sphere::default();
-        s1.material.color = Color::new(0.8, 1.0, 0.6);
-        s1.material.diffuse = 0.7;
-        s1.material.specular = 0.2;
+        let mut material = s1.get_material();
+        material.color = Color::new(0.8, 1.0, 0.6);
+        material.diffuse = 0.7;
+        material.specular = 0.2;
+        s1.set_material(material);
 
         let mut s2 = Sphere::default();
         s2.set_transform(Matrix4::scaling(0.5, 0.5, 0.5));
@@ -193,11 +198,16 @@ mod tests {
 
     #[rstest]
     fn the_color_with_an_intersection_behind_the_ray(mut default_world: World) {
+        // todo: builders for World & Sphere
         let mut outer = default_world.objects[0].clone();
         let mut inner = default_world.objects[1].clone();
-        let expected_color = inner.material.color.clone();
-        outer.material.ambient = 1.0;
-        inner.material.ambient = 1.0;
+        let expected_color = inner.get_material().color;
+        let mut outer_material = outer.get_material();
+        outer_material.ambient = 1.0;
+        outer.set_material(outer_material);
+        let mut inner_material = inner.get_material();
+        inner_material.ambient = 1.0;
+        inner.set_material(inner_material);
         default_world.objects.clear();
         default_world.objects.push(outer);
         default_world.objects.push(inner);

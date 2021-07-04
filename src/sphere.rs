@@ -3,6 +3,7 @@ use nalgebra::{Matrix4, Vector4};
 use crate::intersection::{Intersection, Intersections};
 use crate::material::Material;
 use crate::ray::Ray;
+use crate::shape::Shape;
 use crate::tuple::Tuple;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -10,7 +11,7 @@ pub struct Sphere {
     // Note: we store the inverse of the transform as an optimisation.
     inv_transform: Matrix4<f32>,
 
-    pub material: Material,
+    material: Material,
 }
 
 impl Sphere {
@@ -39,11 +40,6 @@ impl Sphere {
         Some(result)
     }
 
-    pub fn set_transform(&mut self, transform: Matrix4<f32>) {
-        // As an optimisation we invert the transform before storing it.
-        self.inv_transform = transform.try_inverse().unwrap();
-    }
-
     pub fn normal_at(&self, world_point: &Vector4<f32>) -> Vector4<f32> {
         let object_point = self.inv_transform * world_point;
         let object_normal = object_point - Vector4::point(0.0, 0.0, 0.0);
@@ -51,6 +47,25 @@ impl Sphere {
         world_normal.w = 0.0;
 
         (world_normal).normalize()
+    }
+}
+
+impl Shape for Sphere {
+    fn set_transform(&mut self, transform: Matrix4<f32>) {
+        // As an optimisation we invert the transform before storing it.
+        self.inv_transform = transform.try_inverse().unwrap();
+    }
+
+    fn set_material(&mut self, material: Material) {
+        self.material = material;
+    }
+
+    fn get_transform(&self) -> Matrix4<f32> {
+        self.inv_transform.try_inverse().unwrap()
+    }
+
+    fn get_material(&self) -> Material {
+        self.material.clone()
     }
 }
 
@@ -70,6 +85,8 @@ Tests
 
 #[cfg(test)]
 mod tests {
+    use std::f32::consts::{FRAC_1_SQRT_2, PI};
+
     use nalgebra::Matrix4;
     use spectral::assert_that;
     use spectral::numeric::FloatAssertions;
@@ -78,7 +95,6 @@ mod tests {
     use crate::transform::Transform;
 
     use super::*;
-    use std::f32::consts::{PI, FRAC_1_SQRT_2};
 
     #[test]
     fn a_ray_intersects_a_sphere_at_two_points() {

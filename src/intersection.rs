@@ -4,7 +4,7 @@ use std::ops::Index;
 use nalgebra::Vector4;
 
 use crate::ray::Ray;
-use crate::sphere::*;
+use crate::sphere::Sphere;
 
 const EPSILON: f32 = 0.001;
 
@@ -122,10 +122,11 @@ mod tests {
     use spectral::prelude::*;
 
     use crate::ray::Ray;
+    use crate::shape::Shape;
+    use crate::transform::Transform;
     use crate::tuple::Tuple;
 
     use super::*;
-    use crate::transform::Transform;
 
     #[test]
     fn an_intersection_encapsulates_t_and_object() {

@@ -87,6 +87,8 @@ mod tests {
     use spectral::prelude::*;
 
     use crate::color::Color;
+    use crate::material::Material;
+    use crate::shape::Shape;
     use crate::sphere::Sphere;
     use crate::transform::Transform;
 
@@ -159,9 +161,11 @@ mod tests {
     #[fixture]
     fn default_world() -> World {
         let mut s1 = Sphere::default();
-        s1.material.color = Color::new(0.8, 1.0, 0.6);
-        s1.material.diffuse = 0.7;
-        s1.material.specular = 0.2;
+        let mut s1_material = Material::default();
+        s1_material.color = Color::new(0.8, 1.0, 0.6);
+        s1_material.diffuse = 0.7;
+        s1_material.specular = 0.2;
+        s1.set_material(s1_material);
 
         let mut s2 = Sphere::default();
         s2.set_transform(Matrix4::scaling(0.5, 0.5, 0.5));
