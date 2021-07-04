@@ -14,10 +14,16 @@ pub struct Material {
 }
 
 impl Material {
-    pub fn lighting(&self, light: &PointLight, point: Vector4<f32>, eye_vector: Vector4<f32>, normal_vector: Vector4<f32>) -> Color {
+    pub fn lighting(&self, light: &PointLight, point: Vector4<f32>, eye_vector: Vector4<f32>, normal_vector: Vector4<f32>, in_shadow: bool) -> Color {
         let effective_color = self.color * light.intensity;
 
         let ambient = effective_color * self.ambient;
+
+        // Return early if the point is in shadow
+        if in_shadow {
+            return ambient;
+        }
+
         let mut diffuse = Color::black();
         let mut specular = Color::black();
 
@@ -56,57 +62,60 @@ Tests
 
 #[cfg(test)]
 mod tests {
+    use rstest::*;
     use spectral::assert_that;
     use spectral::numeric::FloatAssertions;
 
     use super::*;
 
-    #[test]
-    fn the_default_material() {
-        let m = Material::default();
-
-        assert_that!(m.color).is_equal_to(Color::new(1.0, 1.0, 1.0));
-        assert_that!(m.ambient).is_equal_to(0.1);
-        assert_that!(m.diffuse).is_equal_to(0.9);
-        assert_that!(m.specular).is_equal_to(0.9);
-        assert_that!(m.shininess).is_equal_to(200.0);
+    #[fixture]
+    fn default_material() -> Material {
+        Material::default()
     }
 
-    #[test]
-    fn lighting_with_the_eye_between_the_light_and_the_surface() {
-        let m = Material::default();
-        let position = Vector4::point(0.0, 0.0, 0.0);
+    #[fixture]
+    fn default_position() -> Vector4<f32> {
+        Vector4::point(0.0, 0.0, 0.0)
+    }
+
+    #[rstest]
+    fn the_default_material(default_material: Material) {
+        assert_that!(default_material.color).is_equal_to(Color::white());
+        assert_that!(default_material.ambient).is_equal_to(0.1);
+        assert_that!(default_material.diffuse).is_equal_to(0.9);
+        assert_that!(default_material.specular).is_equal_to(0.9);
+        assert_that!(default_material.shininess).is_equal_to(200.0);
+    }
+
+    #[rstest]
+    fn lighting_with_the_eye_between_the_light_and_the_surface(default_material: Material, default_position: Vector4<f32>) {
         let eye_vector = Vector4::vector(0.0, 0.0, -1.0);
         let normal_vector = Vector4::vector(0.0, 0.0, -1.0);
-        let light = PointLight::new(Vector4::point(0.0, 0.0, -10.0), Color::new(1.0, 1.0, 1.0));
+        let light = PointLight::new(Vector4::point(0.0, 0.0, -10.0), Color::white());
 
-        let result = m.lighting(&light, position, eye_vector, normal_vector);
+        let result = default_material.lighting(&light, default_position, eye_vector, normal_vector, false);
 
         assert_that!(result).is_equal_to(Color::new(1.9, 1.9, 1.9));
     }
 
-    #[test]
-    fn lighting_with_the_eye_between_light_and_surface_eye_offset_45_deg() {
-        let m = Material::default();
-        let position = Vector4::point(0.0, 0.0, 0.0);
+    #[rstest]
+    fn lighting_with_the_eye_between_light_and_surface_eye_offset_45_deg(default_material: Material, default_position: Vector4<f32>) {
         let eye_vector = Vector4::vector(0.0, 2.0_f32.sqrt() / 2.0, -2.0_f32.sqrt() / 2.0);
         let normal_vector = Vector4::vector(0.0, 0.0, -1.0);
-        let light = PointLight::new(Vector4::point(0.0, 0.0, -10.0), Color::new(1.0, 1.0, 1.0));
+        let light = PointLight::new(Vector4::point(0.0, 0.0, -10.0), Color::white());
 
-        let result = m.lighting(&light, position, eye_vector, normal_vector);
+        let result = default_material.lighting(&light, default_position, eye_vector, normal_vector, false);
 
-        assert_that!(result).is_equal_to(Color::new(1.0, 1.0, 1.0));
+        assert_that!(result).is_equal_to(Color::white());
     }
 
-    #[test]
-    fn lighting_with_eye_opposite_surface_light_offset_45_deg() {
-        let m = Material::default();
-        let position = Vector4::point(0.0, 0.0, 0.0);
+    #[rstest]
+    fn lighting_with_eye_opposite_surface_light_offset_45_deg(default_material: Material, default_position: Vector4<f32>) {
         let eye_vector = Vector4::vector(0.0, 0.0, -1.0);
         let normal_vector = Vector4::vector(0.0, 0.0, -1.0);
-        let light = PointLight::new(Vector4::point(0.0, 10.0, -10.0), Color::new(1.0, 1.0, 1.0));
+        let light = PointLight::new(Vector4::point(0.0, 10.0, -10.0), Color::white());
 
-        let result = m.lighting(&light, position, eye_vector, normal_vector);
+        let result = default_material.lighting(&light, default_position, eye_vector, normal_vector, false);
 
         let expected = Color::new(0.7364, 0.7364, 0.7364);
         assert_that!(result.r).is_close_to(expected.r, 0.0001);
@@ -114,15 +123,13 @@ mod tests {
         assert_that!(result.b).is_close_to(expected.b, 0.0001);
     }
 
-    #[test]
-    fn lighting_with_eye_in_the_path_of_the_reflection_vector() {
-        let m = Material::default();
-        let position = Vector4::point(0.0, 0.0, 0.0);
+    #[rstest]
+    fn lighting_with_eye_in_the_path_of_the_reflection_vector(default_material: Material, default_position: Vector4<f32>) {
         let eye_vector = Vector4::vector(0.0, -2.0_f32.sqrt() / 2.0, -2.0_f32.sqrt() / 2.0);
         let normal_vector = Vector4::vector(0.0, 0.0, -1.0);
-        let light = PointLight::new(Vector4::point(0.0, 10.0, -10.0), Color::new(1.0, 1.0, 1.0));
+        let light = PointLight::new(Vector4::point(0.0, 10.0, -10.0), Color::white());
 
-        let result = m.lighting(&light, position, eye_vector, normal_vector);
+        let result = default_material.lighting(&light, default_position, eye_vector, normal_vector, false);
 
         let expected = Color::new(1.6364, 1.6364, 1.6364);
         assert_that!(result.r).is_close_to(expected.r, 0.0001);
@@ -130,15 +137,25 @@ mod tests {
         assert_that!(result.b).is_close_to(expected.b, 0.0001);
     }
 
-    #[test]
-    fn lighting_with_the_light_behind_the_surface() {
-        let m = Material::default();
-        let position = Vector4::point(0.0, 0.0, 0.0);
+    #[rstest]
+    fn lighting_with_the_light_behind_the_surface(default_material: Material, default_position: Vector4<f32>) {
         let eye_vector = Vector4::vector(0.0, 0.0, -1.0);
         let normal_vector = Vector4::vector(0.0, 0.0, -1.0);
-        let light = PointLight::new(Vector4::point(0.0, 0.0, 10.0), Color::new(1.0, 1.0, 1.0));
+        let light = PointLight::new(Vector4::point(0.0, 0.0, 10.0), Color::white());
 
-        let result = m.lighting(&light, position, eye_vector, normal_vector);
+        let result = default_material.lighting(&light, default_position, eye_vector, normal_vector, false);
+
+        assert_that!(result).is_equal_to(Color::new(0.1, 0.1, 0.1));
+    }
+
+    #[rstest]
+    fn lighting_with_the_surface_in_shadow(default_material: Material, default_position: Vector4<f32>) {
+        let eye_vec = Vector4::vector(0.0, 0.0, -1.0);
+        let normal_vec = Vector4::vector(0.0, 0.0, -1.0);
+        let light = PointLight::new(Vector4::point(0.0, 0.0, -10.0), Color::white());
+        let in_shadow = true;
+
+        let result = default_material.lighting(&light, default_position, eye_vec, normal_vec, in_shadow);
 
         assert_that!(result).is_equal_to(Color::new(0.1, 0.1, 0.1));
     }

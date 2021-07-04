@@ -1,7 +1,7 @@
 use nalgebra::Vector4;
 use crate::color::Color;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct PointLight {
     pub position: Vector4<f32>,
     pub intensity: Color,

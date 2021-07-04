@@ -3,10 +3,12 @@ use crate::light::PointLight;
 use crate::ray::Ray;
 use crate::sphere::Sphere;
 use crate::color::Color;
+use nalgebra::Vector4;
+use crate::tuple::Tuple;
 
 pub struct World {
     objects: Vec<Sphere>,
-    light_source: Option<PointLight>,
+    light_source: PointLight,
 }
 
 impl World {
@@ -29,7 +31,7 @@ impl World {
     }
 
     pub fn set_light_source(&mut self, light_source: PointLight) {
-        self.light_source = Some(light_source);
+        self.light_source = light_source;
     }
 
     pub fn add_object(&mut self, object: Sphere) {
@@ -37,32 +39,43 @@ impl World {
     }
 
     pub fn shade_hit(&self, comps: Computations) -> Color {
-        if let Some(ls) = &self.light_source {
-            return comps.object.material.lighting(ls, comps.point, comps.eye_vector, comps.normal_vector);
-        }
-
-        Color::black()
+        let ls = &self.light_source;
+        comps.object.material.lighting(ls, comps.point, comps.eye_vector, comps.normal_vector, false)
     }
 
     pub fn color_at(&self, ray: &Ray) -> Color {
-        if self.light_source.is_some() {
-            if let Some(intersections) = self.intersect(ray) {
-                if let Some(hit) = intersections.hit() {
-                    let comps = hit.prepare_computations(ray);
-                    return self.shade_hit(comps);
-                }
+        if let Some(intersections) = self.intersect(ray) {
+            if let Some(hit) = intersections.hit() {
+                let comps = hit.prepare_computations(ray);
+                return self.shade_hit(comps);
             }
         }
 
         Color::black()
     }
+
+    fn is_shadowed(&self, point: &Vector4<f32>) -> bool {
+        let v = self.light_source.position - point;
+        let distance = v.magnitude();
+        let direction = v.normalize();
+
+        let r = Ray::new(point.clone(), direction);
+        if let Some(intersections) = self.intersect(&r) {
+            if let Some(h) = intersections.hit() {
+                return h.t < distance;
+            }
+        }
+
+        false
+    }
+
 }
 
 impl Default for World {
     fn default() -> Self {
         Self {
             objects: Vec::new(),
-            light_source: None,
+            light_source: PointLight::new(Vector4::point(-10.0, 10.0, -10.0), Color::white()),
         }
     }
 }
@@ -77,7 +90,6 @@ mod tests {
     use rstest::*;
     use spectral::prelude::*;
 
-    use crate::color::Color;
     use crate::transform::Transform;
     use crate::tuple::Tuple;
 
@@ -86,8 +98,6 @@ mod tests {
 
     #[fixture]
     fn default_world() -> World {
-        let light = PointLight::new(Vector4::point(-10.0, 10.0, -10.0), Color::white());
-
         let mut s1 = Sphere::default();
         s1.material.color = Color::new(0.8, 1.0, 0.6);
         s1.material.diffuse = 0.7;
@@ -99,7 +109,6 @@ mod tests {
         let mut w = World::default();
         w.objects.push(s1);
         w.objects.push(s2);
-        w.light_source = Some(light);
 
         w
     }
@@ -107,8 +116,10 @@ mod tests {
     #[rstest]
     fn creating_a_world() {
         let w = World::default();
+        let expected_light = PointLight::new(Vector4::point(-10.0, 10.0, -10.0), Color::white());
+
         assert_that!(w.objects).is_empty();
-        assert_that!(w.light_source).is_none();
+        assert_that!(w.light_source).is_equal_to(expected_light);
     }
 
     #[rstest]
@@ -191,5 +202,33 @@ mod tests {
         let c = default_world.color_at(&r);
 
         assert_that!(c).is_equal_to(expected_color);
+    }
+
+    #[rstest]
+    fn there_is_no_shadow_when_nothing_is_co_linear_with_point_and_light(default_world: World) {
+        let p = Vector4::point(0.0, 10.0, 0.0);
+
+        assert_that!(default_world.is_shadowed(&p)).is_false();
+    }
+
+    #[rstest]
+    fn the_shadow_when_an_object_is_between_the_point_and_the_light(default_world: World) {
+        let p = Vector4::point(10.0, -10.0, 10.0);
+
+        assert_that!(default_world.is_shadowed(&p)).is_true();
+    }
+
+    #[rstest]
+    fn there_is_no_shadow_when_an_object_is_behind_the_light(default_world: World) {
+        let p = Vector4::point(-20.0, 20.0, -20.0);
+
+        assert_that!(default_world.is_shadowed(&p)).is_false();
+    }
+
+    #[rstest]
+    fn there_is_no_shadow_when_an_object_is_behind_the_point(default_world: World) {
+        let p = Vector4::point(-2.0, 2.0, -2.0);
+
+        assert_that!(default_world.is_shadowed(&p)).is_false();
     }
 }

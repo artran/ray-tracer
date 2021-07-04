@@ -87,7 +87,6 @@ mod tests {
     use spectral::prelude::*;
 
     use crate::color::Color;
-    use crate::light::PointLight;
     use crate::sphere::Sphere;
     use crate::transform::Transform;
 
@@ -159,8 +158,6 @@ mod tests {
 
     #[fixture]
     fn default_world() -> World {
-        let light = PointLight::new(Vector4::point(-10.0, 10.0, -10.0), Color::white());
-
         let mut s1 = Sphere::default();
         s1.material.color = Color::new(0.8, 1.0, 0.6);
         s1.material.diffuse = 0.7;
@@ -172,7 +169,6 @@ mod tests {
         let mut world = World::default();
         world.add_object(s1);
         world.add_object(s2);
-        world.set_light_source(light);
 
         world
     }

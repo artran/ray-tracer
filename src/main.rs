@@ -5,7 +5,6 @@ use nalgebra::{Matrix4, Vector4};
 
 use crate::camera::Camera;
 use crate::color::Color;
-use crate::light::PointLight;
 use crate::sphere::Sphere;
 use crate::transform::Transform;
 use crate::tuple::Tuple;
@@ -63,7 +62,6 @@ fn main() -> Result<(), std::io::Error> {
     left.material.specular = 0.3;
 
     let mut world = World::default();
-    world.set_light_source(PointLight::new(Vector4::point(-10.0, 10.0, -10.0), Color::white()));
     world.add_object(floor);
     world.add_object(left_wall);
     world.add_object(right_wall);
