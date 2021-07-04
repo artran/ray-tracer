@@ -6,6 +6,8 @@ use nalgebra::Vector4;
 use crate::ray::Ray;
 use crate::sphere::*;
 
+const EPSILON: f32 = 0.001;
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct Intersection<'a> {
     pub t: f32,
@@ -14,7 +16,7 @@ pub struct Intersection<'a> {
 
 #[derive(Debug)]
 pub struct Intersections<'a> {
-    intersections: Vec<Intersection<'a>>
+    intersections: Vec<Intersection<'a>>,
 }
 
 pub struct Computations<'a> {
@@ -30,7 +32,8 @@ pub struct Computations<'a> {
 impl<'a> Intersection<'a> {
     pub fn new(t: f32, object: &'a Sphere) -> Self {
         Self {
-            t, object
+            t,
+            object,
         }
     }
 
@@ -45,9 +48,9 @@ impl<'a> Intersection<'a> {
             normal_vector = -normal_vector;
         }
 
-        let over_point = point + normal_vector * f32::EPSILON;
+        let over_point = point + normal_vector * EPSILON;
 
-            Computations {
+        Computations {
             t: self.t,
             object: self.object,
             point,
@@ -259,7 +262,7 @@ mod tests {
 
         let comps = i.prepare_computations(&r);
 
-        assert_that!(comps.over_point.z).is_less_than(-f32::EPSILON/2.0);
+        assert_that!(comps.over_point.z).is_less_than(-EPSILON / 2.0);
         assert_that!(comps.point.z).is_greater_than(comps.over_point.z);
     }
 }
