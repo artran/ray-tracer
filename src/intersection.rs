@@ -21,6 +21,7 @@ pub struct Computations<'a> {
     pub t: f32,
     pub object: &'a Sphere,
     pub point: Vector4<f32>,
+    pub over_point: Vector4<f32>,
     pub eye_vector: Vector4<f32>,
     pub normal_vector: Vector4<f32>,
     pub inside: bool,
@@ -44,10 +45,13 @@ impl<'a> Intersection<'a> {
             normal_vector = -normal_vector;
         }
 
-        Computations {
+        let over_point = point + normal_vector * f32::EPSILON;
+
+            Computations {
             t: self.t,
             object: self.object,
             point,
+            over_point,
             eye_vector,
             normal_vector,
             inside,
@@ -111,13 +115,14 @@ Tests
 
 #[cfg(test)]
 mod tests {
-    use nalgebra::Vector4;
+    use nalgebra::Matrix4;
     use spectral::prelude::*;
 
     use crate::ray::Ray;
     use crate::tuple::Tuple;
 
     use super::*;
+    use crate::transform::Transform;
 
     #[test]
     fn an_intersection_encapsulates_t_and_object() {
@@ -243,5 +248,18 @@ mod tests {
         assert_that!(comps.inside).is_true();
         // normal would have been (0, 0, 1), but is inverted!
         assert_that!(comps.normal_vector).is_equal_to(Vector4::vector(0.0, 0.0, -1.0));
+    }
+
+    #[test]
+    fn the_hit_should_offset_the_point() {
+        let r = Ray::new(Vector4::point(0.0, 0.0, -5.0), Vector4::vector(0.0, 0.0, 1.0));
+        let mut shape = Sphere::default();
+        shape.set_transform(Matrix4::translation(0.0, 0.0, 1.0));
+        let i = Intersection::new(5.0, &shape);
+
+        let comps = i.prepare_computations(&r);
+
+        assert_that!(comps.over_point.z).is_less_than(-f32::EPSILON/2.0);
+        assert_that!(comps.point.z).is_greater_than(comps.over_point.z);
     }
 }

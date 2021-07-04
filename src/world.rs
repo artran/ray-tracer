@@ -39,8 +39,13 @@ impl World {
     }
 
     pub fn shade_hit(&self, comps: Computations) -> Color {
-        let ls = &self.light_source;
-        comps.object.material.lighting(ls, comps.point, comps.eye_vector, comps.normal_vector, false)
+        comps.object.material.lighting(
+            &self.light_source,
+            comps.point,
+            comps.eye_vector,
+            comps.normal_vector,
+            self.is_shadowed(&comps.over_point),
+        )
     }
 
     pub fn color_at(&self, ray: &Ray) -> Color {
@@ -208,7 +213,25 @@ mod tests {
     #[case(Vector4::point(10.0, - 10.0, 10.0), true)] // the_shadow_when_an_object_is_between_the_point_and_the_light
     #[case(Vector4::point(- 20.0, 20.0, - 20.0), false)] // there_is_no_shadow_when_an_object_is_behind_the_light
     #[case(Vector4::point(- 2.0, 2.0, - 2.0), false)] // there_is_no_shadow_when_an_object_is_behind_the_point
-    fn test_is_shadowed (default_world: World, #[case] p: Vector4<f32>, #[case] expected: bool) {
+    fn test_is_shadowed(default_world: World, #[case] p: Vector4<f32>, #[case] expected: bool) {
         assert_that!(default_world.is_shadowed(&p)).is_equal_to(expected);
+    }
+
+    #[test]
+    fn shade_hit_is_given_an_intersection_in_shadow() {
+        let mut w = World::default();
+        w.light_source = PointLight::new(Vector4::point(0.0, 0.0, -10.0), Color::white());
+        let s1 = Sphere::default();
+        let mut s2 = Sphere::default();
+        s2.set_transform(Matrix4::translation(0.0, 0.0, 10.0));
+        w.objects.push(s1);
+        w.objects.push(s2.clone());
+        let r = Ray::new(Vector4::point(0.0, 0.0, 5.0), Vector4::vector(0.0, 0.0, 1.0));
+        let i = Intersection::new(4.0, &s2);
+        let comps = i.prepare_computations(&r);
+
+        let c = w.shade_hit(comps);
+
+        assert_that!(c).is_equal_to(Color::new(0.1, 0.1, 0.1));
     }
 }
