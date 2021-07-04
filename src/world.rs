@@ -68,7 +68,6 @@ impl World {
 
         false
     }
-
 }
 
 impl Default for World {
@@ -205,30 +204,11 @@ mod tests {
     }
 
     #[rstest]
-    fn there_is_no_shadow_when_nothing_is_co_linear_with_point_and_light(default_world: World) {
-        let p = Vector4::point(0.0, 10.0, 0.0);
-
-        assert_that!(default_world.is_shadowed(&p)).is_false();
-    }
-
-    #[rstest]
-    fn the_shadow_when_an_object_is_between_the_point_and_the_light(default_world: World) {
-        let p = Vector4::point(10.0, -10.0, 10.0);
-
-        assert_that!(default_world.is_shadowed(&p)).is_true();
-    }
-
-    #[rstest]
-    fn there_is_no_shadow_when_an_object_is_behind_the_light(default_world: World) {
-        let p = Vector4::point(-20.0, 20.0, -20.0);
-
-        assert_that!(default_world.is_shadowed(&p)).is_false();
-    }
-
-    #[rstest]
-    fn there_is_no_shadow_when_an_object_is_behind_the_point(default_world: World) {
-        let p = Vector4::point(-2.0, 2.0, -2.0);
-
-        assert_that!(default_world.is_shadowed(&p)).is_false();
+    #[case(Vector4::point(0.0, 10.0, 0.0), false)] // there_is_no_shadow_when_nothing_is_co_linear_with_point_and_light
+    #[case(Vector4::point(10.0, - 10.0, 10.0), true)] // the_shadow_when_an_object_is_between_the_point_and_the_light
+    #[case(Vector4::point(- 20.0, 20.0, - 20.0), false)] // there_is_no_shadow_when_an_object_is_behind_the_light
+    #[case(Vector4::point(- 2.0, 2.0, - 2.0), false)] // there_is_no_shadow_when_an_object_is_behind_the_point
+    fn test_is_shadowed (default_world: World, #[case] p: Vector4<f32>, #[case] expected: bool) {
+        assert_that!(default_world.is_shadowed(&p)).is_equal_to(expected);
     }
 }
