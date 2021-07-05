@@ -1,5 +1,6 @@
 use nalgebra::Vector4;
 use crate::color::Color;
+use crate::tuple::Tuple;
 
 #[derive(Debug, PartialEq)]
 pub struct PointLight {
@@ -12,6 +13,15 @@ impl PointLight {
         Self {
             position,
             intensity,
+        }
+    }
+}
+
+impl Default for PointLight {
+    fn default() -> Self {
+        Self {
+            position: Vector4::point(-10.0, 10.0, -10.0),
+            intensity: Color::white(),
         }
     }
 }

@@ -93,6 +93,7 @@ mod tests {
     use crate::transform::Transform;
 
     use super::*;
+    use crate::world::WorldBuilder;
 
     fn vector_values_are_close(actual: Vector4<f32>, expected: Vector4<f32>, tolerance: f32) {
         for row in 0..4 {
@@ -170,11 +171,10 @@ mod tests {
         let mut s2 = Sphere::default();
         s2.set_transform(Matrix4::scaling(0.5, 0.5, 0.5));
 
-        let mut world = World::default();
-        world.add_object(s1);
-        world.add_object(s2);
-
-        world
+        WorldBuilder::new()
+            .with_object(s1)
+            .with_object(s2)
+            .build()
     }
 
     #[rstest]

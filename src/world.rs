@@ -6,9 +6,13 @@ use crate::light::PointLight;
 use crate::ray::Ray;
 use crate::shape::Shape;
 use crate::sphere::Sphere;
-use crate::tuple::Tuple;
 
 pub struct World {
+    objects: Vec<Sphere>,
+    light_source: PointLight,
+}
+
+pub struct WorldBuilder {
     objects: Vec<Sphere>,
     light_source: PointLight,
 }
@@ -30,14 +34,6 @@ impl World {
         }
 
         Some(found)
-    }
-
-    pub fn set_light_source(&mut self, light_source: PointLight) {
-        self.light_source = light_source;
-    }
-
-    pub fn add_object(&mut self, object: Sphere) {
-        self.objects.push(object);
     }
 
     pub fn shade_hit(&self, comps: Computations) -> Color {
@@ -81,7 +77,35 @@ impl Default for World {
     fn default() -> Self {
         Self {
             objects: Vec::new(),
-            light_source: PointLight::new(Vector4::point(-10.0, 10.0, -10.0), Color::white()),
+            light_source: PointLight::default(),
+        }
+    }
+}
+
+impl WorldBuilder {
+    pub fn new() -> Self {
+        Self {
+            objects: Vec::new(),
+            light_source: PointLight::default(),
+        }
+    }
+
+    pub fn with_light_source(mut self, light_source: PointLight) -> Self {
+        self.light_source = light_source;
+
+        self
+    }
+
+    pub fn with_object(mut self, object: Sphere) -> Self {
+        self.objects.push(object);
+
+        self
+    }
+
+    pub fn build(self) -> World {
+        World {
+            objects: self.objects,
+            light_source: self.light_source,
         }
     }
 }
@@ -115,11 +139,9 @@ mod tests {
         let mut s2 = Sphere::default();
         s2.set_transform(Matrix4::scaling(0.5, 0.5, 0.5));
 
-        let mut w = World::default();
-        w.objects.push(s1);
-        w.objects.push(s2);
-
-        w
+        WorldBuilder::new()
+            .with_object(s1)
+            .with_object(s2).build()
     }
 
     #[rstest]
@@ -161,7 +183,7 @@ mod tests {
 
     #[rstest]
     fn shading_an_intersection_from_the_inside(mut default_world: World) {
-        default_world.set_light_source(PointLight::new(Vector4::point(0.0, 0.25, 0.0), Color::white()));
+        default_world.light_source = PointLight::new(Vector4::point(0.0, 0.25, 0.0), Color::white());
         let r = Ray::new(Vector4::point(0.0, 0.0, 0.0), Vector4::vector(0.0, 0.0, 1.0));
         let shape = &default_world.objects[1];
         let i = Intersection::new(0.5, shape);

@@ -10,7 +10,7 @@ use crate::shape::Shape;
 use crate::sphere::Sphere;
 use crate::transform::Transform;
 use crate::tuple::Tuple;
-use crate::world::World;
+use crate::world::WorldBuilder;
 
 mod camera;
 mod canvas;
@@ -73,13 +73,14 @@ fn main() -> Result<(), std::io::Error> {
     left_material.specular = 0.3;
     left.set_material(left_material);
 
-    let mut world = World::default();
-    world.add_object(floor);
-    world.add_object(left_wall);
-    world.add_object(right_wall);
-    world.add_object(middle);
-    world.add_object(right);
-    world.add_object(left);
+    let world = WorldBuilder::new()
+        .with_object(floor)
+        .with_object(left_wall)
+        .with_object(right_wall)
+        .with_object(middle)
+        .with_object(right)
+        .with_object(left)
+        .build();
 
     let mut camera = Camera::new(1000, 750, PI/3.0);
     camera.transform = Matrix4::view_transform(Vector4::point(0.0, 1.5, -5.0),
