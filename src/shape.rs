@@ -20,6 +20,7 @@ mod tests {
     use super::*;
     use crate::sphere::Sphere;
     use crate::transform::Transform;
+    use crate::material::MaterialBuilder;
 
     #[fixture]
     fn test_shape() -> impl Shape {
@@ -39,13 +40,14 @@ mod tests {
 
     #[rstest]
     fn the_default_material(test_shape: impl Shape) {
-        assert_that!(test_shape.get_material()).is_equal_to(Material::default());
+        assert_that!(test_shape.get_material()).is_equal_to(MaterialBuilder::new().build());
     }
 
     #[rstest]
     fn assigning_a_material(mut test_shape: impl Shape) {
-        let mut m = Material::default();
-        m.ambient = 1.0;
+        let m = MaterialBuilder::new()
+            .with_ambient(1.0)
+            .build();
 
         test_shape.set_material(m.clone());
 

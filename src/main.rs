@@ -5,7 +5,7 @@ use nalgebra::{Matrix4, Vector4};
 
 use crate::camera::Camera;
 use crate::color::Color;
-use crate::material::Material;
+use crate::material::MaterialBuilder;
 use crate::shape::Shape;
 use crate::sphere::Sphere;
 use crate::transform::Transform;
@@ -27,9 +27,10 @@ mod tuple;
 mod world;
 
 fn main() -> Result<(), std::io::Error> {
-    let mut wall_material = Material::default();
-    wall_material.color = Color::new(1.0, 0.9, 0.9);
-    wall_material.specular = 0.0;
+    let wall_material = MaterialBuilder::new()
+        .with_color(Color::new(1.0, 0.9, 0.9))
+        .with_specular(0.0)
+        .build();
 
     let mut floor = Sphere::default();
     floor.set_transform(Matrix4::scaling(10.0, 0.01, 10.0));
@@ -51,26 +52,29 @@ fn main() -> Result<(), std::io::Error> {
 
     let mut middle = Sphere::default();
     middle.set_transform(Matrix4::translation(-0.5, 1.0, 0.5));
-    let mut middle_material = Material::default();
-    middle_material.color = Color::new(0.1, 1.0, 0.5);
-    middle_material.diffuse = 0.7;
-    middle_material.specular = 0.3;
+    let middle_material = MaterialBuilder::new()
+        .with_color(Color::new(0.1, 1.0, 0.5))
+        .with_diffuse(0.7)
+        .with_specular(0.3)
+        .build();
     middle.set_material(middle_material);
 
     let mut right = Sphere::default();
     right.set_transform(Matrix4::translation(1.5, 0.5, -0.5) * Matrix4::scaling(0.5, 0.5, 0.5));
-    let mut right_material = Material::default();
-    right_material.color = Color::new(0.5, 1.0, 0.1);
-    right_material.diffuse = 0.7;
-    right_material.specular = 0.3;
+    let right_material = MaterialBuilder::new()
+        .with_color(Color::new(0.5, 1.0, 0.1))
+        .with_diffuse(0.7)
+        .with_specular(0.3)
+        .build();
     right.set_material(right_material);
 
     let mut left = Sphere::default();
     left.set_transform(Matrix4::translation(-1.5, 0.33, -0.75) * Matrix4::scaling(0.33, 0.33, 0.33));
-    let mut left_material = Material::default();
-    left_material.color = Color::new(1.0, 0.8, 0.1);
-    left_material.diffuse = 0.7;
-    left_material.specular = 0.3;
+    let left_material = MaterialBuilder::new()
+        .with_color(Color::new(1.0, 0.8, 0.1))
+        .with_diffuse(0.7)
+        .with_specular(0.3)
+        .build();
     left.set_material(left_material);
 
     let world = WorldBuilder::new()

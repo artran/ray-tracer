@@ -1,7 +1,7 @@
 use nalgebra::{Matrix4, Vector4};
 
 use crate::intersection::{Intersection, Intersections};
-use crate::material::Material;
+use crate::material::{Material, MaterialBuilder};
 use crate::ray::Ray;
 use crate::shape::Shape;
 use crate::tuple::Tuple;
@@ -74,7 +74,7 @@ impl Default for Sphere {
         Self {
             // The inverse of the identity is the identity
             inv_transform: Matrix4::identity(),
-            material: Material::default()
+            material: MaterialBuilder::new().build(),
         }
     }
 }
@@ -88,9 +88,7 @@ mod tests {
     use std::f32::consts::{FRAC_1_SQRT_2, PI};
 
     use nalgebra::Matrix4;
-    use spectral::assert_that;
-    use spectral::numeric::FloatAssertions;
-    use spectral::option::OptionAssertions;
+    use spectral::prelude::*;
 
     use crate::transform::Transform;
 
@@ -287,14 +285,15 @@ mod tests {
     fn a_sphere_has_a_default_material() {
         let s = Sphere::default();
         let m = s.material;
-        assert_that!(m).is_equal_to(Material::default());
+        assert_that!(m).is_equal_to(MaterialBuilder::new().build());
     }
 
     #[test]
     fn a_sphere_may_be_assigned_a_material() {
         let mut s = Sphere::default();
-        let mut m = Material::default();
-        m.ambient = 1.0;
+        let m = MaterialBuilder::new()
+            .with_ambient(1.0)
+            .build();
 
         s.material = m.clone();
 

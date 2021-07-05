@@ -73,15 +73,6 @@ impl World {
     }
 }
 
-impl Default for World {
-    fn default() -> Self {
-        Self {
-            objects: Vec::new(),
-            light_source: PointLight::default(),
-        }
-    }
-}
-
 impl WorldBuilder {
     pub fn new() -> Self {
         Self {
@@ -126,14 +117,16 @@ mod tests {
     use crate::tuple::Tuple;
 
     use super::*;
+    use crate::material::MaterialBuilder;
 
     #[fixture]
     fn default_world() -> World {
+        let material = MaterialBuilder::new()
+            .with_color(Color::new(0.8, 1.0, 0.6))
+            .with_diffuse(0.7)
+            .with_specular(0.2)
+            .build();
         let mut s1 = Sphere::default();
-        let mut material = s1.get_material();
-        material.color = Color::new(0.8, 1.0, 0.6);
-        material.diffuse = 0.7;
-        material.specular = 0.2;
         s1.set_material(material);
 
         let mut s2 = Sphere::default();
@@ -146,7 +139,7 @@ mod tests {
 
     #[rstest]
     fn creating_a_world() {
-        let w = World::default();
+        let w = WorldBuilder::new().build();
         let expected_light = PointLight::new(Vector4::point(-10.0, 10.0, -10.0), Color::white());
 
         assert_that!(w.objects).is_empty();
@@ -218,26 +211,36 @@ mod tests {
         assert_that!(c.b).is_close_to(expected.b, 0.0001);
     }
 
-    #[rstest] // fixme: default_world must me immutable!
-    fn the_color_with_an_intersection_behind_the_ray(mut default_world: World) {
-        // todo: builders for Material & Sphere
-        let mut outer = default_world.objects[0].clone();
-        let mut inner = default_world.objects[1].clone();
-        let expected_color = inner.get_material().color;
-        let mut outer_material = outer.get_material();
-        outer_material.ambient = 1.0;
+    #[rstest]
+    fn the_color_with_an_intersection_behind_the_ray() {
+        // Arrange
+        let outer_material = MaterialBuilder::new()
+            .with_color(Color::new(0.8, 1.0, 0.6))
+            .with_diffuse(0.7)
+            .with_specular(0.2)
+            .with_ambient(1.0)
+            .build();
+        let inner_material = MaterialBuilder::new()
+            .with_ambient(1.0)
+            .build();
+
+        // todo: builder for Sphere
+        let mut outer = Sphere::default();
         outer.set_material(outer_material);
-        let mut inner_material = inner.get_material();
-        inner_material.ambient = 1.0;
+
+        let mut inner = Sphere::default();
+        inner.set_transform(Matrix4::scaling(0.5, 0.5, 0.5));
         inner.set_material(inner_material);
-        default_world.objects.clear();
-        default_world.objects.push(outer);
-        default_world.objects.push(inner);
+
+        let world = WorldBuilder::new()
+            .with_object(outer)
+            .with_object(inner).build();
+
+        // Act
         let r = Ray::new(Vector4::point(0.0, 0.0, 0.75), Vector4::vector(0.0, 0.0, -1.0));
 
-        let c = default_world.color_at(&r);
-
-        assert_that!(c).is_equal_to(expected_color);
+        // Assert
+        assert_that!(world.color_at(&r)).is_equal_to(Color::white());
     }
 
     #[rstest]
@@ -251,7 +254,7 @@ mod tests {
 
     #[test]
     fn shade_hit_is_given_an_intersection_in_shadow() {
-        let mut w = World::default();
+        let mut w = WorldBuilder::new().build();
         w.light_source = PointLight::new(Vector4::point(0.0, 0.0, -10.0), Color::white());
         let s1 = Sphere::default();
         let mut s2 = Sphere::default();

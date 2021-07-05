@@ -87,13 +87,13 @@ mod tests {
     use spectral::prelude::*;
 
     use crate::color::Color;
-    use crate::material::Material;
+    use crate::material::MaterialBuilder;
     use crate::shape::Shape;
     use crate::sphere::Sphere;
     use crate::transform::Transform;
+    use crate::world::WorldBuilder;
 
     use super::*;
-    use crate::world::WorldBuilder;
 
     fn vector_values_are_close(actual: Vector4<f32>, expected: Vector4<f32>, tolerance: f32) {
         for row in 0..4 {
@@ -162,10 +162,11 @@ mod tests {
     #[fixture]
     fn default_world() -> World {
         let mut s1 = Sphere::default();
-        let mut s1_material = Material::default();
-        s1_material.color = Color::new(0.8, 1.0, 0.6);
-        s1_material.diffuse = 0.7;
-        s1_material.specular = 0.2;
+        let s1_material = MaterialBuilder::new()
+            .with_color(Color::new(0.8, 1.0, 0.6))
+            .with_diffuse(0.7)
+            .with_specular(0.2)
+            .build();
         s1.set_material(s1_material);
 
         let mut s2 = Sphere::default();
