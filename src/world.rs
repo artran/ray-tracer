@@ -181,7 +181,7 @@ mod tests {
         assert_that!(c.b).is_close_to(expected.b, 0.0001);
     }
 
-    #[rstest]
+    #[rstest] // fixme: default_world must me immutable!
     fn shading_an_intersection_from_the_inside(mut default_world: World) {
         default_world.light_source = PointLight::new(Vector4::point(0.0, 0.25, 0.0), Color::white());
         let r = Ray::new(Vector4::point(0.0, 0.0, 0.0), Vector4::vector(0.0, 0.0, 1.0));
@@ -218,9 +218,9 @@ mod tests {
         assert_that!(c.b).is_close_to(expected.b, 0.0001);
     }
 
-    #[rstest]
+    #[rstest] // fixme: default_world must me immutable!
     fn the_color_with_an_intersection_behind_the_ray(mut default_world: World) {
-        // todo: builders for World & Sphere
+        // todo: builders for Material & Sphere
         let mut outer = default_world.objects[0].clone();
         let mut inner = default_world.objects[1].clone();
         let expected_color = inner.get_material().color;
