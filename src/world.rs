@@ -101,6 +101,15 @@ impl WorldBuilder {
     }
 }
 
+impl From<World> for WorldBuilder {
+    fn from(item: World) -> Self {
+        Self {
+            objects: item.objects,
+            light_source: item.light_source,
+        }
+    }
+}
+
 /* -------------------------------------------------------------------------------------------------
 Tests
 ------------------------------------------------------------------------------------------------- */
@@ -174,16 +183,19 @@ mod tests {
         assert_that!(c.b).is_close_to(expected.b, 0.0001);
     }
 
-    #[rstest] // fixme: default_world must me immutable!
-    fn shading_an_intersection_from_the_inside(mut default_world: World) {
-        default_world.light_source = PointLight::new(Vector4::point(0.0, 0.25, 0.0), Color::white());
+    #[rstest]
+    fn shading_an_intersection_from_the_inside(default_world: World) {
+        let light = PointLight::new(Vector4::point(0.0, 0.25, 0.0), Color::white());
+        let world = WorldBuilder::from(default_world)
+            .with_light_source(light)
+            .build();
         let r = Ray::new(Vector4::point(0.0, 0.0, 0.0), Vector4::vector(0.0, 0.0, 1.0));
-        let shape = &default_world.objects[1];
+        let shape = &world.objects[1];
         let i = Intersection::new(0.5, shape);
         let comps = i.prepare_computations(&r);
         let expected = Color::new(0.90498, 0.90498, 0.90498);
 
-        let c = default_world.shade_hit(comps);
+        let c = world.shade_hit(comps);
 
         assert_that!(c.r).is_close_to(expected.r, 0.0001);
         assert_that!(c.g).is_close_to(expected.g, 0.0001);
