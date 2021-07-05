@@ -8,7 +8,7 @@ use crate::world::World;
 pub struct Camera {
     hsize: usize,
     vsize: usize,
-    transform: Matrix4<f32>,  // todo: store inverse for efficiency
+    inv_transform: Matrix4<f32>,  // Note: storing inverse for efficiency
     pixel_size: f32,
     half_width: f32,
     half_height: f32,
@@ -39,7 +39,7 @@ impl Camera {
         Self {
             hsize,
             vsize,
-            transform,
+            inv_transform: transform.try_inverse().unwrap(),
             pixel_size,
             half_width,
             half_height,
@@ -59,9 +59,9 @@ impl Camera {
         // using the camera matrix, transform the canvas point and the origin,
         // and then compute the ray's direction vector.
         // (remember that the canvas is at z=-1)
-        let pixel = self.transform.try_inverse().unwrap() * Vector4::point(world_x, world_y, -1.0);
-        let origin = self.transform.try_inverse().unwrap() * Vector4::point(0.0, 0.0, 0.0);
-        let direction = (pixel - origin).normalize();
+        let pixel = &self.inv_transform * Vector4::point(world_x, world_y, -1.0);
+        let origin = &self.inv_transform * Vector4::point(0.0, 0.0, 0.0);
+        let direction = (pixel - &origin).normalize();
 
         Ray::new(origin, direction)
     }
@@ -156,7 +156,7 @@ mod tests {
 
         assert_that!(c.hsize).is_equal_to(160);
         assert_that!(c.vsize).is_equal_to(120);
-        assert_that!(c.transform).is_equal_to(Matrix4::identity());
+        assert_that!(c.inv_transform).is_equal_to(Matrix4::identity());
     }
 
     #[test]
