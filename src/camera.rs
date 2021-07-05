@@ -88,8 +88,7 @@ mod tests {
 
     use crate::color::Color;
     use crate::material::MaterialBuilder;
-    use crate::shape::Shape;
-    use crate::sphere::Sphere;
+    use crate::sphere::SphereBuilder;
     use crate::transform::Transform;
     use crate::world::WorldBuilder;
 
@@ -161,16 +160,18 @@ mod tests {
 
     #[fixture]
     fn default_world() -> World {
-        let mut s1 = Sphere::default();
         let s1_material = MaterialBuilder::new()
             .with_color(Color::new(0.8, 1.0, 0.6))
             .with_diffuse(0.7)
             .with_specular(0.2)
             .build();
-        s1.set_material(s1_material);
+        let s1 = SphereBuilder::new()
+            .with_material(s1_material)
+            .build();
 
-        let mut s2 = Sphere::default();
-        s2.set_transform(Matrix4::scaling(0.5, 0.5, 0.5));
+        let s2 = SphereBuilder::new()
+            .with_transform(Matrix4::scaling(0.5, 0.5, 0.5))
+            .build();
 
         WorldBuilder::new()
             .with_object(s1)

@@ -6,8 +6,7 @@ use nalgebra::{Matrix4, Vector4};
 use crate::camera::Camera;
 use crate::color::Color;
 use crate::material::MaterialBuilder;
-use crate::shape::Shape;
-use crate::sphere::Sphere;
+use crate::sphere::SphereBuilder;
 use crate::transform::Transform;
 use crate::tuple::Tuple;
 use crate::world::WorldBuilder;
@@ -32,50 +31,58 @@ fn main() -> Result<(), std::io::Error> {
         .with_specular(0.0)
         .build();
 
-    let mut floor = Sphere::default();
-    floor.set_transform(Matrix4::scaling(10.0, 0.01, 10.0));
-    floor.set_material(wall_material.clone());
+    let floor = SphereBuilder::new()
+        .with_transform(Matrix4::scaling(10.0, 0.01, 10.0))
+        .with_material(wall_material.clone())
+        .build();
 
-    let mut left_wall = Sphere::default();
-    left_wall.set_transform(Matrix4::translation(0.0, 0.0, 5.0)
-        * Matrix4::rotation_y(-PI/4.0)
-        * Matrix4::rotation_x(PI/2.0)
-        * Matrix4::scaling(10.0, 0.01, 10.0));
-    left_wall.set_material(wall_material.clone());
+    let left_wall = SphereBuilder::new()
+        .with_transform(Matrix4::translation(0.0, 0.0, 5.0)
+            * Matrix4::rotation_y(-PI/4.0)
+            * Matrix4::rotation_x(PI/2.0)
+            * Matrix4::scaling(10.0, 0.01, 10.0))
+        .with_material(wall_material.clone())
+        .build();
 
-    let mut right_wall = Sphere::default();
-    right_wall.set_transform(Matrix4::translation(0.0, 0.0, 5.0)
-        * Matrix4::rotation_y(PI/4.0)
-        * Matrix4::rotation_x(PI/2.0)
-        * Matrix4::scaling(10.0, 0.01, 10.0));
-    right_wall.set_material(wall_material.clone());
+    let right_wall = SphereBuilder::new()
+        .with_transform(Matrix4::translation(0.0, 0.0, 5.0)
+            * Matrix4::rotation_y(PI/4.0)
+            * Matrix4::rotation_x(PI/2.0)
+            * Matrix4::scaling(10.0, 0.01, 10.0))
+        .with_material(wall_material.clone())
+        .build();
 
-    let mut middle = Sphere::default();
-    middle.set_transform(Matrix4::translation(-0.5, 1.0, 0.5));
     let middle_material = MaterialBuilder::new()
         .with_color(Color::new(0.1, 1.0, 0.5))
         .with_diffuse(0.7)
         .with_specular(0.3)
         .build();
-    middle.set_material(middle_material);
+    let middle = SphereBuilder::new()
+        .with_transform(Matrix4::translation(-0.5, 1.0, 0.5))
+        .with_material(middle_material)
+        .build();
 
-    let mut right = Sphere::default();
-    right.set_transform(Matrix4::translation(1.5, 0.5, -0.5) * Matrix4::scaling(0.5, 0.5, 0.5));
     let right_material = MaterialBuilder::new()
         .with_color(Color::new(0.5, 1.0, 0.1))
         .with_diffuse(0.7)
         .with_specular(0.3)
         .build();
-    right.set_material(right_material);
+    let right = SphereBuilder::new()
+        .with_transform(Matrix4::translation(1.5, 0.5, -0.5)
+            * Matrix4::scaling(0.5, 0.5, 0.5))
+        .with_material(right_material)
+        .build();
 
-    let mut left = Sphere::default();
-    left.set_transform(Matrix4::translation(-1.5, 0.33, -0.75) * Matrix4::scaling(0.33, 0.33, 0.33));
     let left_material = MaterialBuilder::new()
         .with_color(Color::new(1.0, 0.8, 0.1))
         .with_diffuse(0.7)
         .with_specular(0.3)
         .build();
-    left.set_material(left_material);
+    let left = SphereBuilder::new()
+        .with_transform(Matrix4::translation(-1.5, 0.33, -0.75)
+            * Matrix4::scaling(0.33, 0.33, 0.33))
+        .with_material(left_material)
+        .build();
 
     let world = WorldBuilder::new()
         .with_object(floor)

@@ -4,7 +4,6 @@ use crate::color::Color;
 use crate::intersection::{Computations, Intersections};
 use crate::light::PointLight;
 use crate::ray::Ray;
-use crate::shape::Shape;
 use crate::sphere::Sphere;
 
 pub struct World {
@@ -121,12 +120,12 @@ mod tests {
     use spectral::prelude::*;
 
     use crate::intersection::Intersection;
-    use crate::shape::Shape;
+    use crate::material::MaterialBuilder;
     use crate::transform::Transform;
     use crate::tuple::Tuple;
 
     use super::*;
-    use crate::material::MaterialBuilder;
+    use crate::sphere::SphereBuilder;
 
     #[fixture]
     fn default_world() -> World {
@@ -135,11 +134,13 @@ mod tests {
             .with_diffuse(0.7)
             .with_specular(0.2)
             .build();
-        let mut s1 = Sphere::default();
-        s1.set_material(material);
+        let s1 = SphereBuilder::new()
+            .with_material(material)
+            .build();
 
-        let mut s2 = Sphere::default();
-        s2.set_transform(Matrix4::scaling(0.5, 0.5, 0.5));
+        let s2 = SphereBuilder::new()
+            .with_transform(Matrix4::scaling(0.5, 0.5, 0.5))
+            .build();
 
         WorldBuilder::new()
             .with_object(s1)
@@ -236,13 +237,14 @@ mod tests {
             .with_ambient(1.0)
             .build();
 
-        // todo: builder for Sphere
-        let mut outer = Sphere::default();
-        outer.set_material(outer_material);
+        let outer = SphereBuilder::new()
+            .with_material(outer_material)
+            .build();
 
-        let mut inner = Sphere::default();
-        inner.set_transform(Matrix4::scaling(0.5, 0.5, 0.5));
-        inner.set_material(inner_material);
+        let inner = SphereBuilder::new()
+            .with_transform(Matrix4::scaling(0.5, 0.5, 0.5))
+            .with_material(inner_material)
+            .build();
 
         let world = WorldBuilder::new()
             .with_object(outer)
@@ -268,9 +270,10 @@ mod tests {
     fn shade_hit_is_given_an_intersection_in_shadow() {
         let mut w = WorldBuilder::new().build();
         w.light_source = PointLight::new(Vector4::point(0.0, 0.0, -10.0), Color::white());
-        let s1 = Sphere::default();
-        let mut s2 = Sphere::default();
-        s2.set_transform(Matrix4::translation(0.0, 0.0, 10.0));
+        let s1 = SphereBuilder::new().build();
+        let s2 = SphereBuilder::new()
+            .with_transform(Matrix4::translation(0.0, 0.0, 10.0))
+            .build();
         w.objects.push(s1);
         w.objects.push(s2.clone());
         let r = Ray::new(Vector4::point(0.0, 0.0, 5.0), Vector4::vector(0.0, 0.0, 1.0));

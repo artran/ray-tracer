@@ -3,14 +3,17 @@ use nalgebra::{Matrix4, Vector4};
 use crate::intersection::{Intersection, Intersections};
 use crate::material::{Material, MaterialBuilder};
 use crate::ray::Ray;
-use crate::shape::Shape;
 use crate::tuple::Tuple;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Sphere {
     // Note: we store the inverse of the transform as an optimisation.
     inv_transform: Matrix4<f32>,
+    material: Material,
+}
 
+pub struct SphereBuilder {
+    transform: Matrix4<f32>,
     material: Material,
 }
 
@@ -48,33 +51,56 @@ impl Sphere {
 
         (world_normal).normalize()
     }
-}
 
-impl Shape for Sphere {
-    fn set_transform(&mut self, transform: Matrix4<f32>) {
-        // As an optimisation we invert the transform before storing it.
-        self.inv_transform = transform.try_inverse().unwrap();
-    }
-
-    fn set_material(&mut self, material: Material) {
-        self.material = material;
-    }
-
-    fn get_transform(&self) -> Matrix4<f32> {
-        self.inv_transform.try_inverse().unwrap()
-    }
-
-    fn get_material(&self) -> Material {
+    // fixme Law of Demeter violation
+    pub fn get_material(&self) -> Material {
         self.material.clone()
     }
 }
 
-impl Default for Sphere {
-    fn default() -> Self {
+// impl Shape for Sphere {
+//     fn set_transform(&mut self, transform: Matrix4<f32>) {
+//         // As an optimisation we invert the transform before storing it.
+//         self.inv_transform = transform.try_inverse().unwrap();
+//     }
+//
+//     fn set_material(&mut self, material: Material) {
+//         self.material = material;
+//     }
+//
+//     fn get_transform(&self) -> Matrix4<f32> {
+//         self.inv_transform.try_inverse().unwrap()
+//     }
+//
+//     fn get_material(&self) -> Material {
+//         self.material.clone()
+//     }
+// }
+
+impl SphereBuilder {
+    pub fn new() -> Self {
         Self {
-            // The inverse of the identity is the identity
-            inv_transform: Matrix4::identity(),
+            transform: Matrix4::identity(),
             material: MaterialBuilder::new().build(),
+        }
+    }
+
+    pub fn with_transform(mut self, transform: Matrix4<f32>) -> Self {
+        self.transform = transform;
+
+        self
+    }
+
+    pub fn with_material(mut self, material: Material) -> Self {
+        self.material = material;
+
+        self
+    }
+
+    pub fn build(self) -> Sphere {
+        Sphere {
+            inv_transform: self.transform.try_inverse().unwrap(),
+            material: self.material,
         }
     }
 }
@@ -97,7 +123,7 @@ mod tests {
     #[test]
     fn a_ray_intersects_a_sphere_at_two_points() {
         let r = Ray::new(Vector4::point(0.0, 0.0, -5.0), Vector4::vector(0.0, 0.0, 1.0));
-        let s = Sphere::default();
+        let s = SphereBuilder::new().build();
 
         let xs = s.intersect(&r).unwrap();
 
@@ -109,7 +135,7 @@ mod tests {
     #[test]
     fn a_ray_intersects_a_sphere_at_a_tangent() {
         let r = Ray::new(Vector4::point(0.0, 1.0, -5.0), Vector4::vector(0.0, 0.0, 1.0));
-        let s = Sphere::default();
+        let s = SphereBuilder::new().build();
 
         let xs = s.intersect(&r).unwrap();
 
@@ -121,7 +147,7 @@ mod tests {
     #[test]
     fn a_ray_misses_a_sphere() {
         let r = Ray::new(Vector4::point(0.0, 2.0, -5.0), Vector4::vector(0.0, 0.0, 1.0));
-        let s = Sphere::default();
+        let s = SphereBuilder::new().build();
 
         let xs = s.intersect(&r);
 
@@ -131,7 +157,7 @@ mod tests {
     #[test]
     fn a_ray_originates_inside_a_sphere() {
         let r = Ray::new(Vector4::point(0.0, 0.0, 0.0), Vector4::vector(0.0, 0.0, 1.0));
-        let s = Sphere::default();
+        let s = SphereBuilder::new().build();
 
         let xs = s.intersect(&r).unwrap();
 
@@ -143,7 +169,7 @@ mod tests {
     #[test]
     fn a_sphere_is_behind_a_ray() {
         let r = Ray::new(Vector4::point(0.0, 0.0, 5.0), Vector4::vector(0.0, 0.0, 1.0));
-        let s = Sphere::default();
+        let s = SphereBuilder::new().build();
 
         let xs = s.intersect(&r).unwrap();
 
@@ -155,7 +181,7 @@ mod tests {
     #[test]
     fn intersect_sets_the_object_on_the_intersection() {
         let r = Ray::new(Vector4::point(0.0, 0.0, -5.0), Vector4::vector(0.0, 0.0, 1.0));
-        let s = Sphere::default();
+        let s = SphereBuilder::new().build();
 
         let xs = s.intersect(&r).unwrap();
 
@@ -166,26 +192,33 @@ mod tests {
 
     #[test]
     fn a_spheres_default_transformation() {
-        let s = Sphere::default();
+        let s = SphereBuilder::new().build();
 
         assert_that!(s.inv_transform).is_equal_to(Matrix4::identity());
     }
 
     #[test]
     fn changing_a_spheres_transformation() {
-        let mut s = Sphere::default();
         let t = Matrix4::translation(2.0, 3.0, 4.0);
+        let expected = Matrix4::new(
+            1.0, 0.0, 0.0, -2.0,
+            0.0, 1.0, 0.0, -3.0,
+            0.0, 0.0, 1.0, -4.0,
+            0.0, 0.0, 0.0, 1.0,
+        );
+        let s = SphereBuilder::new()
+            .with_transform(t.clone())
+            .build();
 
-        s.inv_transform = t;
-
-        assert_that!(s.inv_transform).is_equal_to(t);
+        assert_that!(s.inv_transform).is_equal_to(expected);
     }
 
     #[test]
     fn intersecting_a_scaled_sphere_with_a_ray() {
         let r = Ray::new(Vector4::point(0.0, 0.0, -5.0), Vector4::vector(0.0, 0.0, 1.0));
-        let mut s = Sphere::default();
-        s.set_transform(Matrix4::scaling(2.0, 2.0, 2.0));
+        let s = SphereBuilder::new()
+            .with_transform(Matrix4::scaling(2.0, 2.0, 2.0))
+            .build();
 
         let xs = s.intersect(&r).unwrap();
 
@@ -197,8 +230,9 @@ mod tests {
     #[test]
     fn intersecting_a_translated_sphere_with_a_ray() {
         let r = Ray::new(Vector4::point(0.0, 0.0, -5.0), Vector4::vector(0.0, 0.0, 1.0));
-        let mut s = Sphere::default();
-        s.set_transform(Matrix4::translation(5.0, 0.0, 0.0));
+        let s = SphereBuilder::new()
+            .with_transform(Matrix4::translation(5.0, 0.0, 0.0))
+            .build();
 
         let xs = s.intersect(&r);
 
@@ -207,28 +241,28 @@ mod tests {
 
     #[test]
     fn the_normal_on_a_sphere_at_a_point_on_the_x_axis() {
-        let s = Sphere::default();
+        let s = SphereBuilder::new().build();
         let n = s.normal_at(&Vector4::point(1.0, 0.0, 0.0));
         assert_that!(n).is_equal_to(Vector4::vector(1.0, 0.0, 0.0));
     }
 
     #[test]
     fn the_normal_on_a_sphere_at_a_point_on_the_y_axis() {
-        let s = Sphere::default();
+        let s = SphereBuilder::new().build();
         let n = s.normal_at(&Vector4::point(0.0, 1.0, 0.0));
         assert_that!(n).is_equal_to(Vector4::vector(0.0, 1.0, 0.0));
     }
 
     #[test]
     fn the_normal_on_a_sphere_at_a_point_on_the_z_axis() {
-        let s = Sphere::default();
+        let s = SphereBuilder::new().build();
         let n = s.normal_at(&Vector4::point(0.0, 0.0, 1.0));
         assert_that!(n).is_equal_to(Vector4::vector(0.0, 0.0, 1.0));
     }
 
     #[test]
     fn the_normal_on_a_sphere_at_a_non_axial_point() {
-        let s = Sphere::default();
+        let s = SphereBuilder::new().build();
 
         let n = s.normal_at(&Vector4::point(3.0_f32.sqrt()/3.0, 3.0_f32.sqrt()/3.0, 3.0_f32.sqrt()/3.0));
 
@@ -241,7 +275,7 @@ mod tests {
 
     #[test]
     fn the_normal_is_a_normalized_vector() {
-        let s = Sphere::default();
+        let s = SphereBuilder::new().build();
 
         let n = s.normal_at(&Vector4::point(3.0_f32.sqrt()/3.0, 3.0_f32.sqrt()/3.0, 3.0_f32.sqrt()/3.0));
 
@@ -254,8 +288,9 @@ mod tests {
 
     #[test]
     fn computing_the_normal_on_a_translated_sphere() {
-        let mut s = Sphere::default();
-        s.set_transform(Matrix4::translation(0.0, 1.0, 0.0));
+        let s = SphereBuilder::new()
+            .with_transform(Matrix4::translation(0.0, 1.0, 0.0))
+            .build();
 
         let n = s.normal_at(&Vector4::point(0.0, 1.70711, -FRAC_1_SQRT_2));
 
@@ -268,9 +303,10 @@ mod tests {
 
     #[test]
     fn computing_the_normal_on_a_transformed_sphere() {
-        let mut s = Sphere::default();
-        let m = Matrix4::scaling(1.0, 0.5, 1.0) * Matrix4::rotation_z(PI/5.0);
-        s.set_transform(m);
+        let t = Matrix4::scaling(1.0, 0.5, 1.0) * Matrix4::rotation_z(PI/5.0);
+        let s = SphereBuilder::new()
+            .with_transform(t)
+            .build();
 
         let n = s.normal_at(&Vector4::point(0.0, 2.0_f32.sqrt()/2.0, -2.0_f32.sqrt()/2.0));
 
@@ -283,19 +319,19 @@ mod tests {
 
     #[test]
     fn a_sphere_has_a_default_material() {
-        let s = Sphere::default();
+        let s = SphereBuilder::new().build();
         let m = s.material;
         assert_that!(m).is_equal_to(MaterialBuilder::new().build());
     }
 
     #[test]
     fn a_sphere_may_be_assigned_a_material() {
-        let mut s = Sphere::default();
         let m = MaterialBuilder::new()
             .with_ambient(1.0)
             .build();
-
-        s.material = m.clone();
+        let s = SphereBuilder::new()
+            .with_material(m.clone())
+            .build();
 
         assert_that!(s.material).is_equal_to(m);
     }
