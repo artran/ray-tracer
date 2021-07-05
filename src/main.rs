@@ -3,7 +3,7 @@ use std::fs::File;
 
 use nalgebra::{Matrix4, Vector4};
 
-use crate::camera::Camera;
+use crate::camera::CameraBuilder;
 use crate::color::Color;
 use crate::material::MaterialBuilder;
 use crate::sphere::SphereBuilder;
@@ -93,10 +93,14 @@ fn main() -> Result<(), std::io::Error> {
         .with_object(left)
         .build();
 
-    let mut camera = Camera::new(1000, 750, PI/3.0);
-    camera.transform = Matrix4::view_transform(Vector4::point(0.0, 1.5, -5.0),
+    let camera = CameraBuilder::new()
+        .with_hsize(1000)
+        .with_vsize(750)
+        .with_field_of_view(PI/3.0)
+        .with_transform(Matrix4::view_transform(Vector4::point(0.0, 1.5, -5.0),
                                       Vector4::point(0.0, 1.0, 0.0),
-                                      Vector4::vector(0.0, 1.0, 0.0));
+                                      Vector4::vector(0.0, 1.0, 0.0)))
+        .build();
 
     let canvas = camera.render(&world);
 

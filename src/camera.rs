@@ -8,14 +8,21 @@ use crate::world::World;
 pub struct Camera {
     hsize: usize,
     vsize: usize,
-    pub transform: Matrix4<f32>,
+    transform: Matrix4<f32>,  // todo: store inverse for efficiency
     pixel_size: f32,
     half_width: f32,
     half_height: f32,
 }
 
+pub struct CameraBuilder {
+    hsize: usize,
+    vsize: usize,
+    field_of_view: f32,
+    transform: Matrix4<f32>,
+}
+
 impl Camera {
-    pub fn new(hsize: usize, vsize: usize, field_of_view: f32) -> Self {
+    fn new(hsize: usize, vsize: usize, field_of_view: f32, transform: Matrix4<f32>) -> Self {
         let half_view = (field_of_view / 2.0).tan();
         let aspect = hsize as f32 / vsize as f32;
         let half_width: f32;
@@ -32,7 +39,7 @@ impl Camera {
         Self {
             hsize,
             vsize,
-            transform: Matrix4::identity(),
+            transform,
             pixel_size,
             half_width,
             half_height,
@@ -74,6 +81,41 @@ impl Camera {
     }
 }
 
+impl CameraBuilder {
+    pub fn new() -> Self {
+        Self {
+            hsize: 0,
+            vsize: 0,
+            field_of_view: 0.0,
+            transform: Matrix4::identity(),
+        }
+    }
+
+    pub fn with_hsize(mut self, hsize: usize) -> Self {
+        self.hsize = hsize;
+        self
+    }
+
+    pub fn with_vsize(mut self, vsize: usize) -> Self {
+        self.vsize = vsize;
+        self
+    }
+
+    pub fn with_field_of_view(mut self, field_of_view: f32) -> Self {
+        self.field_of_view = field_of_view;
+        self
+    }
+
+    pub fn with_transform(mut self, transform: Matrix4<f32>) -> Self {
+        self.transform = transform;
+        self
+    }
+
+    pub fn build(self) -> Camera {
+        Camera::new(self.hsize, self.vsize, self.field_of_view, self.transform)
+    }
+}
+
 /* -------------------------------------------------------------------------------------------------
 Tests
 ------------------------------------------------------------------------------------------------- */
@@ -106,7 +148,11 @@ mod tests {
         let vsize: usize = 120;
         let field_of_view = PI / 2.0;
 
-        let c = Camera::new(hsize, vsize, field_of_view);
+        let c = CameraBuilder::new()
+            .with_hsize(hsize)
+            .with_vsize(vsize)
+            .with_field_of_view(field_of_view)
+            .build();
 
         assert_that!(c.hsize).is_equal_to(160);
         assert_that!(c.vsize).is_equal_to(120);
@@ -115,21 +161,33 @@ mod tests {
 
     #[test]
     fn the_pixel_size_for_a_horizontal_canvas() {
-        let c = Camera::new(200, 125, PI / 2.0);
+        let c = CameraBuilder::new()
+            .with_hsize(200)
+            .with_vsize(125)
+            .with_field_of_view(PI / 2.0)
+            .build();
 
         assert_that!(c.pixel_size).is_equal_to(0.01);
     }
 
     #[test]
     fn the_pixel_size_for_a_vertical_canvas() {
-        let c = Camera::new(125, 200, PI / 2.0);
+        let c = CameraBuilder::new()
+            .with_hsize(125)
+            .with_vsize(200)
+            .with_field_of_view(PI / 2.0)
+            .build();
 
         assert_that!(c.pixel_size).is_equal_to(0.01);
     }
 
     #[test]
     fn constructing_a_ray_through_the_center_of_the_canvas() {
-        let c = Camera::new(201, 101, PI / 2.0);
+        let c = CameraBuilder::new()
+            .with_hsize(201)
+            .with_vsize(101)
+            .with_field_of_view(PI / 2.0)
+            .build();
 
         let r = c.ray_for_pixel(100, 50);
 
@@ -139,7 +197,11 @@ mod tests {
 
     #[test]
     fn constructing_a_ray_through_a_corner_of_the_canvas() {
-        let c = Camera::new(201, 101, PI / 2.0);
+        let c = CameraBuilder::new()
+            .with_hsize(201)
+            .with_vsize(101)
+            .with_field_of_view(PI / 2.0)
+            .build();
 
         let r = c.ray_for_pixel(0, 0);
 
@@ -149,8 +211,12 @@ mod tests {
 
     #[test]
     fn constructing_a_ray_when_the_camera_is_transformed() {
-        let mut c = Camera::new(201, 101, PI / 2.0);
-        c.transform = Matrix4::rotation_y(PI / 4.0) * Matrix4::translation(0.0, -2.0, 5.0);
+        let c = CameraBuilder::new()
+            .with_hsize(201)
+            .with_vsize(101)
+            .with_field_of_view(PI / 2.0)
+            .with_transform(Matrix4::rotation_y(PI / 4.0) * Matrix4::translation(0.0, -2.0, 5.0))
+            .build();
 
         let r = c.ray_for_pixel(100, 50);
 
@@ -181,11 +247,15 @@ mod tests {
 
     #[rstest]
     fn rendering_a_world_with_a_camera(default_world: World) {
-        let mut c = Camera::new(11, 11, PI / 2.0);
         let from = Vector4::point(0.0, 0.0, -5.0);
         let to = Vector4::point(0.0, 0.0, 0.0);
         let up = Vector4::vector(0.0, 1.0, 0.0);
-        c.transform = Matrix4::view_transform(from, to, up);
+        let c = CameraBuilder::new()
+            .with_hsize(11)
+            .with_vsize(11)
+            .with_field_of_view(PI / 2.0)
+            .with_transform(Matrix4::view_transform(from, to, up))
+            .build();
 
         let image = c.render(&default_world);
 
