@@ -220,7 +220,7 @@ mod tests {
 
         let r = c.ray_for_pixel(100, 50);
 
-        assert_that!(r.origin).is_equal_to(Vector4::point(0.0, 2.0, -5.0));
+        vector_values_are_close(r.origin, Vector4::point(0.0, 2.0, -5.0), 0.0001);
         vector_values_are_close(r.direction, Vector4::vector(2.0_f32.sqrt() / 2.0, 0.0, -2.0_f32.sqrt() / 2.0), 0.0001);
     }
 

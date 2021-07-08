@@ -5,14 +5,15 @@ use crate::intersection::{Computations, Intersections};
 use crate::light::PointLight;
 use crate::ray::Ray;
 use crate::sphere::Sphere;
+use std::rc::Rc;
 
 pub struct World {
-    objects: Vec<Sphere>,
+    objects: Vec<Rc<Sphere>>,
     light_source: PointLight,
 }
 
 pub struct WorldBuilder {
-    objects: Vec<Sphere>,
+    objects: Vec<Rc<Sphere>>,
     light_source: PointLight,
 }
 
@@ -87,7 +88,7 @@ impl WorldBuilder {
     }
 
     pub fn with_object(mut self, object: Sphere) -> Self {
-        self.objects.push(object);
+        self.objects.push(Rc::new(object));
 
         self
     }
@@ -274,8 +275,8 @@ mod tests {
         let s2 = SphereBuilder::new()
             .with_transform(Matrix4::translation(0.0, 0.0, 10.0))
             .build();
-        w.objects.push(s1);
-        w.objects.push(s2.clone());
+        w.objects.push(Rc::new(s1));
+        w.objects.push(Rc::new(s2.clone()));
         let r = Ray::new(Vector4::point(0.0, 0.0, 5.0), Vector4::vector(0.0, 0.0, 1.0));
         let i = Intersection::new(4.0, &s2);
         let comps = i.prepare_computations(&r);
