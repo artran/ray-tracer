@@ -17,22 +17,17 @@ pub struct WorldBuilder {
 }
 
 impl World {
-    pub fn intersect(&self, ray: &Ray) -> Option<Intersections> {
+    pub fn intersect(&self, ray: &Ray) -> Intersections {
         let mut found: Intersections = Intersections::default();
 
         for o in self.objects.iter() {
-            if let Some(intersections) = o.intersect(ray) {
-                for intersection in intersections.into_iter() {
-                    found.push(intersection);
-                }
+            let intersections = o.intersect(ray);
+            for intersection in intersections.into_iter() {
+                found.push(intersection);
             }
         }
 
-        if found.len() == 0 {
-            return None;
-        }
-
-        Some(found)
+        found
     }
 
     pub fn shade_hit(&self, comps: Computations) -> Color {
@@ -46,11 +41,10 @@ impl World {
     }
 
     pub fn color_at(&self, ray: &Ray) -> Color {
-        if let Some(intersections) = self.intersect(ray) {
-            if let Some(hit) = intersections.hit() {
-                let comps = hit.prepare_computations(ray);
-                return self.shade_hit(comps);
-            }
+        let intersections = self.intersect(ray);
+        if let Some(hit) = intersections.hit() {
+            let comps = hit.prepare_computations(ray);
+            return self.shade_hit(comps);
         }
 
         Color::black()
@@ -62,10 +56,9 @@ impl World {
         let direction = v.normalize();
 
         let r = Ray::new(point.clone(), direction);
-        if let Some(intersections) = self.intersect(&r) {
-            if let Some(h) = intersections.hit() {
-                return h.t < distance;
-            }
+        let intersections = self.intersect(&r);
+        if let Some(h) = intersections.hit() {
+            return h.t < distance;
         }
 
         false
@@ -160,7 +153,7 @@ mod tests {
     fn intersect_a_world_with_a_ray(default_world: World) {
         let r = Ray::new(Vector4::point(0.0, 0.0, -5.0), Vector4::vector(0.0, 0.0, 1.0));
 
-        let xs = default_world.intersect(&r).unwrap();
+        let xs = default_world.intersect(&r);
 
         assert_that!(xs.len()).is_equal_to(4);
         assert_that!(xs[0].t).is_equal_to(4.0);
