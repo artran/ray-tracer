@@ -1,6 +1,8 @@
 use nalgebra::{Matrix4, Vector4};
 
+use crate::color::Color;
 use crate::intersection::{Intersection, Intersections};
+use crate::light::PointLight;
 use crate::material::{Material, MaterialBuilder};
 use crate::ray::Ray;
 use crate::tuple::Tuple;
@@ -52,30 +54,10 @@ impl Sphere {
         (world_normal).normalize()
     }
 
-    // fixme Law of Demeter violation
-    pub fn get_material(&self) -> Material {
-        self.material.clone()
+    pub fn lighting(&self, light: &PointLight, point: Vector4<f32>, eye_vector: Vector4<f32>, normal_vector: Vector4<f32>, in_shadow: bool) -> Color {
+        self.material.lighting(light, point, eye_vector, normal_vector, in_shadow)
     }
 }
-
-// impl Shape for Sphere {
-//     fn set_transform(&mut self, transform: Matrix4<f32>) {
-//         // As an optimisation we invert the transform before storing it.
-//         self.inv_transform = transform.try_inverse().unwrap();
-//     }
-//
-//     fn set_material(&mut self, material: Material) {
-//         self.material = material;
-//     }
-//
-//     fn get_transform(&self) -> Matrix4<f32> {
-//         self.inv_transform.try_inverse().unwrap()
-//     }
-//
-//     fn get_material(&self) -> Material {
-//         self.material.clone()
-//     }
-// }
 
 impl SphereBuilder {
     pub fn new() -> Self {

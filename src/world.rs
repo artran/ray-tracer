@@ -36,7 +36,7 @@ impl World {
     }
 
     pub fn shade_hit(&self, comps: Computations) -> Color {
-        comps.object.get_material().lighting(
+        comps.object.lighting(
             &self.light_source,
             comps.point,
             comps.eye_vector,
@@ -121,11 +121,11 @@ mod tests {
 
     use crate::intersection::Intersection;
     use crate::material::MaterialBuilder;
+    use crate::sphere::SphereBuilder;
     use crate::transform::Transform;
     use crate::tuple::Tuple;
 
     use super::*;
-    use crate::sphere::SphereBuilder;
 
     #[fixture]
     fn default_world() -> World {

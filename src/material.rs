@@ -22,7 +22,7 @@ pub struct MaterialBuilder {
 }
 
 impl Material {
-    pub fn lighting(&self, light: &PointLight, point: Vector4<f32>, eye_vector: Vector4<f32>, normal_vector: Vector4<f32>, in_shadow: bool) -> Color {
+    pub(crate) fn lighting(&self, light: &PointLight, point: Vector4<f32>, eye_vector: Vector4<f32>, normal_vector: Vector4<f32>, in_shadow: bool) -> Color {
         let effective_color = self.color * light.intensity;
 
         let ambient = effective_color * self.ambient;
