@@ -1,5 +1,6 @@
 use std::cmp::Ordering::Equal;
 use std::ops::Index;
+use std::rc::Rc;
 
 use nalgebra::Vector4;
 
@@ -9,19 +10,19 @@ use crate::sphere::Sphere;
 const EPSILON: f32 = 0.001;
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct Intersection<'a> {
+pub struct Intersection {
     pub t: f32,
-    pub object: &'a Sphere,
+    pub object: Rc<Sphere>,
 }
 
 #[derive(Debug)]
-pub struct Intersections<'a> {
-    intersections: Vec<Intersection<'a>>,
+pub struct Intersections {
+    intersections: Vec<Intersection>,
 }
 
-pub struct Computations<'a> {
+pub struct Computations {
     pub t: f32,
-    pub object: &'a Sphere,
+    pub object: Rc<Sphere>,
     pub point: Vector4<f32>,
     pub over_point: Vector4<f32>,
     pub eye_vector: Vector4<f32>,
@@ -29,8 +30,8 @@ pub struct Computations<'a> {
     pub inside: bool,
 }
 
-impl<'a> Intersection<'a> {
-    pub fn new(t: f32, object: &'a Sphere) -> Self {
+impl Intersection {
+    pub fn new(t: f32, object: Rc<Sphere>) -> Self {
         Self {
             t,
             object,
@@ -52,7 +53,7 @@ impl<'a> Intersection<'a> {
 
         Computations {
             t: self.t,
-            object: self.object,
+            object: Rc::clone(&self.object),
             point,
             over_point,
             eye_vector,
@@ -62,7 +63,7 @@ impl<'a> Intersection<'a> {
     }
 }
 
-impl<'a> Intersections<'a> {
+impl<'a> Intersections {
     fn sort(&mut self) {
         self.intersections.sort_unstable_by(|a, b| a.t.partial_cmp(&b.t).unwrap_or(Equal));
     }
@@ -71,7 +72,7 @@ impl<'a> Intersections<'a> {
         self.intersections.len()
     }
 
-    pub fn push(&mut self, intersection: Intersection<'a>) {
+    pub fn push(&mut self, intersection: Intersection) {
         self.intersections.push(intersection);
         self.sort();
     }
@@ -87,15 +88,15 @@ impl<'a> Intersections<'a> {
     }
 }
 
-impl<'a> Index<usize> for Intersections<'a> {
-    type Output = Intersection<'a>;
+impl<'a> Index<usize> for Intersections {
+    type Output = Intersection;
 
     fn index(&self, index: usize) -> &Self::Output {
         &self.intersections[index]
     }
 }
 
-impl<'a> Default for Intersections<'a> {
+impl<'a> Default for Intersections {
     fn default() -> Self {
         Self {
             intersections: Vec::new()
@@ -103,9 +104,9 @@ impl<'a> Default for Intersections<'a> {
     }
 }
 
-impl<'a> IntoIterator for Intersections<'a> {
-    type Item = Intersection<'a>;
-    type IntoIter = std::vec::IntoIter<Intersection<'a>>;
+impl<'a> IntoIterator for Intersections {
+    type Item = Intersection;
+    type IntoIter = std::vec::IntoIter<Intersection>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.intersections.into_iter()
@@ -122,17 +123,17 @@ mod tests {
     use spectral::prelude::*;
 
     use crate::ray::Ray;
+    use crate::sphere::SphereBuilder;
     use crate::transform::Transform;
     use crate::tuple::Tuple;
 
     use super::*;
-    use crate::sphere::SphereBuilder;
 
     #[test]
     fn an_intersection_encapsulates_t_and_object() {
-        let s = SphereBuilder::new().build();
+        let s = Rc::new(SphereBuilder::new().build());
 
-        let i = Intersection::new(3.5, &s);
+        let i = Intersection::new(3.5, Rc::clone(&s));
 
         assert_that!(i.t).is_equal_to(3.5);
         assert_that!(i.object).is_equal_to(&s);
@@ -140,9 +141,9 @@ mod tests {
 
     #[test]
     fn aggregating_intersections() {
-        let s = SphereBuilder::new().build();
-        let i1 = Intersection::new(1.0, &s);
-        let i2 = Intersection::new(2.0, &s);
+        let s = Rc::new(SphereBuilder::new().build());
+        let i1 = Intersection::new(1.0, Rc::clone(&s));
+        let i2 = Intersection::new(2.0, Rc::clone(&s));
 
         let mut xs = Intersections::default();
         xs.push(i1);
@@ -155,9 +156,9 @@ mod tests {
 
     #[test]
     fn the_hit_when_all_intersections_have_positive_t() {
-        let s = SphereBuilder::new().build();
-        let i1 = Intersection::new(1.0, &s);
-        let i2 = Intersection::new(2.0, &s);
+        let s = Rc::new(SphereBuilder::new().build());
+        let i1 = Intersection::new(1.0, Rc::clone(&s));
+        let i2 = Intersection::new(2.0, Rc::clone(&s));
         let mut xs = Intersections::default();
         xs.push(i1.clone());
         xs.push(i2);
@@ -169,9 +170,9 @@ mod tests {
 
     #[test]
     fn the_hit_when_some_intersections_have_negative_t() {
-        let s = SphereBuilder::new().build();
-        let i1 = Intersection::new(-1.0, &s);
-        let i2 = Intersection::new(1.0, &s);
+        let s = Rc::new(SphereBuilder::new().build());
+        let i1 = Intersection::new(-1.0, Rc::clone(&s));
+        let i2 = Intersection::new(1.0, Rc::clone(&s));
         let mut xs = Intersections::default();
         xs.push(i2.clone());
         xs.push(i1);
@@ -183,9 +184,9 @@ mod tests {
 
     #[test]
     fn the_hit_when_all_intersections_have_negative_t() {
-        let s = SphereBuilder::new().build();
-        let i1 = Intersection::new(-2.0, &s);
-        let i2 = Intersection::new(-1.0, &s);
+        let s = Rc::new(SphereBuilder::new().build());
+        let i1 = Intersection::new(-2.0, Rc::clone(&s));
+        let i2 = Intersection::new(-1.0, Rc::clone(&s));
         let mut xs = Intersections::default();
         xs.push(i2);
         xs.push(i1);
@@ -197,11 +198,11 @@ mod tests {
 
     #[test]
     fn the_hit_is_always_the_lowest_nonnegative_intersection() {
-        let s = SphereBuilder::new().build();
-        let i1 = Intersection::new(5.0, &s);
-        let i2 = Intersection::new(7.0, &s);
-        let i3 = Intersection::new(-3.0, &s);
-        let i4 = Intersection::new(2.0, &s);
+        let s = Rc::new(SphereBuilder::new().build());
+        let i1 = Intersection::new(5.0, Rc::clone(&s));
+        let i2 = Intersection::new(7.0, Rc::clone(&s));
+        let i3 = Intersection::new(-3.0, Rc::clone(&s));
+        let i4 = Intersection::new(2.0, Rc::clone(&s));
         let mut xs = Intersections::default();
         xs.push(i1);
         xs.push(i2);
@@ -216,8 +217,8 @@ mod tests {
     #[test]
     fn precomputing_the_state_of_an_intersection() {
         let r = Ray::new(Vector4::point(0.0, 0.0, -5.0), Vector4::vector(0.0, 0.0, 1.0));
-        let shape = SphereBuilder::new().build();
-        let i = Intersection::new(4.0, &shape);
+        let shape = Rc::new(SphereBuilder::new().build());
+        let i = Intersection::new(4.0, Rc::clone(&shape));
 
         let comps = i.prepare_computations(&r);
 
@@ -231,8 +232,8 @@ mod tests {
     #[test]
     fn the_hit_when_an_intersection_occurs_on_the_outside() {
         let r = Ray::new(Vector4::point(0.0, 0.0, -5.0), Vector4::vector(0.0, 0.0, 1.0));
-        let shape = SphereBuilder::new().build();
-        let i = Intersection::new(4.0, &shape);
+        let shape = Rc::new(SphereBuilder::new().build());
+        let i = Intersection::new(4.0, Rc::clone(&shape));
 
         let comps = i.prepare_computations(&r);
 
@@ -242,8 +243,8 @@ mod tests {
     #[test]
     fn the_hit_when_an_intersection_occurs_on_the_inside() {
         let r = Ray::new(Vector4::point(0.0, 0.0, 0.0), Vector4::vector(0.0, 0.0, 1.0));
-        let shape = SphereBuilder::new().build();
-        let i = Intersection::new(1.0, &shape);
+        let shape = Rc::new(SphereBuilder::new().build());
+        let i = Intersection::new(1.0, Rc::clone(&shape));
 
         let comps = i.prepare_computations(&r);
 
@@ -257,10 +258,10 @@ mod tests {
     #[test]
     fn the_hit_should_offset_the_point() {
         let r = Ray::new(Vector4::point(0.0, 0.0, -5.0), Vector4::vector(0.0, 0.0, 1.0));
-        let shape = SphereBuilder::new()
+        let shape = Rc::new(SphereBuilder::new()
             .with_transform(Matrix4::translation(0.0, 0.0, 1.0))
-            .build();
-        let i = Intersection::new(5.0, &shape);
+            .build());
+        let i = Intersection::new(5.0, shape);
 
         let comps = i.prepare_computations(&r);
 

@@ -1,18 +1,20 @@
+use std::rc::Rc;
+
 use nalgebra::Vector4;
 
 use crate::color::Color;
-use crate::intersection::{Computations, Intersections};
+use crate::intersection::{Computations, Intersections, Intersection};
 use crate::light::PointLight;
 use crate::ray::Ray;
 use crate::sphere::Sphere;
 
 pub struct World {
-    objects: Vec<Sphere>,
+    objects: Vec<Rc<Sphere>>,
     light_source: PointLight,
 }
 
 pub struct WorldBuilder {
-    objects: Vec<Sphere>,
+    objects: Vec<Rc<Sphere>>,
     light_source: PointLight,
 }
 
@@ -23,7 +25,7 @@ impl World {
         for o in self.objects.iter() {
             let intersections = o.intersect(ray);
             for intersection in intersections.into_iter() {
-                found.push(intersection);
+                found.push(Intersection::new(intersection, Rc::clone(o)));
             }
         }
 
@@ -80,7 +82,7 @@ impl WorldBuilder {
     }
 
     pub fn with_object(mut self, object: Sphere) -> Self {
-        self.objects.push(object);
+        self.objects.push(Rc::new(object));
 
         self
     }
@@ -166,7 +168,7 @@ mod tests {
     fn shading_an_intersection(default_world: World) {
         let r = Ray::new(Vector4::point(0.0, 0.0, -5.0), Vector4::vector(0.0, 0.0, 1.0));
         let shape = &default_world.objects[0];
-        let i = Intersection::new(4.0, shape);
+        let i = Intersection::new(4.0, Rc::clone(shape));
         let comps = i.prepare_computations(&r);
         let expected = Color::new(0.38066, 0.47583, 0.2855);
 
@@ -185,7 +187,7 @@ mod tests {
             .build();
         let r = Ray::new(Vector4::point(0.0, 0.0, 0.0), Vector4::vector(0.0, 0.0, 1.0));
         let shape = &world.objects[1];
-        let i = Intersection::new(0.5, shape);
+        let i = Intersection::new(0.5, Rc::clone(shape));
         let comps = i.prepare_computations(&r);
         let expected = Color::new(0.90498, 0.90498, 0.90498);
 
@@ -263,14 +265,14 @@ mod tests {
     fn shade_hit_is_given_an_intersection_in_shadow() {
         let mut w = WorldBuilder::new().build();
         w.light_source = PointLight::new(Vector4::point(0.0, 0.0, -10.0), Color::white());
-        let s1 = SphereBuilder::new().build();
-        let s2 = SphereBuilder::new()
+        let s1 = Rc::new(SphereBuilder::new().build());
+        let s2 = Rc::new(SphereBuilder::new()
             .with_transform(Matrix4::translation(0.0, 0.0, 10.0))
-            .build();
+            .build());
         w.objects.push(s1);
-        w.objects.push(s2.clone());
+        w.objects.push(Rc::clone(&s2));
         let r = Ray::new(Vector4::point(0.0, 0.0, 5.0), Vector4::vector(0.0, 0.0, 1.0));
-        let i = Intersection::new(4.0, &s2);
+        let i = Intersection::new(4.0, Rc::clone(&s2));
         let comps = i.prepare_computations(&r);
 
         let c = w.shade_hit(comps);
