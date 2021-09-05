@@ -15,7 +15,7 @@ pub trait Shape {
     fn lighting(&self, light: &PointLight, point: Vector4<f32>, eye_vector: Vector4<f32>, normal_vector: Vector4<f32>, in_shadow: bool) -> Color;
 }
 
-impl<'a> PartialEq for dyn Shape + 'a {
+impl PartialEq for dyn Shape {
     fn eq(&self, other: &Self) -> bool {
         self.material() == other.material() && self.transformation() == other.transformation()
     }
