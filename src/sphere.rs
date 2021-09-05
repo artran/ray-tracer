@@ -20,6 +20,14 @@ pub struct SphereBuilder {
 }
 
 impl Shape for Sphere {
+    fn material(&self) -> &Material {
+        &self.material
+    }
+
+    fn transformation(&self) -> &Matrix4<f32> {
+        &self.inv_transform
+    }
+
     fn intersect(&self, ray: &Ray) -> Vec<f32> {
         let transformed_ray = ray.transform(&self.inv_transform);
 

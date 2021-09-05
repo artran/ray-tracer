@@ -10,12 +10,12 @@ use crate::shape::Shape;
 use crate::sphere::Sphere;
 
 pub struct World {
-    objects: Vec<Rc<Sphere>>,
+    objects: Vec<Rc<dyn Shape>>,
     light_source: PointLight,
 }
 
 pub struct WorldBuilder {
-    objects: Vec<Rc<Sphere>>,
+    objects: Vec<Rc<dyn Shape>>,
     light_source: PointLight,
 }
 
@@ -266,8 +266,8 @@ mod tests {
     fn shade_hit_is_given_an_intersection_in_shadow() {
         let mut w = WorldBuilder::new().build();
         w.light_source = PointLight::new(Vector4::point(0.0, 0.0, -10.0), Color::white());
-        let s1 = Rc::new(SphereBuilder::new().build());
-        let s2 = Rc::new(SphereBuilder::new()
+        let s1: Rc<dyn Shape> = Rc::new(SphereBuilder::new().build());
+        let s2: Rc<dyn Shape> = Rc::new(SphereBuilder::new()
             .with_transform(Matrix4::translation(0.0, 0.0, 10.0))
             .build());
         w.objects.push(s1);

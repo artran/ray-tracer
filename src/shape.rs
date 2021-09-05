@@ -1,12 +1,33 @@
-use nalgebra::Vector4;
+use std::fmt::Debug;
+
+use nalgebra::{Matrix4, Vector4};
 use crate::color::Color;
 use crate::light::PointLight;
+use crate::material::Material;
 use crate::ray::Ray;
 
 pub trait Shape {
+    fn material(&self) -> &Material;
+    fn transformation(&self) -> &Matrix4<f32>;
+
     fn intersect(&self, ray: &Ray) -> Vec<f32>;
     fn normal_at(&self, world_point: &Vector4<f32>) -> Vector4<f32>;
     fn lighting(&self, light: &PointLight, point: Vector4<f32>, eye_vector: Vector4<f32>, normal_vector: Vector4<f32>, in_shadow: bool) -> Color;
+}
+
+impl<'a> PartialEq for dyn Shape + 'a {
+    fn eq(&self, other: &Self) -> bool {
+        self.material() == other.material() && self.transformation() == other.transformation()
+    }
+}
+
+impl Debug for dyn Shape {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Shape")
+            .field("material", &self.material())
+            .field("transform", &self.transformation())
+            .finish()
+    }
 }
 
 /* -------------------------------------------------------------------------------------------------
