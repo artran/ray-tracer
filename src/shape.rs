@@ -1,11 +1,12 @@
-use nalgebra::Matrix4;
-use crate::material::Material;
+use nalgebra::Vector4;
+use crate::color::Color;
+use crate::light::PointLight;
+use crate::ray::Ray;
 
 pub trait Shape {
-    fn set_transform(&mut self, transform: Matrix4<f32>);
-    fn set_material(&mut self, material: Material);
-    fn get_transform(&self) -> Matrix4<f32>;
-    fn get_material(&self) -> Material;
+    fn intersect(&self, ray: &Ray) -> Vec<f32>;
+    fn normal_at(&self, world_point: &Vector4<f32>) -> Vector4<f32>;
+    fn lighting(&self, light: &PointLight, point: Vector4<f32>, eye_vector: Vector4<f32>, normal_vector: Vector4<f32>, in_shadow: bool) -> Color;
 }
 
 /* -------------------------------------------------------------------------------------------------

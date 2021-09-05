@@ -5,6 +5,7 @@ use std::rc::Rc;
 use nalgebra::Vector4;
 
 use crate::ray::Ray;
+use crate::shape::Shape;
 use crate::sphere::Sphere;
 
 const EPSILON: f32 = 0.001;

@@ -4,6 +4,7 @@ use crate::color::Color;
 use crate::light::PointLight;
 use crate::material::{Material, MaterialBuilder};
 use crate::ray::Ray;
+use crate::shape::Shape;
 use crate::tuple::Tuple;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -18,8 +19,8 @@ pub struct SphereBuilder {
     material: Material,
 }
 
-impl Sphere {
-    pub fn intersect(&self, ray: &Ray) -> Vec<f32> {
+impl Shape for Sphere {
+    fn intersect(&self, ray: &Ray) -> Vec<f32> {
         let transformed_ray = ray.transform(&self.inv_transform);
 
         let sphere_to_ray = transformed_ray.origin - Vector4::point(0.0, 0.0, 0.0);
@@ -44,7 +45,7 @@ impl Sphere {
         result
     }
 
-    pub fn normal_at(&self, world_point: &Vector4<f32>) -> Vector4<f32> {
+    fn normal_at(&self, world_point: &Vector4<f32>) -> Vector4<f32> {
         let object_point = self.inv_transform * world_point;
         let object_normal = object_point - Vector4::point(0.0, 0.0, 0.0);
         let mut world_normal = self.inv_transform.transpose() * object_normal;
@@ -53,7 +54,7 @@ impl Sphere {
         (world_normal).normalize()
     }
 
-    pub fn lighting(&self, light: &PointLight, point: Vector4<f32>, eye_vector: Vector4<f32>, normal_vector: Vector4<f32>, in_shadow: bool) -> Color {
+    fn lighting(&self, light: &PointLight, point: Vector4<f32>, eye_vector: Vector4<f32>, normal_vector: Vector4<f32>, in_shadow: bool) -> Color {
         self.material.lighting(light, point, eye_vector, normal_vector, in_shadow)
     }
 }

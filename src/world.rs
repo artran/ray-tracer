@@ -6,6 +6,7 @@ use crate::color::Color;
 use crate::intersection::{Computations, Intersections, Intersection};
 use crate::light::PointLight;
 use crate::ray::Ray;
+use crate::shape::Shape;
 use crate::sphere::Sphere;
 
 pub struct World {
