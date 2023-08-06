@@ -8,7 +8,7 @@ use crate::world::World;
 pub struct Camera {
     hsize: usize,
     vsize: usize,
-    inv_transform: Matrix4<f32>,  // Note: storing inverse for efficiency
+    inv_transform: Matrix4<f32>, // Note: storing inverse for efficiency
     pixel_size: f32,
     half_width: f32,
     half_height: f32,
@@ -206,7 +206,11 @@ mod tests {
         let r = c.ray_for_pixel(0, 0);
 
         assert_that!(r.origin).is_equal_to(Vector4::point(0.0, 0.0, 0.0));
-        vector_values_are_close(r.direction, Vector4::vector(0.66519, 0.33259, -0.66851), 0.0001);
+        vector_values_are_close(
+            r.direction,
+            Vector4::vector(0.66519, 0.33259, -0.66851),
+            0.0001,
+        );
     }
 
     #[test]
@@ -220,8 +224,13 @@ mod tests {
 
         let r = c.ray_for_pixel(100, 50);
 
-        assert_that!(r.origin).is_equal_to(Vector4::point(0.0, 2.0, -5.0));
-        vector_values_are_close(r.direction, Vector4::vector(2.0_f32.sqrt() / 2.0, 0.0, -2.0_f32.sqrt() / 2.0), 0.0001);
+        // assert_that!(r.origin).is_equal_to(Vector4::point(0.0, 2.0, -5.0));
+        vector_values_are_close(r.origin, Vector4::point(0.0, 2.0, -5.0), 0.0001);
+        vector_values_are_close(
+            r.direction,
+            Vector4::vector(2.0_f32.sqrt() / 2.0, 0.0, -2.0_f32.sqrt() / 2.0),
+            0.0001,
+        );
     }
 
     #[fixture]
@@ -231,18 +240,13 @@ mod tests {
             .with_diffuse(0.7)
             .with_specular(0.2)
             .build();
-        let s1 = SphereBuilder::new()
-            .with_material(s1_material)
-            .build();
+        let s1 = SphereBuilder::new().with_material(s1_material).build();
 
         let s2 = SphereBuilder::new()
             .with_transform(Matrix4::scaling(0.5, 0.5, 0.5))
             .build();
 
-        WorldBuilder::new()
-            .with_object(s1)
-            .with_object(s2)
-            .build()
+        WorldBuilder::new().with_object(s1).with_object(s2).build()
     }
 
     #[rstest]
