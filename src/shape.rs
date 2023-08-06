@@ -1,18 +1,26 @@
 use std::fmt::Debug;
 
-use nalgebra::{Matrix4, Vector4};
 use crate::color::Color;
 use crate::light::PointLight;
 use crate::material::Material;
+use crate::matrix::Matrix;
 use crate::ray::Ray;
+use crate::vector4::Vector4;
 
 pub trait Shape {
     fn material(&self) -> &Material;
-    fn transformation(&self) -> &Matrix4<f32>;
+    fn transformation(&self) -> &Matrix<4>;
 
     fn intersect(&self, ray: &Ray) -> Vec<f32>;
-    fn normal_at(&self, world_point: &Vector4<f32>) -> Vector4<f32>;
-    fn lighting(&self, light: &PointLight, point: Vector4<f32>, eye_vector: Vector4<f32>, normal_vector: Vector4<f32>, in_shadow: bool) -> Color;
+    fn normal_at(&self, world_point: &Vector4) -> Vector4;
+    fn lighting(
+        &self,
+        light: &PointLight,
+        point: Vector4,
+        eye_vector: Vector4,
+        normal_vector: Vector4,
+        in_shadow: bool,
+    ) -> Color;
 }
 
 impl PartialEq for dyn Shape {
@@ -51,13 +59,13 @@ mod tests {
     //
     // #[rstest]
     // fn the_default_transformation(test_shape: impl Shape) {
-    //     assert_that!(test_shape.get_transform()).is_equal_to(Matrix4::identity());
+    //     assert_that!(test_shape.get_transform()).is_equal_to(Matrix<4>::identity());
     // }
     //
     // #[rstest]
     // fn assigning_a_transformation(mut test_shape: impl Shape) {
-    //     test_shape.set_transform(Matrix4::translation(2.0, 3.0, 4.0));
-    //     assert_that!(test_shape.get_transform()).is_equal_to(Matrix4::translation(2.0, 3.0, 4.0));
+    //     test_shape.set_transform(Matrix<4>::translation(2.0, 3.0, 4.0));
+    //     assert_that!(test_shape.get_transform()).is_equal_to(Matrix<4>::translation(2.0, 3.0, 4.0));
     // }
     //
     // #[rstest]

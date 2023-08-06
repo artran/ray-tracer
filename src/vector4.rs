@@ -1,42 +1,162 @@
-use nalgebra::Vector4;
+const EPSILON: f32 = 0.001;
 
-pub trait Tuple {
-    fn point(x: f32, y: f32, z: f32) -> Vector4<f32>;
-    fn vector(x: f32, y: f32, z: f32) -> Vector4<f32>;
-    fn cross_product(&self, other: &Vector4<f32>) -> Vector4<f32>;
-    fn is_point(&self) -> bool;
-    fn is_vector(&self) -> bool;
-    fn reflect(&self, normal: &Vector4<f32>) -> Vector4<f32>;
+#[derive(Debug, Clone, Copy)]
+pub struct Vector4 {
+    pub x: f32,
+    pub y: f32,
+    pub z: f32,
+    pub w: f32,
 }
 
-impl Tuple for Vector4<f32> {
-    fn point(x: f32, y: f32, z: f32) -> Vector4<f32> {
-        Vector4::new(x, y, z, 1.0)
+impl PartialEq for Vector4 {
+    fn eq(&self, other: &Self) -> bool {
+        (self.x - other.x).abs() < EPSILON
+            && (self.y - other.y).abs() < EPSILON
+            && (self.z - other.z).abs() < EPSILON
+            && (self.w - other.w).abs() < EPSILON
+    }
+}
+
+impl std::ops::Add for Vector4 {
+    type Output = Vector4;
+
+    fn add(self, other: Self) -> Self {
+        Self {
+            x: self.x + other.x,
+            y: self.y + other.y,
+            z: self.z + other.z,
+            w: self.w + other.w,
+        }
+    }
+}
+
+impl std::ops::Sub for Vector4 {
+    type Output = Vector4;
+
+    fn sub(self, other: Self) -> Self {
+        Self {
+            x: self.x - other.x,
+            y: self.y - other.y,
+            z: self.z - other.z,
+            w: self.w - other.w,
+        }
+    }
+}
+
+impl std::ops::Neg for Vector4 {
+    type Output = Vector4;
+
+    fn neg(self) -> Self {
+        Self {
+            x: -self.x,
+            y: -self.y,
+            z: -self.z,
+            w: -self.w,
+        }
+    }
+}
+
+impl std::ops::Mul<f32> for Vector4 {
+    type Output = Vector4;
+
+    fn mul(self, scale: f32) -> Self {
+        Self {
+            x: self.x * scale,
+            y: self.y * scale,
+            z: self.z * scale,
+            w: self.w * scale,
+        }
+    }
+}
+
+impl std::ops::Div<f32> for Vector4 {
+    type Output = Vector4;
+
+    fn div(self, other: f32) -> Self {
+        Self {
+            x: self.x / other,
+            y: self.y / other,
+            z: self.z / other,
+            w: self.w / other,
+        }
+    }
+}
+
+impl std::ops::Index<usize> for Vector4 {
+    type Output = f32;
+
+    fn index(&self, index: usize) -> &f32 {
+        match index {
+            0 => &self.x,
+            1 => &self.y,
+            2 => &self.z,
+            3 => &self.w,
+            _ => panic!("Not a valid index"),
+        }
+    }
+}
+
+impl std::ops::IndexMut<usize> for Vector4 {
+    fn index_mut(&mut self, index: usize) -> &mut f32 {
+        match index {
+            0 => &mut self.x,
+            1 => &mut self.y,
+            2 => &mut self.z,
+            3 => &mut self.w,
+            _ => panic!("Not a valid index"),
+        }
+    }
+}
+
+impl Vector4 {
+    pub fn new(x: f32, y: f32, z: f32, w: f32) -> Self {
+        Self { x, y, z, w }
     }
 
-    fn vector(x: f32, y: f32, z: f32) -> Vector4<f32> {
-        Vector4::new(x, y, z, 0.0)
+    pub fn point(x: f32, y: f32, z: f32) -> Self {
+        Self { x, y, z, w: 1.0 }
     }
 
-    fn cross_product(&self, other: &Vector4<f32>) -> Vector4<f32> {
-        let me = self.remove_row(3);
-        let rhs = other.remove_row(3);
-
-        let res = me.cross(&rhs);
-
-        res.insert_row(3, 0.0)
+    pub fn vector(x: f32, y: f32, z: f32) -> Self {
+        Self { x, y, z, w: 0.0 }
     }
 
-    fn is_point(&self) -> bool {
+    pub fn cross_product(&self, other: &Self) -> Self {
+        Self {
+            x: self.y * other.z - self.z * other.y,
+            y: self.z * other.x - self.x * other.z,
+            z: self.x * other.y - self.y * other.x,
+            w: 0.0,
+        }
+    }
+
+    pub fn dot(&self, other: &Self) -> f32 {
+        self.x * other.x + self.y * other.y + self.z * other.z + self.w * other.w
+    }
+
+    pub fn is_point(&self) -> bool {
         self.w.round() == 1.0
     }
 
-    fn is_vector(&self) -> bool {
+    pub fn is_vector(&self) -> bool {
         self.w.round() == 0.0
     }
 
-    fn reflect(&self, normal: &Vector4<f32>) -> Vector4<f32> {
-        self - normal * 2.0 * self.dot(normal)
+    pub fn reflect(&self, normal: &Self) -> Self {
+        *self - *normal * 2_f32 * self.dot(normal)
+    }
+
+    pub fn magnitude(&self) -> f32 {
+        (self.x.powi(2) + self.y.powi(2) + self.z.powi(2) + self.w.powi(2)).sqrt()
+    }
+
+    pub fn normalize(&self) -> Self {
+        Self {
+            x: self.x / self.magnitude(),
+            y: self.y / self.magnitude(),
+            z: self.z / self.magnitude(),
+            w: self.w / self.magnitude(),
+        }
     }
 }
 
@@ -106,7 +226,7 @@ mod tests {
         let vector = Vector4::vector(-2.0, 3.0, 1.0);
         let expected = Vector4::point(1.0, 1.0, 6.0);
 
-        let result = &point + &vector;
+        let result = point + vector;
 
         assert_that!(result).is_equal_to(expected);
     }
@@ -117,7 +237,7 @@ mod tests {
         let point2 = Vector4::point(5.0, 6.0, 7.0);
         let expected = Vector4::vector(-2.0, -4.0, -6.0);
 
-        let result = &point1 - &point2;
+        let result = point1 - point2;
 
         assert_that!(result).is_equal_to(expected)
     }
@@ -128,7 +248,7 @@ mod tests {
         let vector = Vector4::vector(5.0, 6.0, 7.0);
         let expected = Vector4::point(-2.0, -4.0, -6.0);
 
-        let result = &point - &vector;
+        let result = point - vector;
 
         assert_that!(result).is_equal_to(expected)
     }
@@ -138,17 +258,17 @@ mod tests {
         let vector = Vector4::vector(1.0, -2.0, 3.0);
         let expected = Vector4::vector(-1.0, 2.0, -3.0);
 
-        let result = -&vector;
+        let result = -vector;
 
         assert_that!(result).is_equal_to(expected);
     }
 
     #[test]
     fn negating_a_tuple_returns_the_negative_tuple() {
-        let tuple = Vector4::new(1.0, -2.0, 3.0, -4.0 );
+        let tuple = Vector4::new(1.0, -2.0, 3.0, -4.0);
         let expected = Vector4::new(-1.0, 2.0, -3.0, 4.0);
 
-        let result = -&tuple;
+        let result = -tuple;
 
         assert_that!(result).is_equal_to(expected);
     }
@@ -290,20 +410,20 @@ mod tests {
 
     #[test]
     fn reflecting_a_vector_approaching_at_45_deg() {
-    let v = Vector4::vector(1.0, -1.0, 0.0);
-    let n = Vector4::vector(0.0, 1.0, 0.0);
+        let v = Vector4::vector(1.0, -1.0, 0.0);
+        let n = Vector4::vector(0.0, 1.0, 0.0);
 
-    let r = v.reflect(&n);
+        let r = v.reflect(&n);
 
-    assert_that!(r).is_equal_to(Vector4::vector(1.0, 1.0, 0.0));
+        assert_that!(r).is_equal_to(Vector4::vector(1.0, 1.0, 0.0));
     }
 
     #[test]
     fn reflecting_a_vector_off_a_slanted_surface() {
-    let v = Vector4::vector(0.0, -1.0, 0.0);
-    let n = Vector4::vector(2.0_f32.sqrt()/2.0, 2.0_f32.sqrt()/2.0, 0.0);
+        let v = Vector4::vector(0.0, -1.0, 0.0);
+        let n = Vector4::vector(2.0_f32.sqrt() / 2.0, 2.0_f32.sqrt() / 2.0, 0.0);
 
-    let r = v.reflect(&n);
+        let r = v.reflect(&n);
 
         let expected = Vector4::vector(1.0, 0.0, 0.0);
         assert_that!(r.x).is_close_to(expected.x, 0.0001);

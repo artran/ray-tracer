@@ -1,14 +1,13 @@
-use nalgebra::{Matrix4, Vector4};
-
 use crate::canvas::Canvas;
+use crate::matrix::Matrix;
 use crate::ray::Ray;
-use crate::tuple::Tuple;
+use crate::vector4::Vector4;
 use crate::world::World;
 
 pub struct Camera {
     hsize: usize,
     vsize: usize,
-    inv_transform: Matrix4<f32>, // Note: storing inverse for efficiency
+    inv_transform: Matrix<4>, // Note: storing inverse for efficiency
     pixel_size: f32,
     half_width: f32,
     half_height: f32,
@@ -18,11 +17,11 @@ pub struct CameraBuilder {
     hsize: usize,
     vsize: usize,
     field_of_view: f32,
-    transform: Matrix4<f32>,
+    transform: Matrix<4>,
 }
 
 impl Camera {
-    fn new(hsize: usize, vsize: usize, field_of_view: f32, transform: Matrix4<f32>) -> Self {
+    fn new(hsize: usize, vsize: usize, field_of_view: f32, transform: Matrix<4>) -> Self {
         let half_view = (field_of_view / 2.0).tan();
         let aspect = hsize as f32 / vsize as f32;
         let half_width: f32;
@@ -59,9 +58,9 @@ impl Camera {
         // using the camera matrix, transform the canvas point and the origin,
         // and then compute the ray's direction vector.
         // (remember that the canvas is at z=-1)
-        let pixel = &self.inv_transform * Vector4::point(world_x, world_y, -1.0);
-        let origin = &self.inv_transform * Vector4::point(0.0, 0.0, 0.0);
-        let direction = (pixel - &origin).normalize();
+        let pixel = *&self.inv_transform * Vector4::point(world_x, world_y, -1.0);
+        let origin = *&self.inv_transform * Vector4::point(0.0, 0.0, 0.0);
+        let direction = (pixel - *&origin).normalize();
 
         Ray::new(origin, direction)
     }
@@ -87,7 +86,7 @@ impl CameraBuilder {
             hsize: 0,
             vsize: 0,
             field_of_view: 0.0,
-            transform: Matrix4::identity(),
+            transform: Matrix::identity(),
         }
     }
 
@@ -106,7 +105,7 @@ impl CameraBuilder {
         self
     }
 
-    pub fn with_transform(mut self, transform: Matrix4<f32>) -> Self {
+    pub fn with_transform(mut self, transform: Matrix<4>) -> Self {
         self.transform = transform;
         self
     }
@@ -124,7 +123,6 @@ Tests
 mod tests {
     use std::f32::consts::PI;
 
-    use nalgebra::Vector4;
     use rstest::*;
     use spectral::prelude::*;
 
@@ -132,11 +130,12 @@ mod tests {
     use crate::material::MaterialBuilder;
     use crate::sphere::SphereBuilder;
     use crate::transform::Transform;
+    use crate::vector4::Vector4;
     use crate::world::WorldBuilder;
 
     use super::*;
 
-    fn vector_values_are_close(actual: Vector4<f32>, expected: Vector4<f32>, tolerance: f32) {
+    fn vector_values_are_close(actual: Vector4, expected: Vector4, tolerance: f32) {
         for row in 0..4 {
             assert_that!(actual[row]).is_close_to(expected[row], tolerance);
         }
@@ -156,7 +155,7 @@ mod tests {
 
         assert_that!(c.hsize).is_equal_to(160);
         assert_that!(c.vsize).is_equal_to(120);
-        assert_that!(c.inv_transform).is_equal_to(Matrix4::identity());
+        assert_that!(c.inv_transform).is_equal_to(Matrix::identity());
     }
 
     #[test]
@@ -219,7 +218,7 @@ mod tests {
             .with_hsize(201)
             .with_vsize(101)
             .with_field_of_view(PI / 2.0)
-            .with_transform(Matrix4::rotation_y(PI / 4.0) * Matrix4::translation(0.0, -2.0, 5.0))
+            .with_transform(Matrix::rotation_y(PI / 4.0) * Matrix::translation(0.0, -2.0, 5.0))
             .build();
 
         let r = c.ray_for_pixel(100, 50);
@@ -243,7 +242,7 @@ mod tests {
         let s1 = SphereBuilder::new().with_material(s1_material).build();
 
         let s2 = SphereBuilder::new()
-            .with_transform(Matrix4::scaling(0.5, 0.5, 0.5))
+            .with_transform(Matrix::scaling(0.5, 0.5, 0.5))
             .build();
 
         WorldBuilder::new().with_object(s1).with_object(s2).build()
@@ -258,7 +257,7 @@ mod tests {
             .with_hsize(11)
             .with_vsize(11)
             .with_field_of_view(PI / 2.0)
-            .with_transform(Matrix4::view_transform(from, to, up))
+            .with_transform(Matrix::view_transform(from, to, up))
             .build();
 
         let image = c.render(&default_world);

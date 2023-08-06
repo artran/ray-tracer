@@ -1,13 +1,12 @@
 use std::rc::Rc;
 
-use nalgebra::Vector4;
-
 use crate::color::Color;
-use crate::intersection::{Computations, Intersections, Intersection};
+use crate::intersection::{Computations, Intersection, Intersections};
 use crate::light::PointLight;
 use crate::ray::Ray;
 use crate::shape::Shape;
 use crate::sphere::Sphere;
+use crate::vector4::Vector4;
 
 pub struct World {
     objects: Vec<Rc<dyn Shape>>,
@@ -53,8 +52,8 @@ impl World {
         Color::black()
     }
 
-    fn is_shadowed(&self, point: &Vector4<f32>) -> bool {
-        let v = self.light_source.position - point;
+    fn is_shadowed(&self, point: &Vector4) -> bool {
+        let v = self.light_source.position - *point;
         let distance = v.magnitude();
         let direction = v.normalize();
 
@@ -111,15 +110,15 @@ Tests
 
 #[cfg(test)]
 mod tests {
-    use nalgebra::{Matrix4, Vector4};
     use rstest::*;
     use spectral::prelude::*;
 
     use crate::intersection::Intersection;
     use crate::material::MaterialBuilder;
+    use crate::matrix::Matrix;
     use crate::sphere::SphereBuilder;
     use crate::transform::Transform;
-    use crate::tuple::Tuple;
+    use crate::vector4::Vector4;
 
     use super::*;
 
@@ -130,17 +129,13 @@ mod tests {
             .with_diffuse(0.7)
             .with_specular(0.2)
             .build();
-        let s1 = SphereBuilder::new()
-            .with_material(material)
-            .build();
+        let s1 = SphereBuilder::new().with_material(material).build();
 
         let s2 = SphereBuilder::new()
-            .with_transform(Matrix4::scaling(0.5, 0.5, 0.5))
+            .with_transform(Matrix::scaling(0.5, 0.5, 0.5))
             .build();
 
-        WorldBuilder::new()
-            .with_object(s1)
-            .with_object(s2).build()
+        WorldBuilder::new().with_object(s1).with_object(s2).build()
     }
 
     #[rstest]
@@ -154,7 +149,10 @@ mod tests {
 
     #[rstest]
     fn intersect_a_world_with_a_ray(default_world: World) {
-        let r = Ray::new(Vector4::point(0.0, 0.0, -5.0), Vector4::vector(0.0, 0.0, 1.0));
+        let r = Ray::new(
+            Vector4::point(0.0, 0.0, -5.0),
+            Vector4::vector(0.0, 0.0, 1.0),
+        );
 
         let xs = default_world.intersect(&r);
 
@@ -167,7 +165,10 @@ mod tests {
 
     #[rstest]
     fn shading_an_intersection(default_world: World) {
-        let r = Ray::new(Vector4::point(0.0, 0.0, -5.0), Vector4::vector(0.0, 0.0, 1.0));
+        let r = Ray::new(
+            Vector4::point(0.0, 0.0, -5.0),
+            Vector4::vector(0.0, 0.0, 1.0),
+        );
         let shape = &default_world.objects[0];
         let i = Intersection::new(4.0, Rc::clone(shape));
         let comps = i.prepare_computations(&r);
@@ -186,7 +187,10 @@ mod tests {
         let world = WorldBuilder::from(default_world)
             .with_light_source(light)
             .build();
-        let r = Ray::new(Vector4::point(0.0, 0.0, 0.0), Vector4::vector(0.0, 0.0, 1.0));
+        let r = Ray::new(
+            Vector4::point(0.0, 0.0, 0.0),
+            Vector4::vector(0.0, 0.0, 1.0),
+        );
         let shape = &world.objects[1];
         let i = Intersection::new(0.5, Rc::clone(shape));
         let comps = i.prepare_computations(&r);
@@ -201,7 +205,10 @@ mod tests {
 
     #[rstest]
     fn the_color_when_a_ray_misses(default_world: World) {
-        let r = Ray::new(Vector4::point(0.0, 0.0, -5.0), Vector4::vector(0.0, 1.0, 0.0));
+        let r = Ray::new(
+            Vector4::point(0.0, 0.0, -5.0),
+            Vector4::vector(0.0, 1.0, 0.0),
+        );
 
         let c = default_world.color_at(&r);
 
@@ -210,7 +217,10 @@ mod tests {
 
     #[rstest]
     fn the_color_when_a_ray_hits(default_world: World) {
-        let r = Ray::new(Vector4::point(0.0, 0.0, -5.0), Vector4::vector(0.0, 0.0, 1.0));
+        let r = Ray::new(
+            Vector4::point(0.0, 0.0, -5.0),
+            Vector4::vector(0.0, 0.0, 1.0),
+        );
         let expected = Color::new(0.38066, 0.47583, 0.2855);
 
         let c = default_world.color_at(&r);
@@ -229,25 +239,25 @@ mod tests {
             .with_specular(0.2)
             .with_ambient(1.0)
             .build();
-        let inner_material = MaterialBuilder::new()
-            .with_ambient(1.0)
-            .build();
+        let inner_material = MaterialBuilder::new().with_ambient(1.0).build();
 
-        let outer = SphereBuilder::new()
-            .with_material(outer_material)
-            .build();
+        let outer = SphereBuilder::new().with_material(outer_material).build();
 
         let inner = SphereBuilder::new()
-            .with_transform(Matrix4::scaling(0.5, 0.5, 0.5))
+            .with_transform(Matrix::scaling(0.5, 0.5, 0.5))
             .with_material(inner_material)
             .build();
 
         let world = WorldBuilder::new()
             .with_object(outer)
-            .with_object(inner).build();
+            .with_object(inner)
+            .build();
 
         // Act
-        let r = Ray::new(Vector4::point(0.0, 0.0, 0.75), Vector4::vector(0.0, 0.0, -1.0));
+        let r = Ray::new(
+            Vector4::point(0.0, 0.0, 0.75),
+            Vector4::vector(0.0, 0.0, -1.0),
+        );
 
         // Assert
         assert_that!(world.color_at(&r)).is_equal_to(Color::white());
@@ -258,7 +268,7 @@ mod tests {
     #[case(Vector4::point(10.0, - 10.0, 10.0), true)] // the_shadow_when_an_object_is_between_the_point_and_the_light
     #[case(Vector4::point(- 20.0, 20.0, - 20.0), false)] // there_is_no_shadow_when_an_object_is_behind_the_light
     #[case(Vector4::point(- 2.0, 2.0, - 2.0), false)] // there_is_no_shadow_when_an_object_is_behind_the_point
-    fn test_is_shadowed(default_world: World, #[case] p: Vector4<f32>, #[case] expected: bool) {
+    fn test_is_shadowed(default_world: World, #[case] p: Vector4, #[case] expected: bool) {
         assert_that!(default_world.is_shadowed(&p)).is_equal_to(expected);
     }
 
@@ -267,12 +277,17 @@ mod tests {
         let mut w = WorldBuilder::new().build();
         w.light_source = PointLight::new(Vector4::point(0.0, 0.0, -10.0), Color::white());
         let s1: Rc<dyn Shape> = Rc::new(SphereBuilder::new().build());
-        let s2: Rc<dyn Shape> = Rc::new(SphereBuilder::new()
-            .with_transform(Matrix4::translation(0.0, 0.0, 10.0))
-            .build());
+        let s2: Rc<dyn Shape> = Rc::new(
+            SphereBuilder::new()
+                .with_transform(Matrix::translation(0.0, 0.0, 10.0))
+                .build(),
+        );
         w.objects.push(s1);
         w.objects.push(Rc::clone(&s2));
-        let r = Ray::new(Vector4::point(0.0, 0.0, 5.0), Vector4::vector(0.0, 0.0, 1.0));
+        let r = Ray::new(
+            Vector4::point(0.0, 0.0, 5.0),
+            Vector4::vector(0.0, 0.0, 1.0),
+        );
         let i = Intersection::new(4.0, Rc::clone(&s2));
         let comps = i.prepare_computations(&r);
 

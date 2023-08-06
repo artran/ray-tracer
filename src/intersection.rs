@@ -2,10 +2,9 @@ use std::cmp::Ordering::Equal;
 use std::ops::Index;
 use std::rc::Rc;
 
-use nalgebra::Vector4;
-
 use crate::ray::Ray;
 use crate::shape::Shape;
+use crate::vector4::Vector4;
 
 const EPSILON: f32 = 0.001;
 
@@ -29,19 +28,16 @@ pub struct Intersections {
 pub struct Computations {
     pub t: f32,
     pub object: Rc<dyn Shape>,
-    pub point: Vector4<f32>,
-    pub over_point: Vector4<f32>,
-    pub eye_vector: Vector4<f32>,
-    pub normal_vector: Vector4<f32>,
+    pub point: Vector4,
+    pub over_point: Vector4,
+    pub eye_vector: Vector4,
+    pub normal_vector: Vector4,
     pub inside: bool,
 }
 
 impl Intersection {
     pub fn new(t: f32, object: Rc<dyn Shape>) -> Self {
-        Self {
-            t,
-            object,
-        }
+        Self { t, object }
     }
 
     pub fn prepare_computations(&self, ray: &Ray) -> Computations {
@@ -71,7 +67,8 @@ impl Intersection {
 
 impl<'a> Intersections {
     fn sort(&mut self) {
-        self.intersections.sort_unstable_by(|a, b| a.t.partial_cmp(&b.t).unwrap_or(Equal));
+        self.intersections
+            .sort_unstable_by(|a, b| a.t.partial_cmp(&b.t).unwrap_or(Equal));
     }
 
     pub fn len(&self) -> usize {
@@ -105,7 +102,7 @@ impl<'a> Index<usize> for Intersections {
 impl<'a> Default for Intersections {
     fn default() -> Self {
         Self {
-            intersections: Vec::new()
+            intersections: Vec::new(),
         }
     }
 }
@@ -125,13 +122,13 @@ Tests
 
 #[cfg(test)]
 mod tests {
-    use nalgebra::Matrix4;
     use spectral::prelude::*;
 
+    use crate::matrix::Matrix;
     use crate::ray::Ray;
     use crate::sphere::SphereBuilder;
     use crate::transform::Transform;
-    use crate::tuple::Tuple;
+    use crate::vector4::Vector4;
 
     use super::*;
 
@@ -222,7 +219,10 @@ mod tests {
 
     #[test]
     fn precomputing_the_state_of_an_intersection() {
-        let r = Ray::new(Vector4::point(0.0, 0.0, -5.0), Vector4::vector(0.0, 0.0, 1.0));
+        let r = Ray::new(
+            Vector4::point(0.0, 0.0, -5.0),
+            Vector4::vector(0.0, 0.0, 1.0),
+        );
         let shape: Rc<dyn Shape> = Rc::new(SphereBuilder::new().build());
         let i = Intersection::new(4.0, Rc::clone(&shape));
 
@@ -237,7 +237,10 @@ mod tests {
 
     #[test]
     fn the_hit_when_an_intersection_occurs_on_the_outside() {
-        let r = Ray::new(Vector4::point(0.0, 0.0, -5.0), Vector4::vector(0.0, 0.0, 1.0));
+        let r = Ray::new(
+            Vector4::point(0.0, 0.0, -5.0),
+            Vector4::vector(0.0, 0.0, 1.0),
+        );
         let shape: Rc<dyn Shape> = Rc::new(SphereBuilder::new().build());
         let i = Intersection::new(4.0, Rc::clone(&shape));
 
@@ -248,7 +251,10 @@ mod tests {
 
     #[test]
     fn the_hit_when_an_intersection_occurs_on_the_inside() {
-        let r = Ray::new(Vector4::point(0.0, 0.0, 0.0), Vector4::vector(0.0, 0.0, 1.0));
+        let r = Ray::new(
+            Vector4::point(0.0, 0.0, 0.0),
+            Vector4::vector(0.0, 0.0, 1.0),
+        );
         let shape: Rc<dyn Shape> = Rc::new(SphereBuilder::new().build());
         let i = Intersection::new(1.0, Rc::clone(&shape));
 
@@ -263,10 +269,15 @@ mod tests {
 
     #[test]
     fn the_hit_should_offset_the_point() {
-        let r = Ray::new(Vector4::point(0.0, 0.0, -5.0), Vector4::vector(0.0, 0.0, 1.0));
-        let shape: Rc<dyn Shape> = Rc::new(SphereBuilder::new()
-            .with_transform(Matrix4::translation(0.0, 0.0, 1.0))
-            .build());
+        let r = Ray::new(
+            Vector4::point(0.0, 0.0, -5.0),
+            Vector4::vector(0.0, 0.0, 1.0),
+        );
+        let shape: Rc<dyn Shape> = Rc::new(
+            SphereBuilder::new()
+                .with_transform(Matrix::translation(0.0, 0.0, 1.0))
+                .build(),
+        );
         let i = Intersection::new(5.0, shape);
 
         let comps = i.prepare_computations(&r);

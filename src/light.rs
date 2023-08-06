@@ -1,15 +1,14 @@
-use nalgebra::Vector4;
 use crate::color::Color;
-use crate::tuple::Tuple;
+use crate::vector4::Vector4;
 
 #[derive(Debug, PartialEq)]
 pub struct PointLight {
-    pub position: Vector4<f32>,
+    pub position: Vector4,
     pub intensity: Color,
 }
 
 impl PointLight {
-    pub fn new(position: Vector4<f32>, intensity: Color) -> Self {
+    pub fn new(position: Vector4, intensity: Color) -> Self {
         Self {
             position,
             intensity,
@@ -35,7 +34,7 @@ mod tests {
     use spectral::assert_that;
 
     use super::*;
-    use crate::tuple::Tuple;
+    use crate::vector4::Vector4;
 
     #[test]
     fn a_point_light_has_a_position_and_intensity() {
