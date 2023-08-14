@@ -23,8 +23,8 @@ impl Shape for Sphere {
         &self.material
     }
 
-    fn transformation(&self) -> &Matrix<4> {
-        &self.inv_transform
+    fn transformation(&self) -> Matrix<4> {
+        self.inv_transform.try_inverse().unwrap()
     }
 
     fn intersect(&self, ray: &Ray) -> Vec<f32> {

@@ -9,7 +9,7 @@ use crate::vector4::Vector4;
 
 pub trait Shape {
     fn material(&self) -> &Material;
-    fn transformation(&self) -> &Matrix<4>;
+    fn transformation(&self) -> Matrix<4>;
 
     fn intersect(&self, ray: &Ray) -> Vec<f32>;
     fn normal_at(&self, world_point: &Vector4) -> Vector4;
@@ -44,43 +44,42 @@ Tests
 
 #[cfg(test)]
 mod tests {
-    // use rstest::*;
-    // use spectral::prelude::*;
-    //
-    // use super::*;
-    // use crate::sphere::{Sphere, SphereBuilder};
-    // use crate::transform::Transform;
-    // use crate::material::MaterialBuilder;
-    //
-    // #[fixture]
-    // fn test_shape() -> Sphere {
-    //     SphereBuilder::new().build()
-    // }
-    //
-    // #[rstest]
-    // fn the_default_transformation(test_shape: impl Shape) {
-    //     assert_that!(test_shape.get_transform()).is_equal_to(Matrix<4>::identity());
-    // }
-    //
-    // #[rstest]
-    // fn assigning_a_transformation(mut test_shape: impl Shape) {
-    //     test_shape.set_transform(Matrix<4>::translation(2.0, 3.0, 4.0));
-    //     assert_that!(test_shape.get_transform()).is_equal_to(Matrix<4>::translation(2.0, 3.0, 4.0));
-    // }
-    //
-    // #[rstest]
-    // fn the_default_material(test_shape: impl Shape) {
-    //     assert_that!(test_shape.get_material()).is_equal_to(MaterialBuilder::new().build());
-    // }
-    //
-    // #[rstest]
-    // fn assigning_a_material(mut test_shape: impl Shape) {
-    //     let m = MaterialBuilder::new()
-    //         .with_ambient(1.0)
-    //         .build();
-    //
-    //     test_shape.set_material(m.clone());
-    //
-    //     assert_that!(test_shape.get_material()).is_equal_to(m);
-    // }
+    use rstest::*;
+    use spectral::prelude::*;
+
+    use super::*;
+    use crate::material::MaterialBuilder;
+    use crate::sphere::{Sphere, SphereBuilder};
+    use crate::transform::Transform;
+
+    #[fixture]
+    fn test_shape() -> Sphere {
+        SphereBuilder::new().build()
+    }
+
+    #[rstest]
+    fn the_default_transformation(test_shape: impl Shape) {
+        assert_that!(test_shape.transformation()).is_equal_to(&Matrix::identity());
+    }
+
+    #[rstest]
+    fn assigning_a_transformation() {
+        let test_shape = SphereBuilder::new()
+            .with_transform(Matrix::translation(2.0, 3.0, 4.0))
+            .build();
+        assert_that!(test_shape.transformation()).is_equal_to(&Matrix::translation(2.0, 3.0, 4.0));
+    }
+
+    #[rstest]
+    fn the_default_material(test_shape: impl Shape) {
+        assert_that!(test_shape.material()).is_equal_to(&MaterialBuilder::new().build());
+    }
+
+    #[rstest]
+    fn assigning_a_material() {
+        let m = MaterialBuilder::new().with_ambient(1.0).build();
+        let test_shape = SphereBuilder::new().with_material(m.clone()).build();
+
+        assert_that!(test_shape.material()).is_equal_to(&m);
+    }
 }
