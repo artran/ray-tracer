@@ -58,9 +58,9 @@ impl Camera {
         // using the camera matrix, transform the canvas point and the origin,
         // and then compute the ray's direction vector.
         // (remember that the canvas is at z=-1)
-        let pixel = *&self.inv_transform * Vector4::point(world_x, world_y, -1.0);
-        let origin = *&self.inv_transform * Vector4::point(0.0, 0.0, 0.0);
-        let direction = (pixel - *&origin).normalize();
+        let pixel = self.inv_transform * Vector4::point(world_x, world_y, -1.0);
+        let origin = self.inv_transform * Vector4::point(0.0, 0.0, 0.0);
+        let direction = (pixel - origin).normalize();
 
         Ray::new(origin, direction)
     }

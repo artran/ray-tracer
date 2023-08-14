@@ -433,7 +433,7 @@ mod tests {
     fn multiplying_identity_matrix_by_a_tuple() {
         let tuple: Vector4 = Vector4::new(1.0, 2.0, 3.0, 4.0);
 
-        let result = Matrix::identity() * *&tuple;
+        let result = Matrix::identity() * tuple;
 
         assert_that!(result).is_equal_to(tuple);
     }
