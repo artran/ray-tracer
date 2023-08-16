@@ -9,10 +9,26 @@ use crate::vector4::Vector4;
 
 pub trait Shape {
     fn material(&self) -> &Material;
-    fn transformation(&self) -> Matrix<4>;
 
-    fn intersect(&self, ray: &Ray) -> Vec<f32>;
-    fn normal_at(&self, world_point: &Vector4) -> Vector4;
+    fn transformation(&self) -> Matrix<4>;
+    fn inv_transform(&self) -> &Matrix<4>;
+
+    fn intersect(&self, ray: &Ray) -> Vec<f32> {
+        let transformed_ray = ray.transform(&self.inv_transform());
+        self.local_intersect(&transformed_ray)
+    }
+    fn local_intersect(&self, ray: &Ray) -> Vec<f32>;
+
+    fn normal_at(&self, world_point: &Vector4) -> Vector4 {
+        let object_point = *self.inv_transform() * *world_point;
+        let local_normal = self.local_normal_at(object_point);
+        let mut world_normal = self.inv_transform().transpose() * local_normal;
+        world_normal.w = 0.0;
+
+        (world_normal).normalize()
+    }
+    fn local_normal_at(&self, world_point: Vector4) -> Vector4;
+
     fn lighting(
         &self,
         light: &PointLight,

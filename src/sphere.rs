@@ -27,9 +27,11 @@ impl Shape for Sphere {
         self.inv_transform.try_inverse().unwrap()
     }
 
-    fn intersect(&self, ray: &Ray) -> Vec<f32> {
-        let transformed_ray = ray.transform(&self.inv_transform);
+    fn inv_transform(&self) -> &Matrix<4> {
+        &self.inv_transform
+    }
 
+    fn local_intersect(&self, transformed_ray: &Ray) -> Vec<f32> {
         let sphere_to_ray = transformed_ray.origin - Vector4::point(0.0, 0.0, 0.0);
         let a = transformed_ray.direction.dot(&transformed_ray.direction);
         let b = 2.0 * transformed_ray.direction.dot(&sphere_to_ray);
@@ -52,13 +54,8 @@ impl Shape for Sphere {
         result
     }
 
-    fn normal_at(&self, world_point: &Vector4) -> Vector4 {
-        let object_point = self.inv_transform * *world_point;
-        let object_normal = object_point - Vector4::point(0.0, 0.0, 0.0);
-        let mut world_normal = self.inv_transform.transpose() * object_normal;
-        world_normal.w = 0.0;
-
-        (world_normal).normalize()
+    fn local_normal_at(&self, object_point: Vector4) -> Vector4 {
+        object_point - Vector4::point(0.0, 0.0, 0.0)
     }
 
     fn lighting(
