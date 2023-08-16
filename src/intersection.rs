@@ -2,11 +2,10 @@ use std::cmp::Ordering::Equal;
 use std::ops::Index;
 use std::rc::Rc;
 
+use crate::consts::EPSILON;
 use crate::ray::Ray;
 use crate::shape::Shape;
 use crate::vector4::Vector4;
-
-const EPSILON: f32 = 0.001;
 
 #[derive(Clone, Debug)]
 pub struct Intersection {

@@ -1,8 +1,7 @@
 use std::error::Error;
 
+use crate::consts::EPSILON;
 use crate::vector4::Vector4;
-
-const EPSILON: f32 = 0.001;
 
 #[derive(Debug)]
 pub struct NonInvertibleError;

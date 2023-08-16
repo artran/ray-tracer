@@ -14,6 +14,7 @@ use crate::world::WorldBuilder;
 mod camera;
 mod canvas;
 mod color;
+mod consts;
 mod intersection;
 mod light;
 mod material;

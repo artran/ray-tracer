@@ -109,6 +109,7 @@ mod tests {
 
     use spectral::prelude::*;
 
+    use crate::consts::EPSILON;
     use crate::transform::Transform;
 
     use super::*;
@@ -275,9 +276,9 @@ mod tests {
             3.0_f32.sqrt() / 3.0,
             3.0_f32.sqrt() / 3.0,
         );
-        assert_that!(n.x).is_close_to(expected.x, 0.0001);
-        assert_that!(n.y).is_close_to(expected.y, 0.0001);
-        assert_that!(n.z).is_close_to(expected.z, 0.0001);
+        assert_that!(n.x).is_close_to(expected.x, EPSILON);
+        assert_that!(n.y).is_close_to(expected.y, EPSILON);
+        assert_that!(n.z).is_close_to(expected.z, EPSILON);
         assert_that!(n.w).is_equal_to(expected.w);
     }
 
@@ -292,9 +293,9 @@ mod tests {
         ));
 
         let normalized: Vector4 = n.normalize();
-        assert_that!(n.x).is_close_to(normalized.x, 0.0001);
-        assert_that!(n.y).is_close_to(normalized.y, 0.0001);
-        assert_that!(n.z).is_close_to(normalized.z, 0.0001);
+        assert_that!(n.x).is_close_to(normalized.x, EPSILON);
+        assert_that!(n.y).is_close_to(normalized.y, EPSILON);
+        assert_that!(n.z).is_close_to(normalized.z, EPSILON);
         assert_that!(n.w).is_equal_to(normalized.w);
     }
 
@@ -307,9 +308,9 @@ mod tests {
         let n = s.normal_at(&Vector4::point(0.0, 1.70711, -FRAC_1_SQRT_2));
 
         let expected = Vector4::vector(0.0, FRAC_1_SQRT_2, -FRAC_1_SQRT_2);
-        assert_that!(n.x).is_close_to(expected.x, 0.0001);
-        assert_that!(n.y).is_close_to(expected.y, 0.0001);
-        assert_that!(n.z).is_close_to(expected.z, 0.0001);
+        assert_that!(n.x).is_close_to(expected.x, EPSILON);
+        assert_that!(n.y).is_close_to(expected.y, EPSILON);
+        assert_that!(n.z).is_close_to(expected.z, EPSILON);
         assert_that!(n.w).is_equal_to(expected.w);
     }
 
@@ -325,9 +326,9 @@ mod tests {
         ));
 
         let expected = Vector4::vector(0.0, 0.97014, -0.24254);
-        assert_that!(n.x).is_close_to(expected.x, 0.0001);
-        assert_that!(n.y).is_close_to(expected.y, 0.0001);
-        assert_that!(n.z).is_close_to(expected.z, 0.0001);
+        assert_that!(n.x).is_close_to(expected.x, EPSILON);
+        assert_that!(n.y).is_close_to(expected.y, EPSILON);
+        assert_that!(n.z).is_close_to(expected.z, EPSILON);
         assert_that!(n.w).is_equal_to(expected.w);
     }
 

@@ -1,4 +1,4 @@
-const EPSILON: f32 = 0.001;
+use crate::consts::EPSILON;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Vector4 {
