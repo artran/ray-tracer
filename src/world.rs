@@ -5,7 +5,6 @@ use crate::intersection::{Computations, Intersection, Intersections};
 use crate::light::PointLight;
 use crate::ray::Ray;
 use crate::shape::Shape;
-use crate::sphere::Sphere;
 use crate::vector4::Vector4;
 
 pub struct World {
@@ -81,8 +80,8 @@ impl WorldBuilder {
         self
     }
 
-    pub fn with_object(mut self, object: Sphere) -> Self {
-        self.objects.push(Rc::new(object));
+    pub fn with_object(mut self, object: Rc<dyn Shape>) -> Self {
+        self.objects.push(object);
 
         self
     }
@@ -135,7 +134,10 @@ mod tests {
             .with_transform(Matrix::scaling(0.5, 0.5, 0.5))
             .build();
 
-        WorldBuilder::new().with_object(s1).with_object(s2).build()
+        WorldBuilder::new()
+            .with_object(Rc::new(s1))
+            .with_object(Rc::new(s2))
+            .build()
     }
 
     #[rstest]
@@ -249,8 +251,8 @@ mod tests {
             .build();
 
         let world = WorldBuilder::new()
-            .with_object(outer)
-            .with_object(inner)
+            .with_object(Rc::new(outer))
+            .with_object(Rc::new(inner))
             .build();
 
         // Act

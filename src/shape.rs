@@ -49,11 +49,11 @@ mod tests {
 
     use super::*;
     use crate::material::MaterialBuilder;
-    use crate::sphere::{Sphere, SphereBuilder};
+    use crate::sphere::SphereBuilder;
     use crate::transform::Transform;
 
     #[fixture]
-    fn test_shape() -> Sphere {
+    fn test_shape() -> impl Shape {
         SphereBuilder::new().build()
     }
 
@@ -81,5 +81,22 @@ mod tests {
         let test_shape = SphereBuilder::new().with_material(m.clone()).build();
 
         assert_that!(test_shape.material()).is_equal_to(&m);
+    }
+
+    #[rstest]
+    fn intersecting_a_scaled_shape_with_a_ray() {
+        let r = Ray::new(
+            Vector4::point(0.0, 0.0, -5.0),
+            Vector4::vector(0.0, 0.0, 1.0),
+        );
+        let s = SphereBuilder::new()
+            .with_transform(Matrix::scaling(2.0, 2.0, 2.0))
+            .build();
+
+        let xs = s.intersect(&r);
+
+        assert_that!(xs.len()).is_equal_to(2);
+        assert_that!(xs[0]).is_equal_to(3.0);
+        assert_that!(xs[1]).is_equal_to(7.0);
     }
 }

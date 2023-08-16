@@ -94,7 +94,7 @@ impl SphereBuilder {
         self
     }
 
-    pub fn build(self) -> Sphere {
+    pub fn build(self) -> impl Shape {
         Sphere {
             inv_transform: self.transform.try_inverse().unwrap(),
             material: self.material,
@@ -193,21 +193,21 @@ mod tests {
     fn a_spheres_default_transformation() {
         let s = SphereBuilder::new().build();
 
-        assert_that!(s.inv_transform).is_equal_to(Matrix::identity());
+        assert_that!(s.transformation()).is_equal_to(Matrix::identity());
     }
 
     #[test]
     fn changing_a_spheres_transformation() {
         let t = Matrix::translation(2.0, 3.0, 4.0);
         let expected = Matrix::from([
-            [1.0, 0.0, 0.0, -2.0],
-            [0.0, 1.0, 0.0, -3.0],
-            [0.0, 0.0, 1.0, -4.0],
+            [1.0, 0.0, 0.0, 2.0],
+            [0.0, 1.0, 0.0, 3.0],
+            [0.0, 0.0, 1.0, 4.0],
             [0.0, 0.0, 0.0, 1.0],
         ]);
         let s = SphereBuilder::new().with_transform(t.clone()).build();
 
-        assert_that!(s.inv_transform).is_equal_to(expected);
+        assert_that!(s.transformation()).is_equal_to(expected);
     }
 
     #[test]
@@ -337,8 +337,8 @@ mod tests {
     #[test]
     fn a_sphere_has_a_default_material() {
         let s = SphereBuilder::new().build();
-        let m = s.material;
-        assert_that!(m).is_equal_to(MaterialBuilder::new().build());
+        let m = s.material();
+        assert_that!(m).is_equal_to(&MaterialBuilder::new().build());
     }
 
     #[test]
@@ -346,6 +346,6 @@ mod tests {
         let m = MaterialBuilder::new().with_ambient(1.0).build();
         let s = SphereBuilder::new().with_material(m.clone()).build();
 
-        assert_that!(s.material).is_equal_to(m);
+        assert_that!(s.material()).is_equal_to(&m);
     }
 }

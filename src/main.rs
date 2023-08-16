@@ -1,5 +1,6 @@
 use std::f32::consts::PI;
 use std::fs::File;
+use std::rc::Rc;
 
 use crate::camera::CameraBuilder;
 use crate::color::Color;
@@ -86,12 +87,12 @@ fn main() -> Result<(), std::io::Error> {
         .build();
 
     let world = WorldBuilder::new()
-        .with_object(floor)
-        .with_object(left_wall)
-        .with_object(right_wall)
-        .with_object(middle)
-        .with_object(right)
-        .with_object(left)
+        .with_object(Rc::new(floor))
+        .with_object(Rc::new(left_wall))
+        .with_object(Rc::new(right_wall))
+        .with_object(Rc::new(middle))
+        .with_object(Rc::new(right))
+        .with_object(Rc::new(left))
         .build();
 
     let camera = CameraBuilder::new()

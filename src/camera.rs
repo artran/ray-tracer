@@ -122,6 +122,7 @@ Tests
 #[cfg(test)]
 mod tests {
     use std::f32::consts::PI;
+    use std::rc::Rc;
 
     use rstest::*;
     use spectral::prelude::*;
@@ -245,7 +246,10 @@ mod tests {
             .with_transform(Matrix::scaling(0.5, 0.5, 0.5))
             .build();
 
-        WorldBuilder::new().with_object(s1).with_object(s2).build()
+        WorldBuilder::new()
+            .with_object(Rc::new(s1))
+            .with_object(Rc::new(s2))
+            .build()
     }
 
     #[rstest]
