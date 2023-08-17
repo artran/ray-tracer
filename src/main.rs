@@ -6,6 +6,7 @@ use crate::camera::CameraBuilder;
 use crate::color::Color;
 use crate::material::MaterialBuilder;
 use crate::matrix::Matrix;
+use crate::plane::PlaneBuilder;
 use crate::sphere::SphereBuilder;
 use crate::transform::Transform;
 use crate::vector4::Vector4;
@@ -19,6 +20,7 @@ mod intersection;
 mod light;
 mod material;
 mod matrix;
+mod plane;
 mod ray;
 mod shape;
 mod sphere;
@@ -27,33 +29,23 @@ mod vector4;
 mod world;
 
 fn main() -> Result<(), std::io::Error> {
-    let wall_material = MaterialBuilder::new()
+    let floor_material = MaterialBuilder::new()
         .with_color(Color::new(1.0, 0.9, 0.9))
         .with_specular(0.0)
         .build();
 
-    let floor = SphereBuilder::new()
-        .with_transform(Matrix::scaling(10.0, 0.01, 10.0))
-        .with_material(wall_material.clone())
+    let wall_material = MaterialBuilder::new()
+        .with_color(Color::new(1.0, 0.5, 0.5))
+        .with_specular(0.0)
         .build();
 
-    let left_wall = SphereBuilder::new()
-        .with_transform(
-            Matrix::translation(0.0, 0.0, 5.0)
-                * Matrix::rotation_y(-PI / 4.0)
-                * Matrix::rotation_x(PI / 2.0)
-                * Matrix::scaling(10.0, 0.01, 10.0),
-        )
-        .with_material(wall_material.clone())
+    let floor = PlaneBuilder::new()
+        // .with_transform(Matrix::scaling(10.0, 0.01, 10.0))
+        .with_material(floor_material.clone())
         .build();
 
-    let right_wall = SphereBuilder::new()
-        .with_transform(
-            Matrix::translation(0.0, 0.0, 5.0)
-                * Matrix::rotation_y(PI / 4.0)
-                * Matrix::rotation_x(PI / 2.0)
-                * Matrix::scaling(10.0, 0.01, 10.0),
-        )
+    let rear_wall = PlaneBuilder::new()
+        .with_transform(Matrix::translation(0.0, 0.0, 3.0) * Matrix::rotation_x(PI / 2.0))
         .with_material(wall_material.clone())
         .build();
 
@@ -89,8 +81,7 @@ fn main() -> Result<(), std::io::Error> {
 
     let world = WorldBuilder::new()
         .with_object(Rc::new(floor))
-        .with_object(Rc::new(left_wall))
-        .with_object(Rc::new(right_wall))
+        .with_object(Rc::new(rear_wall))
         .with_object(Rc::new(middle))
         .with_object(Rc::new(right))
         .with_object(Rc::new(left))
