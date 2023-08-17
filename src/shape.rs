@@ -29,6 +29,7 @@ pub trait Shape {
     }
     fn local_normal_at(&self, world_point: Vector4) -> Vector4;
 
+    // TODO: Put a default implementation here
     fn lighting(
         &self,
         light: &PointLight,

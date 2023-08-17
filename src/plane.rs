@@ -96,7 +96,8 @@ mod tests {
     use spectral::prelude::*;
 
     use super::*;
-    use crate::{ray::Ray, vector4::Vector4};
+    use crate::ray::Ray;
+    use crate::vector4::Vector4;
 
     #[fixture]
     fn test_shape() -> impl Shape {
