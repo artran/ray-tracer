@@ -1,5 +1,6 @@
+use std::fmt::Debug;
+
 use crate::color::Color;
-use crate::consts::EPSILON;
 use crate::vector4::Vector4;
 
 pub trait Pattern {
@@ -18,6 +19,12 @@ impl Pattern for StripePattern {
             return self.color1;
         }
         self.color2
+    }
+}
+
+impl Debug for dyn Pattern {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Pattern").finish()
     }
 }
 

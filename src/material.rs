@@ -1,5 +1,8 @@
+use std::rc::Rc;
+
 use crate::color::Color;
 use crate::light::PointLight;
+use crate::pattern::Pattern;
 use crate::vector4::Vector4;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -9,6 +12,7 @@ pub struct Material {
     diffuse: f32,
     specular: f32,
     shininess: f32,
+    pattern: Option<Rc<dyn Pattern>>,
 }
 
 pub struct MaterialBuilder {
@@ -17,6 +21,7 @@ pub struct MaterialBuilder {
     diffuse: f32,
     specular: f32,
     shininess: f32,
+    pattern: Option<Rc<dyn Pattern>>,
 }
 
 impl Material {
@@ -65,6 +70,7 @@ impl MaterialBuilder {
             diffuse: 0.9,
             specular: 0.9,
             shininess: 200.0,
+            pattern: None,
         }
     }
 
@@ -98,6 +104,12 @@ impl MaterialBuilder {
         self
     }
 
+    pub fn with_pattern(mut self, pattern: Rc<impl Pattern>) -> Self {
+        self.pattern = Some(pattern);
+
+        self
+    }
+
     pub fn build(self) -> Material {
         Material {
             color: self.color,
@@ -105,6 +117,7 @@ impl MaterialBuilder {
             diffuse: self.diffuse,
             specular: self.specular,
             shininess: self.shininess,
+            pattern: self.pattern,
         }
     }
 }
@@ -117,6 +130,8 @@ Tests
 mod tests {
     use rstest::*;
     use spectral::prelude::*;
+
+    use crate::pattern::StripePattern;
 
     use super::*;
 
@@ -231,5 +246,19 @@ mod tests {
             default_material.lighting(&light, default_position, eye_vec, normal_vec, in_shadow);
 
         assert_that!(result).is_equal_to(Color::new(0.1, 0.1, 0.1));
+    }
+
+    #[rstest]
+    fn lighting_with_a_pattern_appplied() {
+        let p = StripePattern {
+            color1: Color::white(),
+            color2: Color::black(),
+        };
+        let m = MaterialBuilder::new()
+            .with_ambient(1.0)
+            .with_diffuse(0.0)
+            .with_specular(0.0)
+            .with_pattern(Rc::new(p))
+            .build();
     }
 }
