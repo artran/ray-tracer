@@ -8,6 +8,25 @@ pub trait Pattern {
 }
 
 #[derive(Clone, Debug, PartialEq)]
+pub struct SolidPattern {
+    color: Color,
+}
+
+impl Pattern for SolidPattern {
+    fn color_at_point(&self, point: Vector4) -> Color {
+        self.color
+    }
+}
+
+impl Default for SolidPattern {
+    fn default() -> Self {
+        Self {
+            color: Color::white(),
+        }
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
 pub struct StripePattern {
     color1: Color,
     color2: Color,
@@ -25,6 +44,12 @@ impl Pattern for StripePattern {
 impl Debug for dyn Pattern {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Pattern").finish()
+    }
+}
+
+impl PartialEq for dyn Pattern {
+    fn eq(&self, other: &Self) -> bool {
+        self.eq(other)
     }
 }
 
