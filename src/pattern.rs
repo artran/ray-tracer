@@ -3,7 +3,7 @@ use std::fmt::Debug;
 use crate::color::Color;
 use crate::vector4::Vector4;
 
-pub trait Pattern {
+pub trait Pattern: Debug {
     fn color_at_point(&self, point: Vector4) -> Color;
 }
 
@@ -38,18 +38,6 @@ impl Pattern for StripePattern {
             return self.color1;
         }
         self.color2
-    }
-}
-
-impl Debug for dyn Pattern {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("Pattern").finish()
-    }
-}
-
-impl PartialEq for dyn Pattern {
-    fn eq(&self, other: &Self) -> bool {
-        true
     }
 }
 
