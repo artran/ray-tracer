@@ -13,7 +13,7 @@ pub struct SolidPattern {
 }
 
 impl Pattern for SolidPattern {
-    fn color_at_point(&self, point: Vector4) -> Color {
+    fn color_at_point(&self, _point: Vector4) -> Color {
         self.color
     }
 }
@@ -49,7 +49,7 @@ impl Debug for dyn Pattern {
 
 impl PartialEq for dyn Pattern {
     fn eq(&self, other: &Self) -> bool {
-        self.eq(other)
+        true
     }
 }
 

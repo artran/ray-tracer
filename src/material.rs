@@ -1,13 +1,13 @@
-use std::boxed::Box;
+use std::rc::Rc;
 
 use crate::color::Color;
 use crate::light::PointLight;
 use crate::pattern::{Pattern, SolidPattern};
 use crate::vector4::Vector4;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Material {
-    pattern: Box<dyn Pattern>,
+    pattern: Rc<dyn Pattern>,
     ambient: f32,
     diffuse: f32,
     specular: f32,
@@ -15,7 +15,7 @@ pub struct Material {
 }
 
 pub struct MaterialBuilder {
-    pattern: Option<Box<dyn Pattern>>,
+    pattern: Option<Rc<dyn Pattern>>,
     ambient: f32,
     diffuse: f32,
     specular: f32,
@@ -73,12 +73,12 @@ impl MaterialBuilder {
 
     pub fn with_color(mut self, color: Color) -> Self {
         let pattern = SolidPattern { color };
-        self.pattern = Some(Box::new(pattern));
+        self.pattern = Some(Rc::new(pattern));
 
         self
     }
 
-    pub fn with_pattern(mut self, pattern: Box<impl Pattern>) -> Self {
+    pub fn with_pattern(mut self, pattern: Rc<impl Pattern>) -> Self {
         self.pattern = Some(pattern);
 
         self
@@ -111,7 +111,7 @@ impl MaterialBuilder {
     pub fn build(self) -> Material {
         let pattern = match self.pattern {
             Some(p) => p,
-            None => Box::new(SolidPattern::default()),
+            None => Rc::new(SolidPattern::default()),
         };
         Material {
             pattern,
