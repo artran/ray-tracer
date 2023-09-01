@@ -1,10 +1,17 @@
-use std::fmt::Debug;
+use std::fmt;
+use std::fmt::{Debug, Display};
 
 use crate::color::Color;
 use crate::vector4::Vector4;
 
-pub trait Pattern: Debug {
+pub trait Pattern: Debug + Display {
     fn color_at_point(&self, point: Vector4) -> Color;
+}
+
+impl PartialEq for &dyn Pattern {
+    fn eq(&self, other: &Self) -> bool {
+        self.to_string() == other.to_string()
+    }
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -15,6 +22,12 @@ pub struct SolidPattern {
 impl Pattern for SolidPattern {
     fn color_at_point(&self, _point: Vector4) -> Color {
         self.color
+    }
+}
+
+impl Display for SolidPattern {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "(SolidPattern {})", self.color)
     }
 }
 
@@ -38,6 +51,12 @@ impl Pattern for StripePattern {
             return self.color1;
         }
         self.color2
+    }
+}
+
+impl Display for StripePattern {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "(StripedPattern {}, {})", self.color1, self.color2)
     }
 }
 
