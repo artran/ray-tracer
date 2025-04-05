@@ -159,7 +159,7 @@ mod tests {
         default_material: Material,
         default_position: Vector4,
     ) {
-        let eye_vector = Vector4::vector(0.0, 2.0_f32.sqrt() / 2.0, -2.0_f32.sqrt() / 2.0);
+        let eye_vector = Vector4::vector(0.0, 2.0_f32.sqrt() / 2.0, -(2.0_f32.sqrt()) / 2.0);
         let normal_vector = Vector4::vector(0.0, 0.0, -1.0);
         let light = PointLight::new(Vector4::point(0.0, 0.0, -10.0), Color::white());
 
@@ -192,7 +192,7 @@ mod tests {
         default_material: Material,
         default_position: Vector4,
     ) {
-        let eye_vector = Vector4::vector(0.0, -2.0_f32.sqrt() / 2.0, -2.0_f32.sqrt() / 2.0);
+        let eye_vector = Vector4::vector(0.0, -(2.0_f32.sqrt()) / 2.0, -(2.0_f32.sqrt()) / 2.0);
         let normal_vector = Vector4::vector(0.0, 0.0, -1.0);
         let light = PointLight::new(Vector4::point(0.0, 10.0, -10.0), Color::white());
 
