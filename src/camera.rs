@@ -228,7 +228,7 @@ mod tests {
         vector_values_are_close(r.origin, Vector4::point(0.0, 2.0, -5.0), 0.0001);
         vector_values_are_close(
             r.direction,
-            Vector4::vector(2.0_f32.sqrt() / 2.0, 0.0, -2.0_f32.sqrt() / 2.0),
+            Vector4::vector(2.0_f32.sqrt() / 2.0, 0.0, -(2.0_f32.sqrt()) / 2.0),
             0.0001,
         );
     }

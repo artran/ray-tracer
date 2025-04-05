@@ -323,7 +323,7 @@ mod tests {
         let n = s.normal_at(&Vector4::point(
             0.0,
             2.0_f32.sqrt() / 2.0,
-            -2.0_f32.sqrt() / 2.0,
+            -(2.0_f32.sqrt()) / 2.0,
         ));
 
         let expected = Vector4::vector(0.0, 0.97014, -0.24254);

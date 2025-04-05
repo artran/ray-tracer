@@ -184,7 +184,7 @@ mod tests {
 
         vector_values_are_close(
             inv * p,
-            Vector4::point(0.0, 2.0_f32.sqrt() / 2.0, -2.0_f32.sqrt() / 2.0),
+            Vector4::point(0.0, 2.0_f32.sqrt() / 2.0, -(2.0_f32.sqrt()) / 2.0),
             0.00001,
         );
     }
@@ -211,7 +211,7 @@ mod tests {
 
         vector_values_are_close(
             half_quarter * p,
-            Vector4::point(-2.0_f32.sqrt() / 2.0, 2.0_f32.sqrt() / 2.0, 0.0),
+            Vector4::point(-(2.0_f32.sqrt()) / 2.0, 2.0_f32.sqrt() / 2.0, 0.0),
             0.0001,
         );
         vector_values_are_close(full_quarter * p, Vector4::point(-1.0, 0.0, 0.0), 0.0001);
