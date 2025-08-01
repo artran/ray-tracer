@@ -56,7 +56,7 @@ impl World {
         let distance = v.magnitude();
         let direction = v.normalize();
 
-        let r = Ray::new(point.clone(), direction);
+        let r = Ray::new(*point, direction);
         let intersections = self.intersect(&r);
         if let Some(h) = intersections.hit() {
             return h.t < distance;

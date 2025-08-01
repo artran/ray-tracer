@@ -76,7 +76,7 @@ impl Camera {
             }
         }
 
-        return image;
+        image
     }
 }
 

@@ -48,10 +48,7 @@ impl Shape for Sphere {
         let t1 = (-b - root_disc) / (two_a);
         let t2 = (-b + root_disc) / (two_a);
 
-        let mut result = Vec::default();
-        result.push(t1);
-        result.push(t2);
-        result
+        vec![t1, t2]
     }
 
     fn local_normal_at(&self, object_point: Vector4) -> Vector4 {
@@ -204,7 +201,7 @@ mod tests {
             [0.0, 0.0, 1.0, 4.0],
             [0.0, 0.0, 0.0, 1.0],
         ]);
-        let s = SphereBuilder::new().with_transform(t.clone()).build();
+        let s = SphereBuilder::new().with_transform(t).build();
 
         assert_that!(s.transformation()).is_equal_to(expected);
     }

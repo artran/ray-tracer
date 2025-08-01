@@ -19,7 +19,7 @@ impl PartialEq for Intersection {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct Intersections {
     intersections: Vec<Intersection>,
 }
@@ -64,7 +64,7 @@ impl Intersection {
     }
 }
 
-impl<'a> Intersections {
+impl Intersections {
     fn sort(&mut self) {
         self.intersections
             .sort_unstable_by(|a, b| a.t.partial_cmp(&b.t).unwrap_or(Equal));
@@ -80,17 +80,11 @@ impl<'a> Intersections {
     }
 
     pub fn hit(&self) -> Option<&Intersection> {
-        for i in &self.intersections {
-            if i.t >= 0.0 {
-                return Some(i);
-            }
-        }
-
-        None
+        self.intersections.iter().find(|i| i.t >= 0.0)
     }
 }
 
-impl<'a> Index<usize> for Intersections {
+impl Index<usize> for Intersections {
     type Output = Intersection;
 
     fn index(&self, index: usize) -> &Self::Output {
@@ -98,15 +92,7 @@ impl<'a> Index<usize> for Intersections {
     }
 }
 
-impl<'a> Default for Intersections {
-    fn default() -> Self {
-        Self {
-            intersections: Vec::new(),
-        }
-    }
-}
-
-impl<'a> IntoIterator for Intersections {
+impl IntoIterator for Intersections {
     type Item = Intersection;
     type IntoIter = std::vec::IntoIter<Intersection>;
 

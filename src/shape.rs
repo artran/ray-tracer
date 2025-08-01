@@ -14,7 +14,7 @@ pub trait Shape {
     fn inv_transform(&self) -> &Matrix<4>;
 
     fn intersect(&self, ray: &Ray) -> Vec<f32> {
-        let transformed_ray = ray.transform(&self.inv_transform());
+        let transformed_ray = ray.transform(self.inv_transform());
         self.local_intersect(&transformed_ray)
     }
     fn local_intersect(&self, ray: &Ray) -> Vec<f32>;
@@ -76,7 +76,7 @@ mod tests {
 
     #[rstest]
     fn the_default_transformation(test_shape: impl Shape) {
-        assert_that!(test_shape.transformation()).is_equal_to(&Matrix::identity());
+        assert_that!(test_shape.transformation()).is_equal_to(Matrix::identity());
     }
 
     #[rstest]
@@ -84,7 +84,7 @@ mod tests {
         let test_shape = SphereBuilder::new()
             .with_transform(Matrix::translation(2.0, 3.0, 4.0))
             .build();
-        assert_that!(test_shape.transformation()).is_equal_to(&Matrix::translation(2.0, 3.0, 4.0));
+        assert_that!(test_shape.transformation()).is_equal_to(Matrix::translation(2.0, 3.0, 4.0));
     }
 
     #[rstest]

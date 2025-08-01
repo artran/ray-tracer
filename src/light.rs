@@ -41,7 +41,7 @@ mod tests {
         let intensity = Color::new(1.0, 1.0, 1.0);
         let position = Vector4::point(0.0, 0.0, 0.0);
 
-        let light = PointLight::new(position.clone(), intensity.clone());
+        let light = PointLight::new(position, intensity);
 
         assert_that!(light.position).is_equal_to(position);
         assert_that!(light.intensity).is_equal_to(intensity);

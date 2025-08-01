@@ -37,7 +37,7 @@ impl std::ops::Mul for Matrix<4> {
                     + self[[row, 3]] * other[[3, col]];
             }
         }
-        Matrix::from(new_inner)
+        new_inner
     }
 }
 
@@ -182,11 +182,7 @@ impl Matrix<3> {
     /// Panics if the provided indices are invalid.
     pub fn cofactor(&self, row: usize, col: usize) -> f32 {
         let minor = self.minor(row, col);
-        if (row + col) % 2 == 0 {
-            minor
-        } else {
-            -minor
-        }
+        if (row + col) % 2 == 0 { minor } else { -minor }
     }
 }
 
@@ -241,11 +237,7 @@ impl Matrix<4> {
     /// Panics if the provided indices are invalid.
     pub fn cofactor(&self, row: usize, col: usize) -> f32 {
         let minor = self.minor(row, col);
-        if (row + col) % 2 == 0 {
-            minor
-        } else {
-            -minor
-        }
+        if (row + col) % 2 == 0 { minor } else { -minor }
     }
 
     /// Calculate the determinant of the matrix.

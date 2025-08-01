@@ -5,13 +5,13 @@ use crate::color::Color;
 const PPM_MAX_LINE_LENGTH: usize = 70;
 
 pub struct Canvas {
-    pixels: Vec<Vec<Color>>
+    pixels: Vec<Vec<Color>>,
 }
 
 impl Canvas {
     pub fn new(width: usize, height: usize) -> Self {
         Self {
-            pixels: vec![vec![Color::black(); width]; height]
+            pixels: vec![vec![Color::black(); width]; height],
         }
     }
 
@@ -24,33 +24,37 @@ impl Canvas {
     }
 
     pub fn pixel_at(&self, x: usize, y: usize) -> Color {
-        self.pixels[y][x].clone()
+        self.pixels[y][x]
     }
 
     pub fn write_pixel(&mut self, x: usize, y: usize, color: &Color) {
-        self.pixels[y][x] = color.clone();
+        self.pixels[y][x] = *color;
     }
 
     pub fn save(&self, file: &mut impl Write) -> Result<(), Error> {
-        let header = format!("P3\n{width} {height}\n255\n", width=self.width(), height=self.height());
+        let header = format!(
+            "P3\n{width} {height}\n255\n",
+            width = self.width(),
+            height = self.height()
+        );
         let _ = file.write(header.as_bytes()).unwrap();
         for row in &self.pixels {
             let mut current_length = 0;
             for (i, pixel) in row.iter().enumerate() {
                 if i > 0 {
-                    file.write(b" ")?;
+                    file.write_all(b" ")?;
                     current_length += 1;
                 }
                 let pixel_str = pixel.to_string();
                 let pixel_bytes = pixel_str.as_bytes();
                 if current_length + pixel_bytes.len() > PPM_MAX_LINE_LENGTH {
-                    file.write(b"\n")?;
+                    file.write_all(b"\n")?;
                     current_length = 1;
                 }
-                file.write(pixel_bytes)?;
+                file.write_all(pixel_bytes)?;
                 current_length += pixel_bytes.len();
             }
-            file.write(b"\n")?;
+            file.write_all(b"\n")?;
         }
 
         Ok(())
@@ -166,7 +170,7 @@ mod tests {
         let mut readable = &file[..];
         let mut buf = String::new();
         for _ in 0..3 {
-            let _ = readable.read_line(&mut buf);  // Discard header lines
+            let _ = readable.read_line(&mut buf); // Discard header lines
             buf.clear();
         }
         let _ = readable.read_line(&mut buf);
@@ -198,20 +202,28 @@ mod tests {
         let mut readable = &file[..];
         let mut buf = String::new();
         for _ in 0..3 {
-            let _ = readable.read_line(&mut buf);  // Discard header lines
+            let _ = readable.read_line(&mut buf); // Discard header lines
             buf.clear();
         }
         let _ = readable.read_line(&mut buf);
-        assert_that!(buf).is_equal_to(String::from("255 204 153 255 204 153 255 204 153 255 204 153 255 204 153 \n"));
+        assert_that!(buf).is_equal_to(String::from(
+            "255 204 153 255 204 153 255 204 153 255 204 153 255 204 153 \n",
+        ));
         buf.clear();
         let _ = readable.read_line(&mut buf);
-        assert_that!(buf).is_equal_to(String::from("255 204 153 255 204 153 255 204 153 255 204 153 255 204 153\n"));
+        assert_that!(buf).is_equal_to(String::from(
+            "255 204 153 255 204 153 255 204 153 255 204 153 255 204 153\n",
+        ));
         buf.clear();
         let _ = readable.read_line(&mut buf);
-        assert_that!(buf).is_equal_to(String::from("255 204 153 255 204 153 255 204 153 255 204 153 255 204 153 \n"));
+        assert_that!(buf).is_equal_to(String::from(
+            "255 204 153 255 204 153 255 204 153 255 204 153 255 204 153 \n",
+        ));
         buf.clear();
         let _ = readable.read_line(&mut buf);
-        assert_that!(buf).is_equal_to(String::from("255 204 153 255 204 153 255 204 153 255 204 153 255 204 153\n"));
+        assert_that!(buf).is_equal_to(String::from(
+            "255 204 153 255 204 153 255 204 153 255 204 153 255 204 153\n",
+        ));
         buf.clear();
         let res = readable.read_line(&mut buf);
         assert_that!(res).is_ok().is_equal_to(0);

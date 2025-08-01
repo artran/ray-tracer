@@ -1,5 +1,4 @@
 use crate::color::Color;
-use crate::consts::EPSILON;
 use crate::vector4::Vector4;
 
 pub trait Pattern {

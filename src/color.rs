@@ -1,5 +1,5 @@
-use std::fmt::{Formatter, Display, Error};
-use std::ops::{Add, Sub, Mul};
+use std::fmt::{Display, Error, Formatter};
+use std::ops::{Add, Mul, Sub};
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Color {
@@ -59,7 +59,7 @@ impl Display for Color {
         let red = (self.r.clamp(0.0, 1.0) * 255.0).round() as u8;
         let green = (self.g.clamp(0.0, 1.0) * 255.0).round() as u8;
         let blue = (self.b.clamp(0.0, 1.0) * 255.0).round() as u8;
-        write!(f, "{} {} {}", red, green, blue)
+        write!(f, "{red} {green} {blue}")
     }
 }
 
@@ -69,9 +69,9 @@ Tests
 
 #[cfg(test)]
 mod tests {
+    use crate::color::Color;
     use spectral::assert_that;
     use spectral::numeric::FloatAssertions;
-    use crate::color::Color;
 
     #[test]
     fn adding_colours() {
