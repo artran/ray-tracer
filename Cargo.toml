@@ -2,12 +2,12 @@
 name = "ray-tracer"
 version = "0.1.0"
 authors = ["Ray Tran <ray@artran.co.uk>"]
-edition = "2018"
+edition = "2024"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 
 [dev-dependencies]
-rstest = "0.18.1"
+rstest = "0.26.1"
 spectral = "^0.6.0"
