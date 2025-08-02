@@ -116,7 +116,7 @@ mod tests {
     use crate::intersection::Intersection;
     use crate::material::MaterialBuilder;
     use crate::matrix::Matrix;
-    use crate::sphere::SphereBuilder;
+    use crate::shape::sphere::SphereBuilder;
     use crate::transform::Transform;
     use crate::vector4::Vector4;
 

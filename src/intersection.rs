@@ -113,7 +113,7 @@ mod tests {
 
     use crate::matrix::Matrix;
     use crate::ray::Ray;
-    use crate::sphere::SphereBuilder;
+    use crate::shape::sphere::SphereBuilder;
     use crate::transform::Transform;
     use crate::vector4::Vector4;
 

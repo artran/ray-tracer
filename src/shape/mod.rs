@@ -1,3 +1,6 @@
+pub mod plane;
+pub mod sphere;
+
 use std::any::Any;
 use std::fmt::Debug;
 
@@ -8,7 +11,7 @@ use crate::matrix::Matrix;
 use crate::ray::Ray;
 use crate::vector4::Vector4;
 
-pub trait Shape: 'static {
+pub trait Shape {
     fn as_any(&self) -> &dyn Any;
     fn shape_eq(&self, other: &dyn Shape) -> bool;
 
@@ -70,7 +73,7 @@ mod tests {
 
     use super::*;
     use crate::material::MaterialBuilder;
-    use crate::sphere::SphereBuilder;
+    use crate::shape::sphere::SphereBuilder;
     use crate::transform::Transform;
 
     #[fixture]
@@ -121,3 +124,5 @@ mod tests {
         assert_that!(xs[1]).is_equal_to(7.0);
     }
 }
+
+
