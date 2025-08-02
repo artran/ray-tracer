@@ -24,7 +24,7 @@ impl Shape for Plane {
     }
 
     fn shape_eq(&self, other: &dyn Shape) -> bool {
-        other.as_any().downcast_ref::<Self>().map_or(false, |a| self == a)
+        other.as_any().downcast_ref::<Self>() == Some(self)
     }
 
     fn material(&self) -> &Material {
