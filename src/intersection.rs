@@ -24,6 +24,7 @@ pub struct Intersections {
     intersections: Vec<Intersection>,
 }
 
+#[allow(dead_code)]
 pub struct Computations {
     pub t: f32,
     pub object: Rc<dyn Shape>,
@@ -70,6 +71,7 @@ impl Intersections {
             .sort_unstable_by(|a, b| a.t.partial_cmp(&b.t).unwrap_or(Equal));
     }
 
+    #[allow(dead_code)]
     pub fn len(&self) -> usize {
         self.intersections.len()
     }

@@ -2,6 +2,7 @@ use crate::color::Color;
 use crate::vector4::Vector4;
 
 pub trait Pattern {
+    #[allow(dead_code)]
     fn color_at_point(&self, point: Vector4) -> Color;
 }
 

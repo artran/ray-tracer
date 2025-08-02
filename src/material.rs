@@ -74,6 +74,7 @@ impl MaterialBuilder {
         self
     }
 
+    #[allow(dead_code)]
     pub fn with_ambient(mut self, ambient: f32) -> Self {
         self.ambient = ambient;
 
@@ -92,6 +93,7 @@ impl MaterialBuilder {
         self
     }
 
+    #[allow(dead_code)]
     pub fn with_shininess(mut self, shininess: f32) -> Self {
         self.shininess = shininess;
 

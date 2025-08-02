@@ -74,6 +74,7 @@ impl WorldBuilder {
         }
     }
 
+    #[allow(dead_code)]
     pub fn with_light_source(mut self, light_source: PointLight) -> Self {
         self.light_source = light_source;
 

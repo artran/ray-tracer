@@ -8,6 +8,7 @@ pub struct PointLight {
 }
 
 impl PointLight {
+    #[allow(dead_code)]
     pub fn new(position: Vector4, intensity: Color) -> Self {
         Self {
             position,

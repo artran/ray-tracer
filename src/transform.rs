@@ -1,6 +1,7 @@
 use crate::matrix::Matrix;
 use crate::vector4::Vector4;
 
+#[allow(dead_code)]
 pub trait Transform {
     fn translation(x: f32, y: f32, z: f32) -> Matrix<4>;
     fn scaling(x: f32, y: f32, z: f32) -> Matrix<4>;
