@@ -2,7 +2,8 @@ use std::rc::Rc;
 
 use crate::color::Color;
 use crate::light::PointLight;
-use crate::pattern::{Pattern, SolidPattern};
+use crate::pattern::Pattern;
+use crate::pattern::solid::SolidPattern;
 use crate::vector4::Vector4;
 
 #[derive(Clone, Debug)]
@@ -152,7 +153,7 @@ mod tests {
     use rstest::*;
     use spectral::prelude::*;
 
-    use crate::pattern::StripePattern;
+    use crate::pattern::stripes::StripePattern;
 
     use super::*;
 
