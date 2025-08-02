@@ -1,3 +1,4 @@
+use std::any::Any;
 use std::fmt::Debug;
 
 use crate::color::Color;
@@ -7,7 +8,10 @@ use crate::matrix::Matrix;
 use crate::ray::Ray;
 use crate::vector4::Vector4;
 
-pub trait Shape {
+pub trait Shape: 'static {
+    fn as_any(&self) -> &dyn Any;
+    fn shape_eq(&self, other: &dyn Shape) -> bool;
+
     fn material(&self) -> &Material;
 
     fn transformation(&self) -> Matrix<4>;
@@ -42,7 +46,7 @@ pub trait Shape {
 
 impl PartialEq for dyn Shape {
     fn eq(&self, other: &Self) -> bool {
-        self.material() == other.material() && self.transformation() == other.transformation()
+        self.shape_eq(other)
     }
 }
 

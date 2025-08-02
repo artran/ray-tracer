@@ -1,3 +1,5 @@
+use std::any::Any;
+
 use crate::color::Color;
 use crate::light::PointLight;
 use crate::material::{Material, MaterialBuilder};
@@ -19,6 +21,14 @@ pub struct SphereBuilder {
 }
 
 impl Shape for Sphere {
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+
+    fn shape_eq(&self, other: &dyn Shape) -> bool {
+        other.as_any().downcast_ref::<Self>().map_or(false, |a| self == a)
+    }
+
     fn material(&self) -> &Material {
         &self.material
     }

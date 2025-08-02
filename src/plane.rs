@@ -1,3 +1,5 @@
+use std::any::Any;
+
 use crate::consts::EPSILON;
 use crate::material::{Material, MaterialBuilder};
 use crate::matrix::Matrix;
@@ -17,6 +19,14 @@ pub struct PlaneBuilder {
 }
 
 impl Shape for Plane {
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+
+    fn shape_eq(&self, other: &dyn Shape) -> bool {
+        other.as_any().downcast_ref::<Self>().map_or(false, |a| self == a)
+    }
+
     fn material(&self) -> &Material {
         &self.material
     }
