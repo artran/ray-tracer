@@ -114,7 +114,7 @@ mod tests {
     use spectral::prelude::*;
 
     use crate::intersection::Intersection;
-    use crate::material::MaterialBuilder;
+    use crate::material::builder::MaterialBuilder;
     use crate::matrix::Matrix;
     use crate::shape::sphere::SphereBuilder;
     use crate::transform::Transform;

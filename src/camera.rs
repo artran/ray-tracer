@@ -128,7 +128,7 @@ mod tests {
     use spectral::prelude::*;
 
     use crate::color::Color;
-    use crate::material::MaterialBuilder;
+    use crate::material::builder::MaterialBuilder;
     use crate::shape::sphere::SphereBuilder;
     use crate::transform::Transform;
     use crate::vector4::Vector4;

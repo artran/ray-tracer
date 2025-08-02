@@ -72,7 +72,7 @@ mod tests {
     use spectral::prelude::*;
 
     use super::*;
-    use crate::material::MaterialBuilder;
+    use crate::material::builder::MaterialBuilder;
     use crate::shape::sphere::SphereBuilder;
     use crate::transform::Transform;
 
@@ -124,5 +124,3 @@ mod tests {
         assert_that!(xs[1]).is_equal_to(7.0);
     }
 }
-
-

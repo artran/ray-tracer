@@ -2,7 +2,8 @@ use std::any::Any;
 
 use crate::color::Color;
 use crate::light::PointLight;
-use crate::material::{Material, MaterialBuilder};
+use crate::material::Material;
+use crate::material::builder::MaterialBuilder;
 use crate::matrix::Matrix;
 use crate::ray::Ray;
 use crate::shape::Shape;

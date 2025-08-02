@@ -1,7 +1,8 @@
 use std::any::Any;
 
 use crate::consts::EPSILON;
-use crate::material::{Material, MaterialBuilder};
+use crate::material::Material;
+use crate::material::builder::MaterialBuilder;
 use crate::matrix::Matrix;
 use crate::shape::Shape;
 use crate::vector4::Vector4;

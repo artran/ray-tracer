@@ -4,7 +4,7 @@ use std::rc::Rc;
 
 use crate::camera::CameraBuilder;
 use crate::color::Color;
-use crate::material::MaterialBuilder;
+use crate::material::builder::MaterialBuilder;
 use crate::matrix::Matrix;
 use crate::shape::plane::PlaneBuilder;
 use crate::shape::sphere::SphereBuilder;
