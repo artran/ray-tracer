@@ -1,9 +1,5 @@
-use std::any::Any;
 use std::fmt::{Display, Error, Formatter};
 use std::ops::{Add, Mul, Sub};
-
-use crate::pattern::Pattern;
-use crate::vector4::Vector4;
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Color {
@@ -23,20 +19,6 @@ impl Color {
 
     pub fn white() -> Self {
         Self::new(1.0, 1.0, 1.0)
-    }
-}
-
-impl Pattern for Color {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
-
-    fn pattern_eq(&self, other: &dyn Pattern) -> bool {
-        other.as_any().downcast_ref::<Self>() == Some(self)
-    }
-
-    fn color_at_point(&self, _: Vector4) -> Color {
-        *self
     }
 }
 

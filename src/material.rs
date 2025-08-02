@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use crate::color::Color;
 use crate::light::PointLight;
-use crate::pattern::Pattern;
+use crate::pattern::{Pattern, SolidPattern};
 use crate::vector4::Vector4;
 
 #[derive(Clone, Debug)]
@@ -70,10 +70,22 @@ impl Material {
     }
 }
 
+impl Default for Material {
+    fn default() -> Self {
+        Self {
+            pattern: Rc::new(SolidPattern::new(Color::white())),
+            ambient: 0.1,
+            diffuse: 0.9,
+            specular: 0.9,
+            shininess: 200.0,
+        }
+    }
+}
+
 impl MaterialBuilder {
     pub fn new() -> Self {
         Self {
-            pattern: Rc::new(Color::white()),
+            pattern: Rc::new(SolidPattern::new(Color::white())),
             ambient: 0.1,
             diffuse: 0.9,
             specular: 0.9,
@@ -82,7 +94,7 @@ impl MaterialBuilder {
     }
 
     pub fn with_color(mut self, color: Color) -> Self {
-        self.pattern = Rc::new(color);
+        self.pattern = Rc::new(SolidPattern::new(color));
 
         self
     }
@@ -146,7 +158,7 @@ mod tests {
 
     #[fixture]
     fn default_material() -> Material {
-        MaterialBuilder::new().build()
+        Material::default()
     }
 
     #[fixture]
@@ -167,7 +179,7 @@ mod tests {
 
     #[rstest]
     fn the_default_material(default_material: Material) {
-        // assert_that!(default_material.pattern).is_equal_to(Color::white()); FIXME:
+        // assert_that!(default_material.pattern).is_equal_to(Color::white()); // FIXME:
         assert_that!(default_material.ambient).is_equal_to(0.1);
         assert_that!(default_material.diffuse).is_equal_to(0.9);
         assert_that!(default_material.specular).is_equal_to(0.9);

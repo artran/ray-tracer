@@ -46,6 +46,32 @@ impl StripePattern {
     }
 }
 
+#[derive(Clone, Debug, PartialEq)]
+pub struct SolidPattern {
+    color: Color,
+}
+
+impl Pattern for SolidPattern {
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+
+    fn pattern_eq(&self, other: &dyn Pattern) -> bool {
+        other.as_any().downcast_ref::<Self>() == Some(self)
+    }
+
+    fn color_at_point(&self, _point: Vector4) -> Color {
+        self.color
+    }
+}
+
+impl SolidPattern {
+    #[allow(dead_code)]
+    pub fn new(color: Color) -> Self {
+        Self { color }
+    }
+}
+
 /* -------------------------------------------------------------------------------------------------
 Tests
 ------------------------------------------------------------------------------------------------- */
