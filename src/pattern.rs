@@ -1,9 +1,19 @@
+use std::any::Any;
+use std::fmt::Debug;
+
 use crate::color::Color;
 use crate::vector4::Vector4;
 
-pub trait Pattern {
-    #[allow(dead_code)]
+pub trait Pattern: Debug {
+    fn as_any(&self) -> &dyn Any;
+    fn pattern_eq(&self, other: &dyn Pattern) -> bool;
     fn color_at_point(&self, point: Vector4) -> Color;
+}
+
+impl PartialEq for dyn Pattern {
+    fn eq(&self, other: &Self) -> bool {
+        self.pattern_eq(other)
+    }
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -13,11 +23,26 @@ pub struct StripePattern {
 }
 
 impl Pattern for StripePattern {
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+
+    fn pattern_eq(&self, other: &dyn Pattern) -> bool {
+        other.as_any().downcast_ref::<Self>() == Some(self)
+    }
+
     fn color_at_point(&self, point: Vector4) -> Color {
         if point.x.floor() as isize % 2 == 0 {
             return self.color1;
         }
         self.color2
+    }
+}
+
+impl StripePattern {
+    #[allow(dead_code)]
+    pub fn new(color1: Color, color2: Color) -> Self {
+        Self { color1, color2 }
     }
 }
 
