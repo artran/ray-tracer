@@ -1,13 +1,14 @@
 use std::any::Any;
 
+use ray_math::Matrix;
+use ray_math::Vector4;
+
 use crate::color::Color;
 use crate::light::PointLight;
 use crate::material::Material;
 use crate::material::builder::MaterialBuilder;
-use crate::matrix::Matrix;
 use crate::ray::Ray;
 use crate::shape::Shape;
-use crate::vector4::Vector4;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Sphere {

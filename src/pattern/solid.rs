@@ -1,7 +1,8 @@
 use std::any::Any;
 
+use ray_math::Vector4;
+
 use crate::Color;
-use crate::Vector4;
 use crate::pattern::Pattern;
 
 #[derive(Clone, Debug, PartialEq)]

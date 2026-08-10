@@ -7,7 +7,11 @@ edition = "2024"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+ray-math = { path = "crates/math" }
 
 [dev-dependencies]
 rstest = "0.26.1"
 spectral = "^0.6.0"
+
+[workspace]
+members = ["crates/math"]

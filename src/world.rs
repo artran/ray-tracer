@@ -1,11 +1,12 @@
 use std::rc::Rc;
 
+use ray_math::Vector4;
+
 use crate::color::Color;
 use crate::intersection::{Computations, Intersection, Intersections};
 use crate::light::PointLight;
 use crate::ray::Ray;
 use crate::shape::Shape;
-use crate::vector4::Vector4;
 
 pub struct World {
     objects: Vec<Rc<dyn Shape>>,
@@ -115,10 +116,10 @@ mod tests {
 
     use crate::intersection::Intersection;
     use crate::material::builder::MaterialBuilder;
-    use crate::matrix::Matrix;
     use crate::shape::sphere::SphereBuilder;
     use crate::transform::Transform;
-    use crate::vector4::Vector4;
+    use ray_math::Matrix;
+    use ray_math::Vector4;
 
     use super::*;
 

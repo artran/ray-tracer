@@ -2,11 +2,12 @@ pub mod builder;
 
 use std::rc::Rc;
 
+use ray_math::Vector4;
+
 use crate::color::Color;
 use crate::light::PointLight;
 use crate::pattern::Pattern;
 use crate::pattern::solid::SolidPattern;
-use crate::vector4::Vector4;
 
 #[derive(Clone, Debug)]
 pub struct Material {

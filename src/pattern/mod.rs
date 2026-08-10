@@ -4,8 +4,9 @@ pub mod stripes;
 use std::any::Any;
 use std::fmt::Debug;
 
+use ray_math::Vector4;
+
 use crate::color::Color;
-use crate::vector4::Vector4;
 
 pub trait Pattern: Debug {
     fn as_any(&self) -> &dyn Any;

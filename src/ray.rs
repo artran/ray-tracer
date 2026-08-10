@@ -1,5 +1,5 @@
-use crate::matrix::Matrix;
-use crate::vector4::Vector4;
+use ray_math::Matrix;
+use ray_math::Vector4;
 
 pub struct Ray {
     pub origin: Vector4,

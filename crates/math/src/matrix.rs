@@ -127,6 +127,17 @@ impl<const L: usize> Matrix<L> {
     pub fn len(&self) -> usize {
         L
     }
+
+    /// Returns `true` if the matrix has zero rows and columns.
+    pub fn is_empty(&self) -> bool {
+        L == 0
+    }
+}
+
+impl<const L: usize> Default for Matrix<L> {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl<const L: usize> From<[[f32; L]; L]> for Matrix<L> {
@@ -182,7 +193,11 @@ impl Matrix<3> {
     /// Panics if the provided indices are invalid.
     pub fn cofactor(&self, row: usize, col: usize) -> f32 {
         let minor = self.minor(row, col);
-        if (row + col) % 2 == 0 { minor } else { -minor }
+        if (row + col).is_multiple_of(2) {
+            minor
+        } else {
+            -minor
+        }
     }
 }
 
@@ -237,7 +252,11 @@ impl Matrix<4> {
     /// Panics if the provided indices are invalid.
     pub fn cofactor(&self, row: usize, col: usize) -> f32 {
         let minor = self.minor(row, col);
-        if (row + col) % 2 == 0 { minor } else { -minor }
+        if (row + col).is_multiple_of(2) {
+            minor
+        } else {
+            -minor
+        }
     }
 
     /// Calculate the determinant of the matrix.

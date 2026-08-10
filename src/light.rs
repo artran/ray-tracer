@@ -1,5 +1,6 @@
+use ray_math::Vector4;
+
 use crate::color::Color;
-use crate::vector4::Vector4;
 
 #[derive(Debug, PartialEq)]
 pub struct PointLight {
@@ -35,7 +36,7 @@ mod tests {
     use spectral::assert_that;
 
     use super::*;
-    use crate::vector4::Vector4;
+    use ray_math::Vector4;
 
     #[test]
     fn a_point_light_has_a_position_and_intensity() {

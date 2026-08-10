@@ -1,11 +1,12 @@
 use std::any::Any;
 
+use ray_math::Matrix;
+use ray_math::Vector4;
+
 use crate::consts::EPSILON;
 use crate::material::Material;
 use crate::material::builder::MaterialBuilder;
-use crate::matrix::Matrix;
 use crate::shape::Shape;
-use crate::vector4::Vector4;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Plane {
@@ -52,16 +53,16 @@ impl Shape for Plane {
         result
     }
 
-    fn local_normal_at(&self, _world_point: crate::vector4::Vector4) -> crate::vector4::Vector4 {
+    fn local_normal_at(&self, _world_point: ray_math::Vector4) -> ray_math::Vector4 {
         Vector4::vector(0.0, 1.0, 0.0)
     }
 
     fn lighting(
         &self,
         light: &crate::light::PointLight,
-        point: crate::vector4::Vector4,
-        eye_vector: crate::vector4::Vector4,
-        normal_vector: crate::vector4::Vector4,
+        point: ray_math::Vector4,
+        eye_vector: ray_math::Vector4,
+        normal_vector: ray_math::Vector4,
         in_shadow: bool,
     ) -> crate::color::Color {
         self.material
@@ -108,7 +109,7 @@ mod tests {
 
     use super::*;
     use crate::ray::Ray;
-    use crate::vector4::Vector4;
+    use ray_math::Vector4;
 
     #[fixture]
     fn test_shape() -> impl Shape {

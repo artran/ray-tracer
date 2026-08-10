@@ -1,7 +1,8 @@
+use ray_math::Matrix;
+use ray_math::Vector4;
+
 use crate::canvas::Canvas;
-use crate::matrix::Matrix;
 use crate::ray::Ray;
-use crate::vector4::Vector4;
 use crate::world::World;
 
 pub struct Camera {
@@ -131,8 +132,8 @@ mod tests {
     use crate::material::builder::MaterialBuilder;
     use crate::shape::sphere::SphereBuilder;
     use crate::transform::Transform;
-    use crate::vector4::Vector4;
     use crate::world::WorldBuilder;
+    use ray_math::Vector4;
 
     use super::*;
 

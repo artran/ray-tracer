@@ -260,9 +260,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9c33a3c44ca05fa6f1807d8e6743f3824e8509beca625669633be0acbdf509dc"
 
 [[package]]
+name = "ray-math"
+version = "0.1.0"
+dependencies = [
+ "spectral",
+]
+
+[[package]]
 name = "ray-tracer"
 version = "0.1.0"
 dependencies = [
+ "ray-math",
  "rstest",
  "spectral",
 ]

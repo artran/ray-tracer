@@ -2,14 +2,15 @@ use std::f32::consts::PI;
 use std::fs::File;
 use std::rc::Rc;
 
+use ray_math::Matrix;
+use ray_math::Vector4;
+
 use crate::camera::CameraBuilder;
 use crate::color::Color;
 use crate::material::builder::MaterialBuilder;
-use crate::matrix::Matrix;
 use crate::shape::plane::PlaneBuilder;
 use crate::shape::sphere::SphereBuilder;
 use crate::transform::Transform;
-use crate::vector4::Vector4;
 use crate::world::WorldBuilder;
 
 mod camera;
@@ -19,12 +20,10 @@ mod consts;
 mod intersection;
 mod light;
 mod material;
-mod matrix;
 mod pattern;
 mod ray;
 mod shape;
 mod transform;
-mod vector4;
 mod world;
 
 fn main() -> Result<(), std::io::Error> {

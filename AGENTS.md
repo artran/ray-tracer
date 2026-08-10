@@ -5,11 +5,11 @@ This file gives repository-specific guidance to coding agents working in this Ru
 ## Project Snapshot
 
 - Language: Rust
-- Crate type: single binary crate (`src/main.rs`)
-- Edition: Rust 2024 (`Cargo.toml`)
+- Crate type: workspace with a binary crate `ray-tracer` at the root and a lib crate `ray-math` under `crates/math/`
+- Edition: Rust 2024 (`Cargo.toml` in both packages)
 - Domain: ray tracing primitives, materials, patterns, transforms, intersections, and scene rendering
 - Test layout: unit tests live beside implementation files under `#[cfg(test)]`
-- Dev dependencies used by tests: `rstest`, `spectral`
+- Dev dependencies used by tests: `rstest` (binary crate), `spectral` (both crates)
 
 ## Repository Rules Files
 
@@ -26,7 +26,7 @@ Run all commands from the repository root:
 cargo build
 ```
 
-- Builds the binary crate in debug mode
+- Builds the whole workspace in debug mode
 
 ```bash
 cargo run
@@ -36,23 +36,25 @@ cargo run
 - Current program writes a PPM file to `/tmp/scene.ppm`
 
 ```bash
-cargo test
+cargo test --workspace
 ```
 
-- Runs the full unit test suite (`167` tests currently)
+- Runs the full unit test suite (`167` tests: `119` in `ray-tracer`, `48` in `ray-math`)
+- Plain `cargo test` from the root only runs the `ray-tracer` package, because the workspace root is itself a package rather than a virtual manifest
 
 ```bash
 cargo test camera::tests::constructing_a_camera -- --exact
 ```
 
-- Runs a single exact unit test
+- Runs a single exact unit test in `ray-tracer`
+- For `ray-math` tests, target that crate with `-p ray-math`, e.g. `cargo test -p ray-math matrix::tests::calculating_the_inverse_of_a_matrix -- --exact`
 - Use this pattern for focused verification after small changes
 
 ```bash
 cargo test world::tests::test_is_shadowed
 ```
 
-- Runs all tests whose names contain the given substring
+- Runs all tests whose names contain the given substring (within the current package)
 - Useful when iterating on a module or behavior family
 
 ```bash
@@ -65,26 +67,28 @@ cargo fmt --check
 cargo fmt
 ```
 
-- Applies standard rustfmt formatting
+- Applies standard rustfmt formatting across the workspace
 - Use after edits unless the file already matches rustfmt output
 
 ```bash
-cargo clippy --all-targets --all-features -- -D warnings
+cargo clippy --workspace --all-targets --all-features -- -D warnings
 ```
 
-- Preferred lint command
-- Current baseline fails on `clippy::manual_is_multiple_of` in `src/matrix.rs`
+- Preferred lint command; runs clean on both crates
 
 ## How To Run One Test
 
 - Exact test: `cargo test module::tests::name -- --exact`
 - Substring match: `cargo test partial_name`
 - Module-focused sweep: `cargo test shape::sphere::tests`
-- When changing math-heavy code, prefer one targeted test first, then `cargo test`
+- For `ray-math` tests (e.g. `matrix::tests::...`, `vector4::tests::...`), add `-p ray-math` to target that crate
+- When changing math-heavy code, prefer one targeted test first, then `cargo test --workspace`
 
 ## Code Organization
 
-- Core modules live directly under `src/`; subdomains use submodules like `src/shape/` and `src/pattern/`
+- The workspace has two packages: `ray-tracer` (binary) at the root and `ray-math` (lib) under `crates/math/`
+- `ray-math` owns the linear algebra primitives: `Matrix`, `Vector4`, and `EPSILON` in `crates/math/src/{matrix,vector4,consts}.rs`
+- Core rendering modules live directly under `src/`; subdomains use submodules like `src/shape/` and `src/pattern/`
 - `src/main.rs` declares all top-level modules and contains a sample scene setup
 - Many domain types use builders: `CameraBuilder`, `MaterialBuilder`, `SphereBuilder`, `PlaneBuilder`, `WorldBuilder`
 - Traits define polymorphic behavior: `Shape`, `Pattern`, `Transform`
@@ -93,9 +97,10 @@ cargo clippy --all-targets --all-features -- -D warnings
 ## Imports
 
 - Prefer grouping imports in this order: standard library, external crates, then `crate::...`
+- Math types come from the external `ray_math` crate: `use ray_math::Matrix;` / `use ray_math::Vector4;`
 - Keep imports explicit; the codebase usually names concrete items directly
 - Test modules often use `use super::*;` plus a few targeted `crate::...` imports
-- Be aware that some files rely on root-level aliases like `crate::Color` and `crate::Vector4`; do not introduce them casually in new code unless the surrounding file already uses that pattern
+- Be aware that some files rely on root-level aliases like `crate::Color` (a private `use` in `src/main.rs`); do not introduce them casually in new code unless the surrounding file already uses that pattern
 
 ## Formatting Conventions
 
@@ -108,7 +113,7 @@ cargo clippy --all-targets --all-features -- -D warnings
 ## Types And Numeric Conventions
 
 - Use `f32` consistently for geometry, colors, transforms, and ray math
-- Reuse `EPSILON` from `src/consts.rs` for floating-point tolerance checks
+- Reuse `EPSILON` via `crate::consts::EPSILON` (re-exported from `ray_math::consts`) for floating-point tolerance checks
 - For float comparisons in production code, prefer tolerance-based comparisons when exact equality is unstable
 - For tests, use `spectral` closeness assertions (`is_close_to`) for non-trivial float results
 - `Matrix` uses const generics (`Matrix<const L: usize>`); keep that style when extending matrix operations
@@ -158,7 +163,7 @@ cargo clippy --all-targets --all-features -- -D warnings
 - Match the local style of the file first, even if another file does it slightly differently
 - Preserve existing public APIs unless the task explicitly calls for a refactor
 - Be careful around hand-rolled math and geometric invariants; small changes can invalidate many tests
-- If you change render behavior, run at least the most relevant module tests plus `cargo test`
+- If you change render behavior, run at least the most relevant module tests plus `cargo test --workspace`
 - If you touch formatting-only code, do not mix unrelated behavioral edits into the same change
 
 ## Practical Checklist For Agents
@@ -166,5 +171,5 @@ cargo clippy --all-targets --all-features -- -D warnings
 - Read the target module and its colocated tests before changing behavior
 - Prefer the smallest safe change that fits the current architecture
 - Run a focused single test first when possible
-- Run `cargo test` before finishing
-- Mention the current Clippy baseline issue if linting is part of your report
+- Run `cargo test --workspace` before finishing
+- Clippy passes clean with `-D warnings`; keep it that way

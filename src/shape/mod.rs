@@ -4,12 +4,13 @@ pub mod sphere;
 use std::any::Any;
 use std::fmt::Debug;
 
+use ray_math::Matrix;
+use ray_math::Vector4;
+
 use crate::color::Color;
 use crate::light::PointLight;
 use crate::material::Material;
-use crate::matrix::Matrix;
 use crate::ray::Ray;
-use crate::vector4::Vector4;
 
 pub trait Shape {
     fn as_any(&self) -> &dyn Any;

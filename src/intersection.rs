@@ -2,10 +2,11 @@ use std::cmp::Ordering::Equal;
 use std::ops::Index;
 use std::rc::Rc;
 
+use ray_math::Vector4;
+
 use crate::consts::EPSILON;
 use crate::ray::Ray;
 use crate::shape::Shape;
-use crate::vector4::Vector4;
 
 #[derive(Clone, Debug)]
 pub struct Intersection {
@@ -111,11 +112,11 @@ Tests
 mod tests {
     use spectral::prelude::*;
 
-    use crate::matrix::Matrix;
     use crate::ray::Ray;
     use crate::shape::sphere::SphereBuilder;
     use crate::transform::Transform;
-    use crate::vector4::Vector4;
+    use ray_math::Matrix;
+    use ray_math::Vector4;
 
     use super::*;
 

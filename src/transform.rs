@@ -1,5 +1,5 @@
-use crate::matrix::Matrix;
-use crate::vector4::Vector4;
+use ray_math::Matrix;
+use ray_math::Vector4;
 
 #[allow(dead_code)]
 pub trait Transform {
@@ -94,8 +94,8 @@ mod tests {
     use spectral::assert_that;
     use spectral::numeric::FloatAssertions;
 
-    use crate::matrix::Matrix;
-    use crate::vector4::Vector4;
+    use ray_math::Matrix;
+    use ray_math::Vector4;
 
     use super::*;
 
