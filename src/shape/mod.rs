@@ -37,7 +37,6 @@ pub trait Shape {
     }
     fn local_normal_at(&self, world_point: Vector4) -> Vector4;
 
-    // TODO: Put a default implementation here
     fn lighting(
         &self,
         light: &PointLight,
@@ -45,7 +44,10 @@ pub trait Shape {
         eye_vector: Vector4,
         normal_vector: Vector4,
         in_shadow: bool,
-    ) -> Color;
+    ) -> Color {
+        self.material()
+            .lighting(light, point, eye_vector, normal_vector, in_shadow)
+    }
 }
 
 impl PartialEq for dyn Shape {

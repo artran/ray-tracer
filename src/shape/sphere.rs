@@ -3,8 +3,6 @@ use std::any::Any;
 use ray_math::Matrix;
 use ray_math::Vector4;
 
-use crate::color::Color;
-use crate::light::PointLight;
 use crate::material::Material;
 use crate::material::builder::MaterialBuilder;
 use crate::ray::Ray;
@@ -65,18 +63,6 @@ impl Shape for Sphere {
 
     fn local_normal_at(&self, object_point: Vector4) -> Vector4 {
         object_point - Vector4::point(0.0, 0.0, 0.0)
-    }
-
-    fn lighting(
-        &self,
-        light: &PointLight,
-        point: Vector4,
-        eye_vector: Vector4,
-        normal_vector: Vector4,
-        in_shadow: bool,
-    ) -> Color {
-        self.material
-            .lighting(light, point, eye_vector, normal_vector, in_shadow)
     }
 }
 

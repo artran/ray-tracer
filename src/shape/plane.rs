@@ -56,18 +56,6 @@ impl Shape for Plane {
     fn local_normal_at(&self, _world_point: ray_math::Vector4) -> ray_math::Vector4 {
         Vector4::vector(0.0, 1.0, 0.0)
     }
-
-    fn lighting(
-        &self,
-        light: &crate::light::PointLight,
-        point: ray_math::Vector4,
-        eye_vector: ray_math::Vector4,
-        normal_vector: ray_math::Vector4,
-        in_shadow: bool,
-    ) -> crate::color::Color {
-        self.material
-            .lighting(light, point, eye_vector, normal_vector, in_shadow)
-    }
 }
 
 impl PlaneBuilder {
