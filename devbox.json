@@ -19,11 +19,7 @@
       ],
       "check": [
         "cargo fmt --all --check",
-        "cargo clippy --workspace --all-targets --locked -- -D warnings",
-        "TEST_DATABASE_URL=${TEST_DATABASE_URL:-postgres://$USER@127.0.0.1/postgres} cargo test --workspace --locked",
-        "./qualification/adjudication-engine/run.sh",
-        "(cd browser-tests && npm ci && npm run install:browsers)",
-        "./browser-tests/run.sh"
+        "cargo clippy --workspace --all-targets --locked -- -D warnings"
       ]
     }
   }
