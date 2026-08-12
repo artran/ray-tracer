@@ -63,6 +63,12 @@ impl Debug for dyn Shape {
     }
 }
 
+/// Default implementation for `Shape::shape_eq`.
+/// Reduces boilerplate in concrete shape implementations.
+pub fn default_shape_eq<T: PartialEq + 'static>(this: &T, other: &dyn Shape) -> bool {
+    other.as_any().downcast_ref::<T>() == Some(this)
+}
+
 /* -------------------------------------------------------------------------------------------------
 Tests
 ------------------------------------------------------------------------------------------------- */
