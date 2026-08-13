@@ -18,6 +18,9 @@
       "test-all": [
         "cargo test --workspace"
       ],
+      "clippy": [
+        "cargo clippy --workspace --all-targets --locked -- -D warnings"
+      ],
       "check": [
         "cargo fmt --all --check",
         "cargo clippy --workspace --all-targets --locked -- -D warnings"

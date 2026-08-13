@@ -27,6 +27,9 @@ mod shape;
 mod transform;
 mod world;
 
+#[cfg(test)]
+mod test_utils;
+
 #[allow(clippy::unwrap_used, reason = "Fail fast in main")]
 fn main() -> io::Result<()> {
     let floor_material = MaterialBuilder::new()
