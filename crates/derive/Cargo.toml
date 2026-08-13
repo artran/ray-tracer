@@ -9,3 +9,6 @@ proc-macro = true
 [dependencies]
 syn = { version = "3.0.3", features = ["full"] }
 quote = "1.0.47"
+
+[dev-dependencies]
+ray-traits = { path = "../traits" }

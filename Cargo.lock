@@ -264,6 +264,7 @@ name = "ray-derive"
 version = "0.1.0"
 dependencies = [
  "quote",
+ "ray-traits",
  "syn 3.0.3",
 ]
 
@@ -280,9 +281,14 @@ version = "0.1.0"
 dependencies = [
  "ray-derive",
  "ray-math",
+ "ray-traits",
  "rstest",
  "spectral",
 ]
+
+[[package]]
+name = "ray-traits"
+version = "0.1.0"
 
 [[package]]
 name = "rdrand"

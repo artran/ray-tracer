@@ -5,7 +5,7 @@ use ray_math::Vector4;
 use crate::consts::EPSILON;
 use crate::material::Material;
 use crate::material::builder::MaterialBuilder;
-use crate::shape::{AsAny, Shape};
+use crate::shape::Shape;
 
 #[derive(AsAny, Clone, Debug, PartialEq)]
 pub struct Plane {

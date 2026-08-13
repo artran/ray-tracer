@@ -5,16 +5,13 @@ use std::fmt::Debug;
 
 use ray_math::Matrix;
 use ray_math::Vector4;
+use ray_traits::AsAny;
 
 use crate::color::Color;
 use crate::light::PointLight;
 use crate::material::Material;
 use crate::ray::Ray;
 
-// FIXME: this feels like the wrong place for defining a core trait
-pub trait AsAny {
-    fn as_any(&self) -> &dyn ::core::any::Any;
-}
 pub trait Shape: AsAny {
     fn shape_eq(&self, other: &dyn Shape) -> bool;
 

@@ -9,10 +9,11 @@ edition = "2024"
 [dependencies]
 ray-math = { path = "crates/math" }
 ray-derive = { path = "crates/derive" }
+ray-traits = { path = "crates/traits" }
 
 [dev-dependencies]
 rstest = "0.26.1"
 spectral = "^0.6.0"
 
 [workspace]
-members = ["crates/math", "crates/derive"]
+members = ["crates/math", "crates/derive", "crates/traits"]
