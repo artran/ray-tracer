@@ -15,7 +15,7 @@ pub struct Plane {
 }
 
 pub struct PlaneBuilder {
-    transform: Matrix<4>,
+    inv_transform: Matrix<4>,
     material: Material,
 }
 
@@ -28,8 +28,8 @@ impl Shape for Plane {
         &self.material
     }
 
-    fn transformation(&self) -> Matrix<4> {
-        self.inv_transform.try_inverse().unwrap()
+    fn transformation(&self) -> Option<Matrix<4>> {
+        self.inv_transform.try_inverse().ok()
     }
 
     fn inv_transform(&self) -> &Matrix<4> {
@@ -56,15 +56,15 @@ impl Shape for Plane {
 impl PlaneBuilder {
     pub fn new() -> Self {
         Self {
-            transform: Matrix::identity(),
+            inv_transform: Matrix::identity(),
             material: MaterialBuilder::new().build(),
         }
     }
 
-    pub fn with_transform(mut self, transform: Matrix<4>) -> Self {
-        self.transform = transform;
+    pub fn with_transform(mut self, transform: Matrix<4>) -> Option<Self> {
+        self.inv_transform = transform.try_inverse().ok()?;
 
-        self
+        Some(self)
     }
 
     pub fn with_material(mut self, material: Material) -> Self {
@@ -75,7 +75,7 @@ impl PlaneBuilder {
 
     pub fn build(self) -> impl Shape {
         Plane {
-            inv_transform: self.transform.try_inverse().unwrap(),
+            inv_transform: self.inv_transform,
             material: self.material,
         }
     }

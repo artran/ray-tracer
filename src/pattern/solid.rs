@@ -20,8 +20,8 @@ impl Pattern for SolidPattern {
 }
 
 impl SolidPattern {
-    #[allow(dead_code)]
-    pub fn new(color: Color) -> Self {
+    #[allow(dead_code, reason = "will be used")]
+    pub const fn new(color: Color) -> Self {
         Self { color }
     }
 }

@@ -25,7 +25,7 @@ pub struct Intersections {
     intersections: Vec<Intersection>,
 }
 
-#[allow(dead_code)]
+#[allow(dead_code, reason = "Some fields are test only")]
 pub struct Computations {
     pub t: f32,
     pub object: Rc<dyn Shape>,
@@ -72,8 +72,8 @@ impl Intersections {
             .sort_unstable_by(|a, b| a.t.partial_cmp(&b.t).unwrap_or(Equal));
     }
 
-    #[allow(dead_code)]
-    pub fn len(&self) -> usize {
+    #[allow(dead_code, reason = "Used in tests")]
+    pub const fn len(&self) -> usize {
         self.intersections.len()
     }
 
@@ -90,6 +90,7 @@ impl Intersections {
 impl Index<usize> for Intersections {
     type Output = Intersection;
 
+    #[allow(clippy::indexing_slicing, reason = "expected behaviour")]
     fn index(&self, index: usize) -> &Self::Output {
         &self.intersections[index]
     }
@@ -264,6 +265,7 @@ mod tests {
         let shape: Rc<dyn Shape> = Rc::new(
             SphereBuilder::new()
                 .with_transform(Matrix::translation(0.0, 0.0, 1.0))
+                .unwrap()
                 .build(),
         );
         let i = Intersection::new(5.0, shape);

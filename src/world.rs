@@ -22,9 +22,9 @@ impl World {
     pub fn intersect(&self, ray: &Ray) -> Intersections {
         let mut found: Intersections = Intersections::default();
 
-        for o in self.objects.iter() {
+        for o in &self.objects {
             let intersections = o.intersect(ray);
-            for intersection in intersections.into_iter() {
+            for intersection in intersections {
                 found.push(Intersection::new(intersection, Rc::clone(o)));
             }
         }
@@ -32,7 +32,7 @@ impl World {
         found
     }
 
-    pub fn shade_hit(&self, comps: Computations) -> Color {
+    pub fn shade_hit(&self, comps: &Computations) -> Color {
         comps.object.lighting(
             &self.light_source,
             comps.point,
@@ -46,7 +46,7 @@ impl World {
         let intersections = self.intersect(ray);
         if let Some(hit) = intersections.hit() {
             let comps = hit.prepare_computations(ray);
-            return self.shade_hit(comps);
+            return self.shade_hit(&comps);
         }
 
         Color::black()
@@ -75,8 +75,8 @@ impl WorldBuilder {
         }
     }
 
-    #[allow(dead_code)]
-    pub fn with_light_source(mut self, light_source: PointLight) -> Self {
+    #[allow(dead_code, reason = "sometimes used")]
+    pub const fn with_light_source(mut self, light_source: PointLight) -> Self {
         self.light_source = light_source;
 
         self
@@ -134,6 +134,7 @@ mod tests {
 
         let s2 = SphereBuilder::new()
             .with_transform(Matrix::scaling(0.5, 0.5, 0.5))
+            .unwrap()
             .build();
 
         WorldBuilder::new()
@@ -178,7 +179,7 @@ mod tests {
         let comps = i.prepare_computations(&r);
         let expected = Color::new(0.38066, 0.47583, 0.2855);
 
-        let c = default_world.shade_hit(comps);
+        let c = default_world.shade_hit(&comps);
 
         assert_that!(c.r).is_close_to(expected.r, 0.0001);
         assert_that!(c.g).is_close_to(expected.g, 0.0001);
@@ -200,7 +201,7 @@ mod tests {
         let comps = i.prepare_computations(&r);
         let expected = Color::new(0.90498, 0.90498, 0.90498);
 
-        let c = world.shade_hit(comps);
+        let c = world.shade_hit(&comps);
 
         assert_that!(c.r).is_close_to(expected.r, 0.0001);
         assert_that!(c.g).is_close_to(expected.g, 0.0001);
@@ -249,6 +250,7 @@ mod tests {
 
         let inner = SphereBuilder::new()
             .with_transform(Matrix::scaling(0.5, 0.5, 0.5))
+            .unwrap()
             .with_material(inner_material)
             .build();
 
@@ -284,6 +286,7 @@ mod tests {
         let s2: Rc<dyn Shape> = Rc::new(
             SphereBuilder::new()
                 .with_transform(Matrix::translation(0.0, 0.0, 10.0))
+                .unwrap()
                 .build(),
         );
         w.objects.push(s1);
@@ -295,7 +298,7 @@ mod tests {
         let i = Intersection::new(4.0, Rc::clone(&s2));
         let comps = i.prepare_computations(&r);
 
-        let c = w.shade_hit(comps);
+        let c = w.shade_hit(&comps);
 
         assert_that!(c).is_equal_to(Color::new(0.1, 0.1, 0.1));
     }

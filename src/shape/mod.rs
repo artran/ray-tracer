@@ -18,7 +18,7 @@ pub trait Shape: AsAny + Debug {
     fn material(&self) -> &Material;
 
     #[allow(dead_code, reason = "Used in tests")]
-    fn transformation(&self) -> Matrix<4>;
+    fn transformation(&self) -> Option<Matrix<4>>;
     fn inv_transform(&self) -> &Matrix<4>;
 
     fn intersect(&self, ray: &Ray) -> Vec<f32> {
@@ -83,15 +83,17 @@ mod tests {
 
     #[rstest]
     fn the_default_transformation(test_shape: impl Shape) {
-        assert_that!(test_shape.transformation()).is_equal_to(Matrix::identity());
+        assert_that!(test_shape.transformation()).is_equal_to(Some(Matrix::identity()));
     }
 
     #[rstest]
     fn assigning_a_transformation() {
         let test_shape = SphereBuilder::new()
             .with_transform(Matrix::translation(2.0, 3.0, 4.0))
+            .unwrap()
             .build();
-        assert_that!(test_shape.transformation()).is_equal_to(Matrix::translation(2.0, 3.0, 4.0));
+        assert_that!(test_shape.transformation())
+            .is_equal_to(Some(Matrix::translation(2.0, 3.0, 4.0)));
     }
 
     #[rstest]
@@ -115,6 +117,7 @@ mod tests {
         );
         let s = SphereBuilder::new()
             .with_transform(Matrix::scaling(2.0, 2.0, 2.0))
+            .unwrap()
             .build();
 
         let xs = s.intersect(&r);

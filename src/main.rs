@@ -1,5 +1,6 @@
 use std::f32::consts::PI;
 use std::fs::File;
+use std::io;
 use std::rc::Rc;
 
 use ray_math::Matrix;
@@ -26,7 +27,8 @@ mod shape;
 mod transform;
 mod world;
 
-fn main() -> Result<(), std::io::Error> {
+#[allow(clippy::unwrap_used, reason = "Fail fast in main")]
+fn main() -> io::Result<()> {
     let floor_material = MaterialBuilder::new()
         .with_color(Color::new(1.0, 0.9, 0.9))
         .with_specular(0.0)
@@ -44,6 +46,7 @@ fn main() -> Result<(), std::io::Error> {
 
     let rear_wall = PlaneBuilder::new()
         .with_transform(Matrix::translation(0.0, 0.0, 3.0) * Matrix::rotation_x(PI / 2.0))
+        .unwrap()
         .with_material(wall_material.clone())
         .build();
 
@@ -54,6 +57,7 @@ fn main() -> Result<(), std::io::Error> {
         .build();
     let middle = SphereBuilder::new()
         .with_transform(Matrix::translation(-0.5, 1.0, 0.5))
+        .unwrap()
         .with_material(middle_material)
         .build();
 
@@ -64,6 +68,7 @@ fn main() -> Result<(), std::io::Error> {
         .build();
     let right = SphereBuilder::new()
         .with_transform(Matrix::translation(1.5, 0.5, -0.5) * Matrix::scaling(0.5, 0.5, 0.5))
+        .unwrap()
         .with_material(right_material)
         .build();
 
@@ -74,6 +79,7 @@ fn main() -> Result<(), std::io::Error> {
         .build();
     let left = SphereBuilder::new()
         .with_transform(Matrix::translation(-1.5, 0.33, -0.75) * Matrix::scaling(0.33, 0.33, 0.33))
+        .unwrap()
         .with_material(left_material)
         .build();
 
@@ -94,11 +100,12 @@ fn main() -> Result<(), std::io::Error> {
             Vector4::point(0.0, 1.0, 0.0),
             Vector4::vector(0.0, 1.0, 0.0),
         ))
-        .build();
+        .build()
+        .unwrap();
 
     let canvas = camera.render(&world);
 
-    let mut file = File::create("/tmp/scene.ppm").unwrap();
+    let mut file = File::create("/tmp/scene.ppm")?;
     canvas.save(&mut file)?;
 
     Ok(())

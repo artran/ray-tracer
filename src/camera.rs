@@ -22,7 +22,10 @@ pub struct CameraBuilder {
 }
 
 impl Camera {
-    fn new(hsize: usize, vsize: usize, field_of_view: f32, transform: Matrix<4>) -> Self {
+    #[allow(clippy::cast_precision_loss, reason = "precision loss is fine")]
+    fn new(hsize: usize, vsize: usize, field_of_view: f32, transform: Matrix<4>) -> Option<Self> {
+        // Try the transform early and fail before doing any other work
+        let inv = transform.try_inverse().ok()?;
         let half_view = (field_of_view / 2.0).tan();
         let aspect = hsize as f32 / vsize as f32;
         let half_width: f32;
@@ -36,16 +39,17 @@ impl Camera {
         }
         let pixel_size = (half_width * 2.0) / hsize as f32;
 
-        Self {
+        Some(Self {
             hsize,
             vsize,
-            inv_transform: transform.try_inverse().unwrap(),
+            inv_transform: inv,
             pixel_size,
             half_width,
             half_height,
-        }
+        })
     }
 
+    #[allow(clippy::cast_precision_loss, reason = "precision loss is fine")]
     fn ray_for_pixel(&self, px: usize, py: usize) -> Ray {
         // the offset from the edge of the canvas to the pixel's center
         let xoffset = (px as f32 + 0.5) * self.pixel_size;
@@ -73,7 +77,7 @@ impl Camera {
             for x in 0..self.hsize - 1 {
                 let ray = self.ray_for_pixel(x, y);
                 let color = world.color_at(&ray);
-                image.write_pixel(x, y, &color)
+                image.write_pixel(x, y, &color);
             }
         }
 
@@ -91,27 +95,27 @@ impl CameraBuilder {
         }
     }
 
-    pub fn with_hsize(mut self, hsize: usize) -> Self {
+    pub const fn with_hsize(mut self, hsize: usize) -> Self {
         self.hsize = hsize;
         self
     }
 
-    pub fn with_vsize(mut self, vsize: usize) -> Self {
+    pub const fn with_vsize(mut self, vsize: usize) -> Self {
         self.vsize = vsize;
         self
     }
 
-    pub fn with_field_of_view(mut self, field_of_view: f32) -> Self {
+    pub const fn with_field_of_view(mut self, field_of_view: f32) -> Self {
         self.field_of_view = field_of_view;
         self
     }
 
-    pub fn with_transform(mut self, transform: Matrix<4>) -> Self {
+    pub const fn with_transform(mut self, transform: Matrix<4>) -> Self {
         self.transform = transform;
         self
     }
 
-    pub fn build(self) -> Camera {
+    pub fn build(self) -> Option<Camera> {
         Camera::new(self.hsize, self.vsize, self.field_of_view, self.transform)
     }
 }
@@ -153,7 +157,8 @@ mod tests {
             .with_hsize(hsize)
             .with_vsize(vsize)
             .with_field_of_view(field_of_view)
-            .build();
+            .build()
+            .unwrap();
 
         assert_that!(c.hsize).is_equal_to(160);
         assert_that!(c.vsize).is_equal_to(120);
@@ -166,7 +171,8 @@ mod tests {
             .with_hsize(200)
             .with_vsize(125)
             .with_field_of_view(PI / 2.0)
-            .build();
+            .build()
+            .unwrap();
 
         assert_that!(c.pixel_size).is_equal_to(0.01);
     }
@@ -177,7 +183,8 @@ mod tests {
             .with_hsize(125)
             .with_vsize(200)
             .with_field_of_view(PI / 2.0)
-            .build();
+            .build()
+            .unwrap();
 
         assert_that!(c.pixel_size).is_equal_to(0.01);
     }
@@ -188,7 +195,8 @@ mod tests {
             .with_hsize(201)
             .with_vsize(101)
             .with_field_of_view(PI / 2.0)
-            .build();
+            .build()
+            .unwrap();
 
         let r = c.ray_for_pixel(100, 50);
 
@@ -202,7 +210,8 @@ mod tests {
             .with_hsize(201)
             .with_vsize(101)
             .with_field_of_view(PI / 2.0)
-            .build();
+            .build()
+            .unwrap();
 
         let r = c.ray_for_pixel(0, 0);
 
@@ -221,7 +230,8 @@ mod tests {
             .with_vsize(101)
             .with_field_of_view(PI / 2.0)
             .with_transform(Matrix::rotation_y(PI / 4.0) * Matrix::translation(0.0, -2.0, 5.0))
-            .build();
+            .build()
+            .unwrap();
 
         let r = c.ray_for_pixel(100, 50);
 
@@ -245,6 +255,7 @@ mod tests {
 
         let s2 = SphereBuilder::new()
             .with_transform(Matrix::scaling(0.5, 0.5, 0.5))
+            .unwrap()
             .build();
 
         WorldBuilder::new()
@@ -263,7 +274,8 @@ mod tests {
             .with_vsize(11)
             .with_field_of_view(PI / 2.0)
             .with_transform(Matrix::view_transform(from, to, up))
-            .build();
+            .build()
+            .unwrap();
 
         let image = c.render(&default_world);
 

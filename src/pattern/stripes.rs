@@ -15,6 +15,7 @@ impl Pattern for StripePattern {
         other.as_any().downcast_ref::<Self>() == Some(self)
     }
 
+    #[allow(clippy::cast_possible_truncation, reason = "never an issue")]
     fn color_at_point(&self, point: Vector4) -> Color {
         if point.x.floor() as isize % 2 == 0 {
             return self.color1;
@@ -24,8 +25,8 @@ impl Pattern for StripePattern {
 }
 
 impl StripePattern {
-    #[allow(dead_code)]
-    pub fn new(color1: Color, color2: Color) -> Self {
+    #[allow(dead_code, reason = "will be used")]
+    pub const fn new(color1: Color, color2: Color) -> Self {
         Self { color1, color2 }
     }
 }

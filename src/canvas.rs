@@ -16,29 +16,39 @@ impl Canvas {
     }
 
     pub fn width(&self) -> usize {
-        self.pixels[0].len()
+        self.pixels.first().map_or(0, Vec::len)
     }
 
-    pub fn height(&self) -> usize {
+    pub const fn height(&self) -> usize {
         self.pixels.len()
     }
 
-    #[allow(dead_code)]
+    #[cfg(test)]
     pub fn pixel_at(&self, x: usize, y: usize) -> Color {
         self.pixels[y][x]
     }
 
+    /// Writes `color` to the pixel at column `x`, row `y`.
+    ///
+    /// # Note
+    ///
+    /// Out-of-bounds coordinates are silently ignored: no pixel is written and
+    /// no error is raised. Treat callers as responsible for validating `x` and
+    /// `y` against [`width`](Self::width) and [`height`](Self::height) first.
     pub fn write_pixel(&mut self, x: usize, y: usize, color: &Color) {
-        self.pixels[y][x] = *color;
+        if let Some(pixel) = self.pixels.get_mut(y).and_then(|row| row.get_mut(x)) {
+            *pixel = *color;
+        }
     }
 
-    pub fn save(&self, file: &mut impl Write) -> Result<(), Error> {
+    pub fn save<W: Write>(&self, file: &mut W) -> Result<(), Error> {
         let header = format!(
             "P3\n{width} {height}\n255\n",
             width = self.width(),
             height = self.height()
         );
-        let _ = file.write(header.as_bytes()).unwrap();
+        let _ = file.write(header.as_bytes())?;
+
         for row in &self.pixels {
             let mut current_length = 0;
             for (i, pixel) in row.iter().enumerate() {
@@ -93,7 +103,7 @@ mod tests {
     fn pixels_can_be_read_from() {
         let canvas = Canvas::new(10, 20);
 
-        assert_that!(canvas.pixel_at(1, 2)).is_equal_to(Color::black())
+        assert_that!(canvas.pixel_at(1, 2)).is_equal_to(Color::black());
     }
 
     #[test]
@@ -102,7 +112,7 @@ mod tests {
 
         for x in 0..5 {
             for y in 0..5 {
-                assert_that!(canvas.pixel_at(x, y)).is_equal_to(Color::black())
+                assert_that!(canvas.pixel_at(x, y)).is_equal_to(Color::black());
             }
         }
     }

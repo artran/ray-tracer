@@ -9,15 +9,15 @@ pub struct Color {
 }
 
 impl Color {
-    pub fn new(r: f32, g: f32, b: f32) -> Self {
+    pub const fn new(r: f32, g: f32, b: f32) -> Self {
         Self { r, g, b }
     }
 
-    pub fn black() -> Self {
+    pub const fn black() -> Self {
         Self::new(0.0, 0.0, 0.0)
     }
 
-    pub fn white() -> Self {
+    pub const fn white() -> Self {
         Self::new(1.0, 1.0, 1.0)
     }
 }
@@ -25,41 +25,46 @@ impl Color {
 impl Add for Color {
     type Output = Color;
 
-    fn add(self, other: Self) -> Self::Output {
-        Color::new(self.r + other.r, self.g + other.g, self.b + other.b)
+    fn add(self, rhs: Self) -> Self::Output {
+        Color::new(self.r + rhs.r, self.g + rhs.g, self.b + rhs.b)
     }
 }
 
 impl Sub for Color {
     type Output = Color;
 
-    fn sub(self, other: Self) -> Self::Output {
-        Color::new(self.r - other.r, self.g - other.g, self.b - other.b)
+    fn sub(self, rhs: Self) -> Self::Output {
+        Color::new(self.r - rhs.r, self.g - rhs.g, self.b - rhs.b)
     }
 }
 
 impl Mul for Color {
     type Output = Color;
 
-    fn mul(self, other: Self) -> Self::Output {
-        Color::new(self.r * other.r, self.g * other.g, self.b * other.b)
+    fn mul(self, rhs: Self) -> Self::Output {
+        Color::new(self.r * rhs.r, self.g * rhs.g, self.b * rhs.b)
     }
 }
 
 impl Mul<f32> for Color {
     type Output = Color;
 
-    fn mul(self, factor: f32) -> Self::Output {
-        Color::new(self.r * factor, self.g * factor, self.b * factor)
+    fn mul(self, rhs: f32) -> Self::Output {
+        Color::new(self.r * rhs, self.g * rhs, self.b * rhs)
     }
 }
 
 impl Display for Color {
+    #[allow(clippy::cast_possible_truncation, reason = "truncation is fine")]
+    #[allow(clippy::cast_sign_loss, reason = "not a risk")]
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
         let red = (self.r.clamp(0.0, 1.0) * 255.0).round() as u8;
         let green = (self.g.clamp(0.0, 1.0) * 255.0).round() as u8;
         let blue = (self.b.clamp(0.0, 1.0) * 255.0).round() as u8;
-        write!(f, "{red} {green} {blue}")
+
+        // Language server didn't like bare `write(...)` so need to assign to return
+        let result = write!(f, "{red} {green} {blue}");
+        result
     }
 }
 

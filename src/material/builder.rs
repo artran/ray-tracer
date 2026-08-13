@@ -30,34 +30,34 @@ impl MaterialBuilder {
         self
     }
 
-    #[allow(dead_code)]
+    #[allow(dead_code, reason = "will be used")]
     pub fn with_pattern(mut self, pattern: Rc<dyn Pattern>) -> Self {
         self.pattern = pattern;
 
         self
     }
 
-    #[allow(dead_code)]
-    pub fn with_ambient(mut self, ambient: f32) -> Self {
+    #[allow(dead_code, reason = "will be used")]
+    pub const fn with_ambient(mut self, ambient: f32) -> Self {
         self.ambient = ambient;
 
         self
     }
 
-    pub fn with_diffuse(mut self, diffuse: f32) -> Self {
+    pub const fn with_diffuse(mut self, diffuse: f32) -> Self {
         self.diffuse = diffuse;
 
         self
     }
 
-    pub fn with_specular(mut self, specular: f32) -> Self {
+    pub const fn with_specular(mut self, specular: f32) -> Self {
         self.specular = specular;
 
         self
     }
 
-    #[allow(dead_code)]
-    pub fn with_shininess(mut self, shininess: f32) -> Self {
+    #[allow(dead_code, reason = "will be used")]
+    pub const fn with_shininess(mut self, shininess: f32) -> Self {
         self.shininess = shininess;
 
         self

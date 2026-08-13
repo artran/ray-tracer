@@ -1,7 +1,7 @@
 use ray_math::Matrix;
 use ray_math::Vector4;
 
-#[allow(dead_code)]
+#[allow(dead_code, reason = "Some test only code")]
 pub trait Transform {
     fn translation(x: f32, y: f32, z: f32) -> Matrix<4>;
     fn scaling(x: f32, y: f32, z: f32) -> Matrix<4>;
@@ -286,6 +286,7 @@ mod tests {
         vector_values_are_close(p4, Vector4::point(15.0, 0.0, 7.0), 0.00001);
     }
 
+    #[allow(clippy::many_single_char_names, reason = "test code")]
     #[test]
     fn chained_transformations_must_be_applied_in_reverse_order() {
         let p = Vector4::point(1.0, 0.0, 1.0);

@@ -9,8 +9,8 @@ pub struct PointLight {
 }
 
 impl PointLight {
-    #[allow(dead_code)]
-    pub fn new(position: Vector4, intensity: Color) -> Self {
+    #[allow(dead_code, reason = "will be used")]
+    pub const fn new(position: Vector4, intensity: Color) -> Self {
         Self {
             position,
             intensity,

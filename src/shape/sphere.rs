@@ -15,7 +15,7 @@ pub struct Sphere {
 }
 
 pub struct SphereBuilder {
-    transform: Matrix<4>,
+    inv_transform: Matrix<4>,
     material: Material,
 }
 
@@ -28,18 +28,18 @@ impl Shape for Sphere {
         &self.material
     }
 
-    fn transformation(&self) -> Matrix<4> {
-        self.inv_transform.try_inverse().unwrap()
+    fn transformation(&self) -> Option<Matrix<4>> {
+        self.inv_transform.try_inverse().ok()
     }
 
     fn inv_transform(&self) -> &Matrix<4> {
         &self.inv_transform
     }
 
-    fn local_intersect(&self, transformed_ray: &Ray) -> Vec<f32> {
-        let sphere_to_ray = transformed_ray.origin - Vector4::point(0.0, 0.0, 0.0);
-        let a = transformed_ray.direction.dot(&transformed_ray.direction);
-        let b = 2.0 * transformed_ray.direction.dot(&sphere_to_ray);
+    fn local_intersect(&self, ray: &Ray) -> Vec<f32> {
+        let sphere_to_ray = ray.origin - Vector4::point(0.0, 0.0, 0.0);
+        let a = ray.direction.dot(&ray.direction);
+        let b = 2.0 * ray.direction.dot(&sphere_to_ray);
         let c = &sphere_to_ray.dot(&sphere_to_ray) - 1.0;
 
         let discriminant: f32 = b * b - 4.0 * a * c;
@@ -53,26 +53,28 @@ impl Shape for Sphere {
         let t1 = (-b - root_disc) / (two_a);
         let t2 = (-b + root_disc) / (two_a);
 
-        vec![t1, t2]
+        // Only needed because language server didn't like implicit return of vec![...]
+        let items = vec![t1, t2];
+        items
     }
 
-    fn local_normal_at(&self, object_point: Vector4) -> Vector4 {
-        object_point - Vector4::point(0.0, 0.0, 0.0)
+    fn local_normal_at(&self, world_point: Vector4) -> Vector4 {
+        world_point - Vector4::point(0.0, 0.0, 0.0)
     }
 }
 
 impl SphereBuilder {
     pub fn new() -> Self {
         Self {
-            transform: Matrix::identity(),
+            inv_transform: Matrix::identity(),
             material: MaterialBuilder::new().build(),
         }
     }
 
-    pub fn with_transform(mut self, transform: Matrix<4>) -> Self {
-        self.transform = transform;
+    pub fn with_transform(mut self, transform: Matrix<4>) -> Option<Self> {
+        self.inv_transform = transform.try_inverse().ok()?;
 
-        self
+        Some(self)
     }
 
     pub fn with_material(mut self, material: Material) -> Self {
@@ -83,7 +85,7 @@ impl SphereBuilder {
 
     pub fn build(self) -> impl Shape {
         Sphere {
-            inv_transform: self.transform.try_inverse().unwrap(),
+            inv_transform: self.inv_transform,
             material: self.material,
         }
     }
@@ -182,7 +184,7 @@ mod tests {
     fn a_spheres_default_transformation() {
         let s = SphereBuilder::new().build();
 
-        assert_that!(s.transformation()).is_equal_to(Matrix::identity());
+        assert_that!(s.transformation()).is_equal_to(Some(Matrix::identity()));
     }
 
     #[test]
@@ -194,9 +196,9 @@ mod tests {
             [0.0, 0.0, 1.0, 4.0],
             [0.0, 0.0, 0.0, 1.0],
         ]);
-        let s = SphereBuilder::new().with_transform(t).build();
+        let s = SphereBuilder::new().with_transform(t).unwrap().build();
 
-        assert_that!(s.transformation()).is_equal_to(expected);
+        assert_that!(s.transformation()).is_equal_to(Some(expected));
     }
 
     #[test]
@@ -207,6 +209,7 @@ mod tests {
         );
         let s = SphereBuilder::new()
             .with_transform(Matrix::scaling(2.0, 2.0, 2.0))
+            .unwrap()
             .build();
 
         let xs = s.intersect(&r);
@@ -224,6 +227,7 @@ mod tests {
         );
         let s = SphereBuilder::new()
             .with_transform(Matrix::translation(5.0, 0.0, 0.0))
+            .unwrap()
             .build();
 
         let xs = s.intersect(&r);
@@ -294,6 +298,7 @@ mod tests {
     fn computing_the_normal_on_a_translated_sphere() {
         let s = SphereBuilder::new()
             .with_transform(Matrix::translation(0.0, 1.0, 0.0))
+            .unwrap()
             .build();
 
         let n = s.normal_at(&Vector4::point(0.0, 1.70711, -FRAC_1_SQRT_2));
@@ -308,7 +313,7 @@ mod tests {
     #[test]
     fn computing_the_normal_on_a_transformed_sphere() {
         let t = Matrix::scaling(1.0, 0.5, 1.0) * Matrix::rotation_z(PI / 5.0);
-        let s = SphereBuilder::new().with_transform(t).build();
+        let s = SphereBuilder::new().with_transform(t).unwrap().build();
 
         let n = s.normal_at(&Vector4::point(
             0.0,
