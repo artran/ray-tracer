@@ -12,11 +12,12 @@ use crate::light::PointLight;
 use crate::material::Material;
 use crate::ray::Ray;
 
-pub trait Shape: AsAny {
+pub trait Shape: AsAny + Debug {
     fn shape_eq(&self, other: &dyn Shape) -> bool;
 
     fn material(&self) -> &Material;
 
+    #[allow(dead_code, reason = "Used in tests")]
     fn transformation(&self) -> Matrix<4>;
     fn inv_transform(&self) -> &Matrix<4>;
 
@@ -52,15 +53,6 @@ pub trait Shape: AsAny {
 impl PartialEq for dyn Shape {
     fn eq(&self, other: &Self) -> bool {
         self.shape_eq(other)
-    }
-}
-
-impl Debug for dyn Shape {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("Shape")
-            .field("material", &self.material())
-            .field("transform", &self.transformation())
-            .finish()
     }
 }
 
