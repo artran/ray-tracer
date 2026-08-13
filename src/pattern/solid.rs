@@ -11,7 +11,7 @@ pub struct SolidPattern {
 
 impl Pattern for SolidPattern {
     fn pattern_eq(&self, other: &dyn Pattern) -> bool {
-        other.as_any().downcast_ref::<Self>() == Some(self)
+        crate::pattern::default_pattern_eq(self, other)
     }
 
     fn color_at_point(&self, _point: Vector4) -> Color {

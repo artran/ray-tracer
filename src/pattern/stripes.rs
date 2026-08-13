@@ -12,7 +12,7 @@ pub struct StripePattern {
 
 impl Pattern for StripePattern {
     fn pattern_eq(&self, other: &dyn Pattern) -> bool {
-        other.as_any().downcast_ref::<Self>() == Some(self)
+        crate::pattern::default_pattern_eq(self, other)
     }
 
     #[allow(clippy::cast_possible_truncation, reason = "never an issue")]

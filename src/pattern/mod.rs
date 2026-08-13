@@ -18,3 +18,9 @@ impl PartialEq for dyn Pattern {
         self.pattern_eq(other)
     }
 }
+
+/// Default implementation for `Pattern::pattern_eq`.
+/// Reduces boilerplate in concrete shape implementations.
+pub fn default_pattern_eq<T: PartialEq + 'static>(this: &T, other: &dyn Pattern) -> bool {
+    other.as_any().downcast_ref::<T>() == Some(this)
+}
