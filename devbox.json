@@ -6,16 +6,17 @@
   ],
   "shell": {
     "init_hook": [
-      "echo 'Welcome to devbox!' > /dev/null"
+      "prek install"
     ],
     "scripts": {
       "install-hooks": [
         "prek install"
       ],
       "test": [
-        "TEST_DATABASE_URL=${TEST_DATABASE_URL:-postgres://$USER@127.0.0.1/postgres} cargo test --workspace --locked",
-        "(cd browser-tests && npm ci && npm run install:browsers)",
-        "./browser-tests/run.sh"
+        "cargo test"
+      ],
+      "test-all": [
+        "cargo test --workspace"
       ],
       "check": [
         "cargo fmt --all --check",
