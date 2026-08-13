@@ -1,5 +1,9 @@
 use ray_derive::AsAny;
 
+trait AsAny {
+    fn as_any(&self) -> &dyn std::any::Any;
+}
+
 #[derive(AsAny)]
 struct TestStruct {
     value: i32,

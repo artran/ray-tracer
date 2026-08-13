@@ -1,7 +1,6 @@
 pub mod plane;
 pub mod sphere;
 
-use std::any::Any;
 use std::fmt::Debug;
 
 use ray_math::Matrix;
@@ -12,8 +11,11 @@ use crate::light::PointLight;
 use crate::material::Material;
 use crate::ray::Ray;
 
-pub trait Shape {
-    fn as_any(&self) -> &dyn Any;
+// FIXME: this feels like the wrong place for defining a core trait
+pub trait AsAny {
+    fn as_any(&self) -> &dyn ::core::any::Any;
+}
+pub trait Shape: AsAny {
     fn shape_eq(&self, other: &dyn Shape) -> bool;
 
     fn material(&self) -> &Material;

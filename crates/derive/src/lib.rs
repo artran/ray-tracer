@@ -8,7 +8,7 @@ pub fn derive_as_any(input: TokenStream) -> TokenStream {
 
     let output = quote! {
         #[automatically_derived]
-        impl #name {
+        impl AsAny for #name {
             fn as_any(&self) -> &dyn ::core::any::Any {
                 self
             }

@@ -1,14 +1,13 @@
-use std::any::Any;
-
+use ray_derive::AsAny;
 use ray_math::Matrix;
 use ray_math::Vector4;
 
 use crate::consts::EPSILON;
 use crate::material::Material;
 use crate::material::builder::MaterialBuilder;
-use crate::shape::Shape;
+use crate::shape::{AsAny, Shape};
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(AsAny, Clone, Debug, PartialEq)]
 pub struct Plane {
     // Note: we store the inverse of the transform as an optimisation.
     inv_transform: Matrix<4>,
@@ -21,10 +20,6 @@ pub struct PlaneBuilder {
 }
 
 impl Shape for Plane {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
-
     fn shape_eq(&self, other: &dyn Shape) -> bool {
         crate::shape::default_shape_eq(self, other)
     }
