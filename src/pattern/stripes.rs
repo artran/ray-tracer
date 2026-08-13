@@ -1,21 +1,16 @@
-use std::any::Any;
-
+use ray_derive::AsAny;
 use ray_math::Vector4;
 
 use crate::Color;
 use crate::pattern::Pattern;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(AsAny, Clone, Debug, PartialEq)]
 pub struct StripePattern {
     color1: Color,
     color2: Color,
 }
 
 impl Pattern for StripePattern {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
-
     fn pattern_eq(&self, other: &dyn Pattern) -> bool {
         other.as_any().downcast_ref::<Self>() == Some(self)
     }
