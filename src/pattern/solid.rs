@@ -6,7 +6,7 @@ use crate::pattern::Pattern;
 
 #[derive(AsAny, Clone, Debug, PartialEq)]
 pub struct SolidPattern {
-    color: Color,
+    pub(crate) color: Color,
 }
 
 impl Pattern for SolidPattern {
@@ -20,7 +20,6 @@ impl Pattern for SolidPattern {
 }
 
 impl SolidPattern {
-    #[allow(dead_code, reason = "will be used")]
     pub const fn new(color: Color) -> Self {
         Self { color }
     }

@@ -115,7 +115,15 @@ mod tests {
 
     #[rstest]
     fn the_default_material(default_material: Material) {
-        // assert_that!(default_material.pattern).is_equal_to(Color::white()); // FIXME:
+        assert_that!(
+            default_material
+                .pattern
+                .as_any()
+                .downcast_ref::<SolidPattern>()
+                .unwrap()
+                .color
+        )
+        .is_equal_to(Color::white());
         assert_that!(default_material.ambient).is_equal_to(0.1);
         assert_that!(default_material.diffuse).is_equal_to(0.9);
         assert_that!(default_material.specular).is_equal_to(0.9);

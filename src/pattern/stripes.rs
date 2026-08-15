@@ -6,8 +6,8 @@ use crate::pattern::Pattern;
 
 #[derive(AsAny, Clone, Debug, PartialEq)]
 pub struct StripePattern {
-    color1: Color,
-    color2: Color,
+    pub(crate) color1: Color,
+    pub(crate) color2: Color,
 }
 
 impl Pattern for StripePattern {
