@@ -117,6 +117,7 @@ mod tests {
     use crate::intersection::Intersection;
     use crate::material::builder::MaterialBuilder;
     use crate::shape::sphere::SphereBuilder;
+    use crate::test_utils::default_sphere_rc;
     use crate::transform::Transform;
     use ray_math::Matrix;
     use ray_math::Vector4;
@@ -282,7 +283,7 @@ mod tests {
     fn shade_hit_is_given_an_intersection_in_shadow() {
         let mut w = WorldBuilder::new().build();
         w.light_source = PointLight::new(Vector4::point(0.0, 0.0, -10.0), Color::white());
-        let s1: Rc<dyn Shape> = Rc::new(SphereBuilder::new().build());
+        let s1 = default_sphere_rc();
         let s2: Rc<dyn Shape> = Rc::new(
             SphereBuilder::new()
                 .with_transform(Matrix::translation(0.0, 0.0, 10.0))
